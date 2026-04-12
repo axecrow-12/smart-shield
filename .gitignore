@@ -2,3 +2,23 @@ node_modules
 .env
 serviceAccountKey.json
 .firebase
+
+# Python/ML
+__pycache__/
+.venv/
+.ipynb_checkpoints/
+*.pyc
+
+# Data & Models
+data/*.csv
+!data/TAPnPAY_fraud_enhanced.csv
+!data/TAPnPAY_fraud_synthetic_dataset.csv
+model/*.txt
+model/*.pkl
+model/*.json
+!model/fraud_detection_model_v4_zimbabwe.txt
+!model/model_metadata_v4_zimbabwe.json
+
+# OS files
+.DS_Store
+Thumbs.db
