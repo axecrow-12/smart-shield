@@ -6,18 +6,22 @@ from typing import List, Optional
 import json, os, sys
 from datetime import datetime
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Add ml_core directory to path for imports
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, BASE_DIR)
 from utils.risk_engine import TAPnPAYRiskEngine
 
 app = FastAPI(title="TAPnPAY v4.0 Fraud Detection", version="4.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-# Initialize with v4 model
-engine = TAPnPAYRiskEngine(model_path='model/fraud_detection_model_v4_zimbabwe.txt')
+# Initialize with v4 model using absolute path
+model_path = os.path.join(BASE_DIR, 'model', 'fraud_detection_model_v4_zimbabwe.txt')
+engine = TAPnPAYRiskEngine(model_path=model_path)
 
 # Load v4 metadata
+metadata_path = os.path.join(BASE_DIR, 'model', 'model_metadata_v4_zimbabwe.json')
 try:
-    with open('model/model_metadata_v4_zimbabwe.json', 'r') as f:
+    with open(metadata_path, 'r') as f:
         metadata = json.load(f)
 except:
     metadata = {'version': '4.0', 'model': 'LightGBM', 'focus': 'Zimbabwe-Optimized'}

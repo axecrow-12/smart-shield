@@ -1,0 +1,28 @@
+{
+  "threshold": 0.01,
+  "metrics": {
+    "auc": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "features": [
+    "amount",
+    "is_new_device",
+    "distance_km",
+    "time_since_last_tx",
+    "tx_count_last_10s",
+    "tx_count_last_1min",
+    "token_age",
+    "geo_speed",
+    "merchant_type",
+    "is_night",
+    "transaction_hour",
+    "merchant_risk_score"
+  ],
+  "cat_features": [
+    "is_new_device",
+    "merchant_type",
+    "is_night"
+  ]
+}
