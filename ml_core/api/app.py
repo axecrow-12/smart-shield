@@ -15,7 +15,7 @@ app = FastAPI(title="TAPnPAY v4.0 Fraud Detection", version="4.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # Initialize with v4 model using absolute path
-model_path = os.path.join(BASE_DIR, 'model', 'fraud_detection_model_v4_zimbabwe.txt')
+model_path = os.path.join(BASE_DIR, 'model', 'fraud_detection_model_v4_zimbabwe.lgb')
 engine = TAPnPAYRiskEngine(model_path=model_path)
 
 # Load v4 metadata
@@ -106,18 +106,7 @@ async def score(tx: ZimbabweTransaction):
         risk_score = result.get('risk_score', 0)
         risk_level = result.get('risk_level', 'unknown')
         reasons = result.get('rule_reasons', [])
-        
-        # Decision thresholds for Zimbabwe context
-        if risk_score >= 85:
-            decision = 'BLOCK'
-        elif risk_score >= 70:
-            decision = 'VERIFY'
-        elif risk_score >= 50:
-            decision = 'CHALLENGE'
-        elif risk_score >= 30:
-            decision = 'MONITOR'
-        else:
-            decision = 'APPROVE'
+        decision = result.get('decision', 'APPROVE')
         
         return {
             "risk_score": round(risk_score, 2),
@@ -208,7 +197,7 @@ async def analyze(tx: ZimbabweTransaction):
     try:
         tx_dict = tx.dict()
         
-        # Get ML score
+        # Get ML result with consistent decision
         ml_result = engine.score_transaction(tx_dict)
         ml_score = ml_result.get('risk_score', 0)
         ml_reasons = ml_result.get('rule_reasons', [])
@@ -216,17 +205,10 @@ async def analyze(tx: ZimbabweTransaction):
         # Get rule-based checks
         is_fraud, triggered_rules = engine.apply_rule_based_checks(tx_dict)
         
-        # Combined decision logic
-        if ml_score >= 85 or is_fraud:
+        # Consistent decision logic
+        combined_decision = ml_result.get('decision', 'APPROVE')
+        if is_fraud and combined_decision != 'BLOCK':
             combined_decision = 'BLOCK'
-        elif ml_score >= 70:
-            combined_decision = 'VERIFY'
-        elif ml_score >= 50 or len(triggered_rules) > 2:
-            combined_decision = 'CHALLENGE'
-        elif ml_score >= 30 or len(triggered_rules) > 0:
-            combined_decision = 'MONITOR'
-        else:
-            combined_decision = 'APPROVE'
         
         return {
             "ml_analysis": {

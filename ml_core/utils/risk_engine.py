@@ -33,20 +33,23 @@ class TAPnPAYRiskEngine:
             model_path: Path to the trained LightGBM model
         """
         self.model = None
+        # V4 Zimbabwe-Optimized Features
         self.feature_names = [
-            'amount', 'is_new_device', 'distance_km', 'time_since_last_tx',
-            'tx_count_last_10s', 'tx_count_last_1min', 'token_age',
-            'geo_speed', 'merchant_type', 'is_night', 'transaction_hour',
-            'merchant_risk_score'
+            'sim_change_frequency', 'network_type',
+            'new_device_login', 'time_since_login_seconds',
+            'is_smurf_pattern', 'recent_cashins_24h', 'is_post_downtime',
+            'receiver_risk_score', 'is_legit_merchant', 'is_mule_destination',
+            'merchant_name_risk', 'Token_latency_seconds', 'geo_velocity_kmh',
+            'distance_from_last_cashout_km', 'transaction_hour', 'is_night_transaction',
+            'cashout_interval_hours', 'amount', 'transaction_type'
         ]
         
         # Risk thresholds (EcoCash 2026 - optimized for Zimbabwe market)
-        # Balance: Catch fraud without blocking legitimate users
         self.risk_thresholds = {
-            'low': 0.25,          # Low risk - allow with logging
-            'medium': 0.45,       # Requires OTP verification
-            'high': 0.70,         # Block, contact user
-            'critical': 0.85      # Block immediately
+            'low': 30,
+            'medium': 50,
+            'high': 70,
+            'critical': 85
         }
         
         # Load model if provided
@@ -55,13 +58,13 @@ class TAPnPAYRiskEngine:
             
         # Try to load metadata
         self.decision_threshold = 0.5
-        metadata_path = os.path.join(os.path.dirname(model_path) if model_path else 'model', 'model_metadata.json')
+        metadata_path = os.path.join(os.path.dirname(model_path) if model_path else 'ml_core/model', 'model_metadata_v4_zimbabwe.json')
         if os.path.exists(metadata_path):
             try:
                 with open(metadata_path, 'r') as f:
                     meta = json.load(f)
                     self.decision_threshold = meta.get('threshold', 0.5)
-                print(f"✅ Loaded optimized threshold: {self.decision_threshold}")
+                print(f"Loaded optimized threshold: {self.decision_threshold}")
             except:
                 pass
     
@@ -73,48 +76,40 @@ class TAPnPAYRiskEngine:
                     self.model = pickle.load(f)
             else:
                 self.model = lgb.Booster(model_file=model_path)
-            print(f"✅ Model loaded from {model_path}")
+            print(f"Model loaded from {model_path}")
         except Exception as e:
-            print(f"❌ Error loading model: {e}")
+            print(f"Error loading model: {e}")
             self.model = None
     
     def extract_features(self, transaction: Dict) -> pd.DataFrame:
         """
         Extract and validate features from transaction
-        
-        Args:
-            transaction: Dict with transaction data
-            
-        Returns:
-            DataFrame with features in correct order
         """
-        # Ensure all required features are present
-        required_fields = self.feature_names
-        
-        # Create feature vector
         features = {}
-        for field in required_fields:
-            if field in transaction:
-                features[field] = transaction[field]
-            else:
-                raise ValueError(f"Missing required field: {field}")
+        for field in self.feature_names:
+            val = transaction.get(field, 0)
+            # Handle categorical factorizing (simple encoding for inference)
+            if isinstance(val, str):
+                # Simple hash or mapping for network/type if needed
+                # For v4, the model expects numeric. We'll simulate the factorization.
+                if field == 'network_type':
+                    mapping = {'ecoz_mobile': 0, 'public_wifi': 1, 'vpn': 2}
+                    val = mapping.get(val, 3)
+                elif field == 'transaction_type':
+                    mapping = {'p2p': 0, 'merchant': 1, 'cashout': 2}
+                    val = mapping.get(val, 3)
+                elif field == 'merchant_name_risk':
+                    mapping = {'LEGIT': 0, 'SUSPICIOUS': 1, 'RISKY': 2}
+                    val = mapping.get(val, 1)
+                else:
+                    val = 0
+            features[field] = val
         
-        return pd.DataFrame([features], columns=required_fields)
+        return pd.DataFrame([features], columns=self.feature_names)
     
     def apply_rule_based_checks(self, transaction: Dict) -> Tuple[bool, List[str]]:
         """
-        Apply rule-based fraud detection rules (EcoCash Zimbabwe 2026)
-        
-        Based on real transaction limits and fraud patterns:
-        - P2P max: $500/transaction
-        - Daily max: $1,000-$4,000
-        - Monthly max: $2,000-$4,000
-        
-        Args:
-            transaction: Transaction data
-            
-        Returns:
-            (is_fraud, reasons) - tuple of fraud flag and reasons
+        Apply rule-based fraud detection rules (EcoCash Zimbabwe 2026 - V4 Aligned)
         """
         reasons = []
         is_fraud = False
@@ -124,52 +119,43 @@ class TAPnPAYRiskEngine:
             reasons.append("AMOUNT_LIMIT_EXCEEDED")
             is_fraud = True
         
-        # Rule 2: VELOCITY ATTACK - 5+ transactions in 10 seconds (account takeover)
-        if transaction.get('tx_count_last_10s', 0) >= 5:
-            reasons.append("VELOCITY_ATTACK")
+        # Rule 2: VELOCITY ATTACK - (Adapted for v4 data)
+        if transaction.get('recent_cashins_24h', 0) >= 5:
+            reasons.append("CASH_IN_VELOCITY")
             is_fraud = True
         
-        # Rule 3: BURST ATTACK - 10+ transactions in 1 minute
-        if transaction.get('tx_count_last_1min', 0) >= 10:
-            reasons.append("BURST_ATTACK")
-            is_fraud = True
-        
-        # Rule 4: IMPOSSIBLE MOVEMENT - geo_speed > 500 km/min
-        if transaction.get('geo_speed', 0) > 500:
+        # Rule 3: IMPOSSIBLE MOVEMENT - geo_velocity_kmh > 300
+        if transaction.get('geo_velocity_kmh', 0) > 300:
             reasons.append("LOCATION_JUMP")
             is_fraud = True
         
-        # Rule 5: ACCOUNT TAKEOVER - New device + location change + high amount
-        if (transaction.get('is_new_device', 0) == 1 and 
-            transaction.get('distance_km', 0) > 50 and
-            transaction.get('amount', 0) > 200):
-            reasons.append("ACCOUNT_TAKEOVER")
+        # Rule 4: ACCOUNT TAKEOVER - New device + location change + short session
+        if (transaction.get('new_device_login', 0) == 1 and 
+            transaction.get('distance_from_last_cashout_km', 0) > 50 and
+            transaction.get('time_since_login_seconds', 0) < 60):
+            reasons.append("ACCOUNT_TAKEOVER_RISK")
             is_fraud = True
         
-        # Rule 6: EXPIRED TOKEN - Token > 60 seconds old (session hijacking)
-        if transaction.get('token_age', 0) > 60:
-            reasons.append("EXPIRED_TOKEN")
+        # Rule 5: SMURFING PATTERN
+        if transaction.get('is_smurf_pattern', 0) == 1:
+            reasons.append("SMURFING_PATTERN")
+            is_fraud = True
+            
+        # Rule 6: POST DOWNTIME EXPLOIT
+        if transaction.get('is_post_downtime', 0) == 1 and transaction.get('amount', 0) > 200:
+            reasons.append("POST_DOWNTIME_VULNERABILITY")
+            is_fraud = True
+            
+        # Rule 7: MULE NETWORK
+        if transaction.get('is_mule_destination', 0) == 1:
+            reasons.append("MULE_NETWORK_DETECTION")
             is_fraud = True
         
-        # Rule 7: HIGH-RISK MERCHANT - Risk score > 0.9 (known scammer)
-        if (transaction.get('merchant_risk_score', 0) > 0.9 and 
-            transaction.get('amount', 0) > 50):
-            reasons.append("HIGH_RISK_MERCHANT")
+        # Rule 8: HIGH-RISK RECEIVER
+        if transaction.get('receiver_risk_score', 0) > 0.8:
+            reasons.append("HIGH_RISK_RECEIVER")
             is_fraud = True
-        
-        # Rule 8: NIGHT ACCOUNT TAKEOVER - Night + new device + high amount
-        if (transaction.get('is_night', 0) == 1 and 
-            transaction.get('is_new_device', 0) == 1 and
-            transaction.get('amount', 0) > 150):
-            reasons.append("NIGHT_ACCOUNT_TAKEOVER")
-            is_fraud = True
-        
-        # Rule 9: PHISHING PATTERN - Multiple small txs followed by large withdrawal
-        if (transaction.get('tx_count_last_1min', 0) >= 3 and
-            transaction.get('amount', 0) > 400):
-            reasons.append("PHISHING_PATTERN")
-            is_fraud = True
-        
+            
         return is_fraud, reasons
     
     def score_transaction(self, transaction: Dict) -> Dict:
@@ -227,6 +213,7 @@ class TAPnPAYRiskEngine:
             
             # Action recommendation
             result['action'] = self.get_recommended_action(risk_level, rule_reasons)
+            result['decision'] = self.get_decision_label(risk_level)
             
             return result
             
@@ -341,6 +328,17 @@ class TAPnPAYRiskEngine:
         }
         
         return action_map.get(risk_level, 'UNKNOWN_ACTION')
+
+    def get_decision_label(self, risk_level: str) -> str:
+        """Map internal risk levels to production decision labels"""
+        decision_map = {
+            'CRITICAL': 'BLOCK',
+            'HIGH': 'VERIFY',
+            'MEDIUM': 'CHALLENGE',
+            'LOW': 'MONITOR',
+            'NORMAL': 'APPROVE'
+        }
+        return decision_map.get(risk_level, 'APPROVE')
     
     def batch_score_transactions(self, transactions: List[Dict]) -> List[Dict]:
         """

@@ -6,11 +6,11 @@ import time
 BASE_URL = "http://localhost:8000"
 
 print("="*70)
-print("🧪 TAPnPAY v4 API TESTING - Zimbabwe-Optimized Model")
+print("TAPnPAY v4 API TESTING - Zimbabwe-Optimized Model")
 print("="*70)
 
 # ============= TEST 1: Health Check =============
-print("\n📊 TEST 1: Health Check")
+print("\nTEST 1: Health Check")
 try:
     r = requests.get(f"{BASE_URL}/health")
     print(f"Status: {r.status_code}")
@@ -19,7 +19,7 @@ except Exception as e:
     print(f"❌ Error: {e}")
 
 # ============= TEST 2: Model Info =============
-print("\n📊 TEST 2: Model Info (Metadata)")
+print("\nTEST 2: Model Info (Metadata)")
 try:
     r = requests.get(f"{BASE_URL}/model-info")
     data = r.json()
@@ -30,10 +30,10 @@ try:
     print(f"Fraud Rate: {data.get('fraud_rate')}")
     print(f"Performance: AUC {data.get('performance', {}).get('roc_auc', 'N/A')}, F1 {data.get('performance', {}).get('f1_score', 'N/A')}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 3: Legitimate Transaction =============
-print("\n✅ TEST 3: Legitimate Transaction (Should APPROVE)")
+print("\nTEST 3: Legitimate Transaction (Should APPROVE)")
 legit_tx = {
     "amount": 50.0,
     "transaction_type": "p2p",
@@ -62,12 +62,12 @@ try:
     print(f"Risk Score: {data.get('risk_score')}")
     print(f"Decision: {data.get('decision')}")
     print(f"Patterns Detected: {data.get('patterns_detected')}")
-    print(f"✓ PASS" if data.get('decision') == 'APPROVE' else f"✗ FAIL - Expected APPROVE, got {data.get('decision')}")
+    print(f"PASS" if data.get('decision') == 'APPROVE' else f"FAIL - Expected APPROVE, got {data.get('decision')}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 4: OTP Interception Fraud =============
-print("\n🚨 TEST 4: OTP Interception (New Device + Immediate Tx - Should BLOCK)")
+print("\nTEST 4: OTP Interception (New Device + Immediate Tx - Should BLOCK)")
 otp_fraud_tx = {
     "amount": 300.0,
     "transaction_type": "p2p",
@@ -98,14 +98,14 @@ try:
     print(f"Patterns Detected: {data.get('patterns_detected')}")
     print(f"Top Reasons: {data.get('reasons', [])[:3]}")
     if data.get('risk_score', 0) >= 85:
-        print(f"✓ PASS - High fraud risk detected")
+        print(f"PASS - High fraud risk detected")
     else:
-        print(f"⚠ Risk score: {data.get('risk_score')}")
+        print(f"Risk score: {data.get('risk_score')}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 5: Offline Vulnerability =============
-print("\n⚠️  TEST 5: Offline Vulnerability (Post-Downtime - Should flag)")
+print("\nTEST 5: Offline Vulnerability (Post-Downtime - Should flag)")
 offline_fraud_tx = {
     "amount": 400.0,
     "transaction_type": "merchant",
@@ -135,10 +135,10 @@ try:
     print(f"Decision: {data.get('decision')}")
     print(f"Patterns Detected: {data.get('patterns_detected')}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 6: Rules-Only Check =============
-print("\n🔍 TEST 6: Rules-Only Check (Deterministic Rules)")
+print("\nTEST 6: Rules-Only Check (Deterministic Rules)")
 try:
     r = requests.post(f"{BASE_URL}/check-rules", json=otp_fraud_tx)
     data = r.json()
@@ -149,10 +149,10 @@ try:
         for rule in data.get('triggered_rules', [])[:3]:
             print(f"  - {rule}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 7: Comprehensive Analysis =============
-print("\n🔬 TEST 7: Comprehensive Analysis (ML + Rules Combined)")
+print("\nTEST 7: Comprehensive Analysis (ML + Rules Combined)")
 try:
     r = requests.post(f"{BASE_URL}/analyze", json=otp_fraud_tx)
     data = r.json()
@@ -164,12 +164,12 @@ try:
     print(f"Zimbabwe Patterns Detected:")
     for k, v in data.get('zimbabwe_patterns', {}).items():
         if v:
-            print(f"  ✓ {k.replace('_', ' ').title()}")
+            print(f"  - {k.replace('_', ' ').title()}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 8: Batch Scoring =============
-print("\n📦 TEST 8: Batch Scoring (3 Transactions)")
+print("\nTEST 8: Batch Scoring (3 Transactions)")
 batch_request = {
     "transactions": [legit_tx, otp_fraud_tx, offline_fraud_tx],
     "max_size": 1000
@@ -181,17 +181,17 @@ try:
     print(f"Processed: {data.get('count')} transactions")
     summary = data.get('summary', {})
     print(f"Summary:")
-    print(f"  ✓ Approved: {summary.get('approved')}")
-    print(f"  🔔 Monitor: {summary.get('monitor')}")
-    print(f"  ⚠️  Challenge: {summary.get('challenged')}")
-    print(f"  🔍 Verify: {summary.get('verify')}")
-    print(f"  🚫 Blocked: {summary.get('blocked')}")
+    print(f"  - Approved: {summary.get('approved')}")
+    print(f"  - Monitor: {summary.get('monitor')}")
+    print(f"  - Challenge: {summary.get('challenged')}")
+    print(f"  - Verify: {summary.get('verify')}")
+    print(f"  - Blocked: {summary.get('blocked')}")
     print(f"  Fraud Rate: {summary.get('fraud_rate'):.1%}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 # ============= TEST 9: Root Endpoint =============
-print("\n📋 TEST 9: Root Endpoint (Service Info)")
+print("\nTEST 9: Root Endpoint (Service Info)")
 try:
     r = requests.get(f"{BASE_URL}/")
     data = r.json()
@@ -201,8 +201,8 @@ try:
     print(f"Model: {data.get('model')}")
     print(f"Available Endpoints: {', '.join(data.get('endpoints', []))}")
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"Error: {e}")
 
 print("\n" + "="*70)
-print("✨ API v4 Testing Complete")
+print("API v4 Testing Complete")
 print("="*70)
