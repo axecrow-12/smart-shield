@@ -6,231 +6,270 @@
 <title>SmartPay Shield</title>
 <script src="vendor/qrcode.min.js"></script>
 <style>
+  /* ---- Frost Sentinel design tokens ---- */
   :root {
-    --bg: #0b1020;
-    --panel: #131a2e;
-    --panel-2: #1a2340;
-    --border: #253052;
-    --text: #e8ecf8;
-    --muted: #8b96b8;
-    --accent: #4f8cff;
-    --green: #2fd483;
-    --amber: #ffb648;
-    --red: #ff5d6c;
-    --mono: "Consolas", "Menlo", monospace;
+    --font: "Segoe UI", system-ui, sans-serif;
+    --numFont: Consolas, Menlo, monospace;
+    --bg: radial-gradient(120% 120% at 20% 0%, #0d1428 0%, #070b16 55%, #04060c 100%);
+    --text: #e9edf8; --muted: #8d97b8; --accent: #4f8cff;
+    --good: #34d399; --amber: #fbbf24; --bad: #fb7185;
+    --goodSoft: rgba(52,211,153,.14); --amberSoft: rgba(251,191,36,.14); --badSoft: rgba(251,113,133,.14);
+    --cardBg: rgba(255,255,255,.055); --border: rgba(255,255,255,.13); --rowBorder: rgba(255,255,255,.06);
+    --cardShadow: 0 8px 32px rgba(2,6,18,.45), inset 0 1px 0 rgba(255,255,255,.09);
+    --blur: 18px; --radius: 16px;
+    --inputBg: rgba(255,255,255,.06); --rowBg: rgba(255,255,255,.045); --pillBg: rgba(255,255,255,.06);
+    --btnBg: linear-gradient(135deg, #4f8cff, #6d5cff); --btnText: #fff;
+    --btnShadow: 0 6px 18px rgba(79,140,255,.35);
+    --qrBg: rgba(255,255,255,.92); --qrInk: #0b1020; --track: rgba(255,255,255,.09);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: "Segoe UI", system-ui, sans-serif;
-    min-height: 100vh; padding: 20px;
+  body { min-height: 100vh; font-family: var(--font); color: var(--text); background: var(--bg); overflow-x: hidden; }
+  .bgfx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
+  .wrap { position: relative; z-index: 1; padding: 22px 26px; max-width: 1500px; margin: 0 auto; }
+
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .logo { font-size: 21px; font-weight: 800; letter-spacing: .4px; }
+  .logo em { font-style: normal; color: var(--accent); }
+  .pills { margin-left: auto; display: flex; gap: 8px; }
+  .pill { padding: 4px 13px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--pillBg); color: var(--muted); }
+  .pill.ok { color: var(--good); }
+  .pill.bad { color: var(--bad); }
+
+  .glass {
+    background: var(--cardBg); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--cardShadow);
+    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
   }
-  header {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-  .logo { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
-  .logo span { color: var(--accent); }
-  .pills { display: flex; gap: 8px; margin-left: auto; }
-  .pill {
-    padding: 4px 12px; border-radius: 999px; font-size: 12px;
-    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
-  }
-  .pill.ok { color: var(--green); border-color: rgba(47,212,131,.4); }
-  .pill.bad { color: var(--red); border-color: rgba(255,93,108,.4); }
-  .grid {
-    display: grid; gap: 16px;
-    grid-template-columns: 320px 360px 1fr;
-    align-items: start;
-  }
-  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
-  .card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 12px; padding: 18px;
-  }
-  .card h2 {
-    font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px;
-    color: var(--muted); margin-bottom: 14px;
-  }
-  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+  .kpi { padding: 14px 16px; }
+  .kpiVal { font-size: 26px; font-weight: 800; font-family: var(--numFont); }
+  .kpiLbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+  .grid { display: grid; grid-template-columns: 290px 330px 1fr; gap: 14px; align-items: start; }
+  .col { display: grid; gap: 14px; }
+  @media (max-width: 1150px) { .grid { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } }
+
+  .card { padding: 18px; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); margin-bottom: 13px; font-weight: 700; }
+  label { display: block; font-size: 11px; color: var(--muted); margin: 9px 0 4px; }
   input {
-    width: 100%; padding: 9px 10px; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--panel-2);
-    color: var(--text); font-size: 14px;
+    width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--inputBg); color: var(--text); font-size: 14px;
   }
   input:focus { outline: none; border-color: var(--accent); }
   button {
-    cursor: pointer; border: none; border-radius: 8px;
-    padding: 10px 14px; font-size: 14px; font-weight: 600;
-    background: var(--accent); color: #fff; width: 100%; margin-top: 14px;
+    cursor: pointer; border: none; width: 100%; margin-top: 14px; padding: 11px;
+    border-radius: 8px; font-weight: 700; font-size: 14px;
+    background: var(--btnBg); color: var(--btnText); box-shadow: var(--btnShadow);
+    font-family: var(--font);
   }
   button:hover { filter: brightness(1.12); }
   button:disabled { opacity: .5; cursor: default; }
-  #qrBox {
-    margin-top: 14px; display: none; text-align: center;
-    background: #fff; border-radius: 10px; padding: 14px;
-  }
-  #qrBox img, #qrBox canvas { margin: 0 auto; }
-  .tokenLine {
-    margin-top: 10px; font-family: var(--mono); font-size: 11px;
-    color: var(--muted); word-break: break-all; text-align: center;
-  }
-  .expiry { text-align: center; font-size: 12px; color: var(--amber); margin-top: 6px; }
 
-  .scenarios { display: grid; gap: 8px; }
+  #qrBox { margin: 14px auto 0; width: 180px; padding: 16px; border-radius: 12px; background: var(--qrBg); color: var(--qrInk); display: none; justify-content: center; }
+  #qrBox img, #qrBox canvas { display: block; margin: 0 auto; }
+  .tokenLine { margin-top: 10px; text-align: center; font-family: var(--numFont); font-size: 10px; color: var(--muted); word-break: break-all; }
+  .expiry { text-align: center; font-size: 12px; color: var(--amber); margin-top: 5px; }
+
+  .scenarios { display: grid; gap: 9px; }
   .scenario {
-    display: flex; align-items: center; gap: 10px; text-align: left;
-    background: var(--panel-2); border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px 12px; margin: 0; width: 100%;
-    color: var(--text); font-weight: 500;
+    display: flex; gap: 11px; align-items: center; text-align: left; width: 100%; margin: 0;
+    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--rowBg); color: var(--text); font-size: 13px; font-weight: 500;
+    box-shadow: none;
   }
   .scenario:hover { border-color: var(--accent); filter: none; }
-  .scenario .icon { font-size: 20px; }
+  .scenario .icon { font-size: 19px; }
   .scenario .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
 
   #resultCard { display: none; }
-  .gaugeWrap { display: flex; align-items: center; gap: 16px; }
-  .score { font-size: 42px; font-weight: 800; font-family: var(--mono); }
-  .bar {
-    flex: 1; height: 10px; border-radius: 999px; background: var(--panel-2);
-    overflow: hidden; border: 1px solid var(--border);
-  }
-  .bar i { display: block; height: 100%; width: 0; transition: width .6s ease; }
-  .decision {
-    display: inline-block; margin-top: 10px; padding: 5px 14px; border-radius: 8px;
-    font-weight: 700; font-size: 14px;
-  }
-  .d-approved { background: rgba(47,212,131,.15); color: var(--green); }
-  .d-review   { background: rgba(255,182,72,.15); color: var(--amber); }
-  .d-rejected { background: rgba(255,93,108,.15); color: var(--red); }
-  .reasons { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .reason {
-    font-size: 11px; font-family: var(--mono); padding: 3px 8px;
-    border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border);
-    color: var(--muted);
-  }
+  .verdictRow { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .gaugeNum { font-size: 40px; font-weight: 800; fill: var(--text); font-family: var(--numFont); transition: fill .4s; }
+  .gaugeLbl { font-size: 9px; letter-spacing: 2px; fill: var(--muted); }
+  #gaugeArc { transition: stroke-dasharray .8s ease, stroke .4s; }
+  .verdictInfo { flex: 1; min-width: 280px; }
+  .decision { display: inline-block; padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; }
+  .d-approved { background: var(--goodSoft); color: var(--good); }
+  .d-review { background: var(--amberSoft); color: var(--amber); }
+  .d-rejected { background: var(--badSoft); color: var(--bad); }
+  .reasons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+  .reason { font-size: 10px; font-family: var(--numFont); padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--rowBg); color: var(--muted); }
+  .exTitle { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 10px 0 6px; }
+  .exRow { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 4px; }
+  .exName { width: 165px; text-align: right; font-family: var(--numFont); color: var(--muted); font-size: 10px; }
+  .exTrack { flex: 1; height: 8px; border-radius: 999px; background: var(--track); position: relative; overflow: hidden; }
+  .exTrack i { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+  .exVal { width: 44px; font-family: var(--numFont); font-size: 11px; }
   .srcNote { margin-top: 10px; font-size: 11px; color: var(--muted); }
-  #explain { margin-top: 12px; display: grid; gap: 5px; }
-  .exTitle {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-    color: var(--muted); margin-bottom: 2px;
-  }
-  .exRow { display: flex; align-items: center; gap: 8px; font-size: 11px; }
-  .exName { width: 170px; font-family: var(--mono); color: var(--muted); text-align: right; }
-  .exTrack {
-    flex: 1; height: 8px; background: var(--panel-2); border-radius: 999px;
-    position: relative; overflow: hidden;
-  }
-  .exTrack i { position: absolute; top: 0; bottom: 0; left: 50%; }
-  .exVal { width: 44px; font-family: var(--mono); }
 
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    text-align: left; font-size: 11px; text-transform: uppercase;
-    letter-spacing: 1px; color: var(--muted); padding: 6px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  td { padding: 8px; border-bottom: 1px solid rgba(37,48,82,.5); vertical-align: top; }
-  .chip {
-    padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
-    display: inline-block;
-  }
-  .riskbar {
-    width: 90px; height: 7px; background: var(--panel-2); border-radius: 999px;
-    overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px;
-  }
-  .riskbar i { display: block; height: 100%; }
-  .feedReasons { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .charts { display: flex; gap: 22px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .chart { display: flex; gap: 12px; align-items: center; }
+  .chart.grow { flex: 1; min-width: 220px; display: block; }
+  .chartLbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
+  .spark { width: 100%; height: 54px; display: block; }
+  .donutNum { font-size: 20px; font-weight: 800; fill: var(--text); font-family: var(--numFont); }
+  .donutLbl { font-size: 8px; fill: var(--muted); letter-spacing: 1px; }
+  .legend { display: grid; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px; border-bottom: 1px solid var(--rowBorder); vertical-align: top; }
+  .num { font-family: var(--numFont); }
+  .riskbar { width: 74px; height: 7px; background: var(--track); border-radius: 999px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 7px; }
+  .riskbar i { display: block; height: 100%; border-radius: 999px; }
+  .chip { padding: 2px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; display: inline-block; }
+  .c-approved { background: var(--goodSoft); color: var(--good); }
+  .c-review { background: var(--amberSoft); color: var(--amber); }
+  .c-rejected { background: var(--badSoft); color: var(--bad); }
+  .sig { font-family: var(--numFont); font-size: 10px; color: var(--muted); }
   .empty { color: var(--muted); padding: 24px; text-align: center; font-size: 13px; }
 </style>
 </head>
 <body>
 
+<div class="bgfx">
+  <div class="orb" style="background:#2563eb;width:420px;height:420px;left:-6%;top:-12%"></div>
+  <div class="orb" style="background:#7c3aed;width:380px;height:380px;left:72%;top:-8%"></div>
+  <div class="orb" style="background:#0ea5e9;width:340px;height:340px;left:38%;top:78%"></div>
+</div>
+
+<div class="wrap">
+
 <header>
-  <div class="logo">🛡️ SmartPay <span>Shield</span></div>
+  <div class="logo">🛡️ SmartPay <em>Shield</em></div>
   <div class="pills">
     <span class="pill" id="pillBackend">backend …</span>
     <span class="pill" id="pillMl">ml api …</span>
   </div>
 </header>
 
+<!-- KPI STRIP -->
+<div class="kpis">
+  <div class="kpi glass"><div class="kpiVal" id="kpiScored">–</div><div class="kpiLbl">transactions scored</div></div>
+  <div class="kpi glass"><div class="kpiVal" id="kpiBlocked" style="color:var(--bad)">–</div><div class="kpiLbl">blocked</div></div>
+  <div class="kpi glass"><div class="kpiVal" id="kpiRate">–</div><div class="kpiLbl">block rate</div></div>
+  <div class="kpi glass"><div class="kpiVal" id="kpiAvg">–</div><div class="kpiLbl">avg risk</div></div>
+  <div class="kpi glass"><div class="kpiVal" id="kpiAuc" style="color:var(--accent)">–</div><div class="kpiLbl">model AUC</div></div>
+</div>
+
 <div class="grid">
 
   <!-- MERCHANT TERMINAL -->
-  <div class="card">
-    <h2>Merchant terminal</h2>
-    <label>Merchant</label>
-    <input id="merchantName" value="Mbare Fresh Produce">
-    <label>Amount (USD)</label>
-    <input id="amount" type="number" value="18.50" step="0.5">
-    <button id="btnCreate">Create payment request</button>
-    <div id="qrBox"><div id="qr"></div></div>
-    <div class="tokenLine" id="tokenLine"></div>
-    <div class="expiry" id="expiryLine"></div>
+  <div class="col">
+    <div class="card glass">
+      <h2>Merchant terminal</h2>
+      <label>Merchant</label>
+      <input id="merchantName" value="Mbare Fresh Produce">
+      <label>Amount (USD)</label>
+      <input id="amount" type="number" value="18.50" step="0.5">
+      <button id="btnCreate">Create payment request</button>
+      <div id="qrBox"><div id="qr"></div></div>
+      <div class="tokenLine" id="tokenLine"></div>
+      <div class="expiry" id="expiryLine"></div>
+    </div>
   </div>
 
   <!-- ATTACK SIMULATOR -->
-  <div>
-    <div class="card">
+  <div class="col">
+    <div class="card glass">
       <h2>Customer / attack simulator</h2>
       <div class="scenarios">
         <button class="scenario" data-s="normal">
           <span class="icon">✅</span>
-          <span>Legitimate purchase<br><span class="desc">Known device, home area, normal hours</span></span>
+          <span><b>Legitimate purchase</b><br><span class="desc">Known device, home area, normal hours</span></span>
         </button>
         <button class="scenario" data-s="otp">
           <span class="icon">📵</span>
-          <span>OTP interception / SIM swap<br><span class="desc">New device, 25s-old session, cycled SIM, public Wi-Fi</span></span>
+          <span><b>OTP interception / SIM swap</b><br><span class="desc">New device, 25s-old session, cycled SIM, public Wi-Fi</span></span>
         </button>
         <button class="scenario" data-s="mule">
           <span class="icon">🕸️</span>
-          <span>Mule network payout<br><span class="desc">Known mule destination, high-risk receiver</span></span>
+          <span><b>Mule network payout</b><br><span class="desc">Known mule destination, high-risk receiver</span></span>
         </button>
         <button class="scenario" data-s="velocity">
           <span class="icon">⚡</span>
-          <span>Velocity / smurfing attack<br><span class="desc">9 cash-ins in 24h, structured small amounts</span></span>
+          <span><b>Velocity / smurfing attack</b><br><span class="desc">9 cash-ins in 24h, structured small amounts</span></span>
         </button>
         <button class="scenario" data-s="travel">
           <span class="icon">🛰️</span>
-          <span>Impossible travel<br><span class="desc">450 km/h between transactions, 300 km jump</span></span>
+          <span><b>Impossible travel</b><br><span class="desc">450 km/h between transactions, 300 km jump</span></span>
         </button>
         <button class="scenario" data-s="replay">
           <span class="icon">♻️</span>
-          <span>Token replay attack<br><span class="desc">Same QR token presented twice</span></span>
+          <span><b>Token replay attack</b><br><span class="desc">Same QR token presented twice</span></span>
         </button>
       </div>
     </div>
+  </div>
 
-    <!-- RESULT -->
-    <div class="card" id="resultCard" style="margin-top:16px">
+  <!-- VERDICT + FEED -->
+  <div class="col">
+    <div class="card glass" id="resultCard">
       <h2>Fraud engine verdict</h2>
-      <div class="gaugeWrap">
-        <div class="score" id="scoreNum">–</div>
-        <div class="bar"><i id="scoreBar"></i></div>
+      <div class="verdictRow">
+        <svg viewBox="0 0 160 160" width="170" height="170">
+          <circle cx="80" cy="80" r="64" fill="none" stroke="var(--track)" stroke-width="13"/>
+          <circle id="gaugeArc" cx="80" cy="80" r="64" fill="none" stroke="var(--good)" stroke-width="13"
+            stroke-linecap="round" stroke-dasharray="0 402.1" transform="rotate(-90 80 80)"/>
+          <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="gaugeNum">–</text>
+          <text x="80" y="100" text-anchor="middle" class="gaugeLbl">RISK SCORE</text>
+        </svg>
+        <div class="verdictInfo">
+          <span class="decision" id="decisionChip"></span>
+          <div class="reasons" id="reasonChips"></div>
+          <div id="explain"></div>
+          <div class="srcNote" id="srcNote"></div>
+        </div>
       </div>
-      <span class="decision" id="decisionChip"></span>
-      <div class="reasons" id="reasonChips"></div>
-      <div id="explain"></div>
-      <div class="srcNote" id="srcNote"></div>
+    </div>
+
+    <div class="card glass">
+      <h2>Live transaction feed</h2>
+      <div class="charts">
+        <div class="chart">
+          <svg viewBox="0 0 88 88" width="92" height="92" id="donut">
+            <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+            <circle id="donutA" cx="44" cy="44" r="34" fill="none" stroke="var(--amber)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+            <circle id="donutB" cx="44" cy="44" r="34" fill="none" stroke="var(--bad)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+            <text id="donutNum" x="44" y="41" text-anchor="middle" class="donutNum">0</text>
+            <text x="44" y="55" text-anchor="middle" class="donutLbl">scored</text>
+          </svg>
+          <div class="legend">
+            <span><i style="background:var(--good)"></i><span id="lgApproved">approved 0</span></span>
+            <span><i style="background:var(--amber)"></i><span id="lgReview">review 0</span></span>
+            <span><i style="background:var(--bad)"></i><span id="lgBlocked">blocked 0</span></span>
+          </div>
+        </div>
+        <div class="chart grow">
+          <div class="chartLbl">risk over time</div>
+          <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="spark">
+            <defs>
+              <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="transparent"/>
+              </linearGradient>
+            </defs>
+            <polygon id="sparkArea" points="" fill="url(#sparkFill)" opacity="0.25"/>
+            <polyline id="sparkLine" points="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+        <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- LIVE FEED -->
-  <div class="card">
-    <h2>Live transaction feed</h2>
-    <table>
-      <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
-      <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
-    </table>
-  </div>
-
+</div>
 </div>
 
 <script>
 const $ = (id) => document.getElementById(id);
 let currentPayment = null;
 let expiryTimer = null;
-let qrObj = null;
 
 const SCENARIOS = {
   normal: {
@@ -278,7 +317,7 @@ async function api(method, url, body) {
   return { status: res.status, json: await res.json().catch(() => null) };
 }
 
-/* ---------- health pills ---------- */
+/* ---------- health pills + model AUC ---------- */
 async function health() {
   try {
     const r = await fetch("/api");
@@ -295,6 +334,15 @@ function setPill(id, ok, text) {
   el.textContent = (ok ? "● " : "○ ") + text;
   el.className = "pill " + (ok ? "ok" : "bad");
 }
+async function loadModelInfo() {
+  try {
+    // served by the ML API; only reachable if it's up
+    const res = await fetch("http://127.0.0.1:8000/model-info");
+    const meta = await res.json();
+    const auc = meta?.performance?.roc_auc;
+    if (auc) $("kpiAuc").textContent = auc.toFixed(3);
+  } catch {}
+}
 
 /* ---------- merchant terminal ---------- */
 async function createPayment(amount, merchantName) {
@@ -309,9 +357,9 @@ async function createPayment(amount, merchantName) {
 
 function renderPayment() {
   const p = currentPayment;
-  $("qrBox").style.display = "block";
+  $("qrBox").style.display = "flex";
   $("qr").innerHTML = "";
-  qrObj = new QRCode($("qr"), { text: p.qrPayload, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
+  new QRCode($("qr"), { text: p.qrPayload, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
   $("tokenLine").textContent = "token " + p.token;
   clearInterval(expiryTimer);
   expiryTimer = setInterval(() => {
@@ -361,15 +409,19 @@ async function runReplay() {
 }
 
 /* ---------- verdict panel ---------- */
+function riskColor(score) {
+  return score >= 70 ? "var(--bad)" : score >= 40 ? "var(--amber)" : "var(--good)";
+}
+
 function showResult(fr, status, label) {
   $("resultCard").style.display = "block";
   const score = Math.round(fr.score);
-  $("scoreNum").textContent = score;
-  const color = score >= 70 ? "var(--red)" : score >= 40 ? "var(--amber)" : "var(--green)";
-  $("scoreNum").style.color = color;
-  const bar = $("scoreBar");
-  bar.style.width = score + "%";
-  bar.style.background = color;
+  const C = 2 * Math.PI * 64;
+  $("gaugeArc").setAttribute("stroke-dasharray", `${(C * score / 100).toFixed(1)} ${C.toFixed(1)}`);
+  $("gaugeArc").setAttribute("stroke", riskColor(score));
+  $("gaugeNum").textContent = score;
+  $("gaugeNum").style.fill = riskColor(score);
+
   const chip = $("decisionChip");
   chip.textContent = `${label} → ${status.toUpperCase()}` + (fr.decision ? ` (${fr.decision})` : "");
   chip.className = "decision d-" + (status === "approved" ? "approved" : status === "review" ? "review" : "rejected");
@@ -386,49 +438,89 @@ function showResult(fr, status, label) {
         const pct = Math.min(50, (Math.abs(f.contribution) / maxAbs) * 50);
         const pos = f.contribution > 0;
         const barStyle = pos
-          ? `left:50%;width:${pct}%;background:var(--red)`
-          : `left:${50 - pct}%;width:${pct}%;background:var(--green)`;
+          ? `left:50%;width:${pct}%;background:var(--bad)`
+          : `left:${50 - pct}%;width:${pct}%;background:var(--good)`;
         return `<div class="exRow">
           <span class="exName">${f.feature}</span>
           <span class="exTrack"><i style="${barStyle}"></i></span>
-          <span class="exVal" style="color:${pos ? "var(--red)" : "var(--green)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
+          <span class="exVal" style="color:${pos ? "var(--bad)" : "var(--good)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
         </div>`;
       }).join("");
   } else {
     $("explain").innerHTML = "";
   }
+
   $("srcNote").textContent =
     fr.source === "ml+rules"
       ? `scored by LightGBM v4 (ml ${Math.round(fr.mlScore ?? 0)}/100, level ${fr.mlRiskLevel}) + token rules`
       : `scored by: ${fr.source}`;
 }
 
-/* ---------- live feed ---------- */
+/* ---------- KPIs + charts + live feed ---------- */
+function updateKpis(txs) {
+  const scored = txs.length;
+  const blocked = txs.filter((t) => t.status === "rejected").length;
+  const review = txs.filter((t) => t.status === "review").length;
+  const approved = scored - blocked - review;
+  const avg = scored ? txs.reduce((s, t) => s + (t.fraudResult?.score ?? 0), 0) / scored : 0;
+
+  $("kpiScored").textContent = scored;
+  $("kpiBlocked").textContent = blocked;
+  $("kpiRate").textContent = scored ? Math.round((blocked / scored) * 100) + "%" : "0%";
+  $("kpiAvg").textContent = Math.round(avg);
+  $("kpiAvg").style.color = riskColor(avg);
+
+  // donut
+  const C = 2 * Math.PI * 34;
+  const seg = (id, frac, off) => {
+    const el = $(id);
+    el.setAttribute("stroke-dasharray", `${Math.max(0, C * frac - 2).toFixed(1)} ${C.toFixed(1)}`);
+    el.setAttribute("stroke-dashoffset", (-C * off).toFixed(1));
+  };
+  const fA = scored ? approved / scored : 0, fR = scored ? review / scored : 0, fB = scored ? blocked / scored : 0;
+  seg("donutG", fA, 0); seg("donutA", fR, fA); seg("donutB", fB, fA + fR);
+  $("donutNum").textContent = scored;
+  $("lgApproved").textContent = `approved ${approved}`;
+  $("lgReview").textContent = `review ${review}`;
+  $("lgBlocked").textContent = `blocked ${blocked}`;
+
+  // sparkline: chronological risk of the recent transactions
+  const points = txs.slice().reverse().map((t) => t.fraudResult?.score ?? 0);
+  const w = 260, h = 54;
+  if (points.length >= 2) {
+    const step = w / (points.length - 1);
+    const pts = points.map((v, i) => `${(i * step).toFixed(1)},${(h - (v / 100) * (h - 6) - 3).toFixed(1)}`);
+    $("sparkLine").setAttribute("points", pts.join(" "));
+    $("sparkArea").setAttribute("points", `0,${h} ${pts.join(" ")} ${w},${h}`);
+  }
+}
+
 async function refreshFeed() {
   try {
     const r = await api("GET", "/api/payments/transactions");
     const txs = r.json?.transactions || [];
-    const tbody = $("feed");
+    updateKpis(txs);
     if (!txs.length) return;
-    tbody.innerHTML = txs.map((t) => {
+    $("feed").innerHTML = txs.map((t) => {
       const score = Math.round(t.fraudResult?.score ?? 0);
-      const color = score >= 70 ? "var(--red)" : score >= 40 ? "var(--amber)" : "var(--green)";
+      const color = riskColor(score);
       const st = t.status || "?";
-      const cls = st === "approved" ? "d-approved" : st === "review" ? "d-review" : "d-rejected";
+      const cls = st === "approved" ? "c-approved" : st === "review" ? "c-review" : "c-rejected";
       const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
       return `<tr>
         <td>${new Date(t.createdAt).toLocaleTimeString()}</td>
         <td>${t.merchantName || "-"}</td>
-        <td>$${Number(t.amount).toFixed(2)}</td>
-        <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span>${score}</td>
+        <td class="num">$${Number(t.amount).toFixed(2)}</td>
+        <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
         <td><span class="chip ${cls}">${st}</span></td>
-        <td class="feedReasons">${reasons || "—"}</td>
+        <td class="sig">${reasons || "—"}</td>
       </tr>`;
     }).join("");
   } catch {}
 }
 
 health();
+loadModelInfo();
 refreshFeed();
 setInterval(health, 10000);
 setInterval(refreshFeed, 3000);
