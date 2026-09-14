@@ -7,6 +7,8 @@ Smart fraud detection for Zimbabwe mobile money (EcoCash/OneMoney). Two services
 
 Every payment processed by the backend is scored live by the ML service (`ml+rules`); if the ML service is down, the backend falls back to local rules (`rules_fallback`).
 
+> **New here or presenting a demo?** See [docs/RUNNING_AND_NAVIGATION.md](docs/RUNNING_AND_NAVIGATION.md) for a plain-language, step-by-step guide to starting everything and a full walkthrough of the dashboard.
+
 ## Quick start — Docker (any machine with Docker)
 
 ```bash
