@@ -6,35 +6,31 @@
 <title>SmartPay Shield</title>
 <script src="vendor/qrcode.min.js"></script>
 <style>
-  /* ---- Frost Sentinel design tokens ---- */
+  /* ---- Frost Sentinel design tokens (teal accent, app-shell layout) ---- */
   :root {
     --font: "Segoe UI", system-ui, sans-serif;
     --numFont: Consolas, Menlo, monospace;
     --bg: radial-gradient(120% 120% at 20% 0%, #0d1428 0%, #070b16 55%, #04060c 100%);
-    --text: #e9edf8; --muted: #8d97b8; --accent: #4f8cff;
-    --good: #34d399; --amber: #fbbf24; --bad: #fb7185;
-    --goodSoft: rgba(52,211,153,.14); --amberSoft: rgba(251,191,36,.14); --badSoft: rgba(251,113,133,.14);
+    --text: #e9edf8; --muted: #8d97b8; --faint: #5c6690;
+    --accent: #14b8a6; --accent2: #10b981;
+    --good: #2dd4bf; --amber: #fbbf24; --bad: #fb7185; --purple: #8b5cf6; --blue: #3b82f6;
+    --goodSoft: rgba(45,212,191,.14); --amberSoft: rgba(251,191,36,.14); --badSoft: rgba(251,113,133,.14);
+    --purpleSoft: rgba(139,92,246,.14); --blueSoft: rgba(59,130,246,.14);
     --cardBg: rgba(255,255,255,.055); --border: rgba(255,255,255,.13); --rowBorder: rgba(255,255,255,.06);
     --cardShadow: 0 8px 32px rgba(2,6,18,.45), inset 0 1px 0 rgba(255,255,255,.09);
     --blur: 18px; --radius: 16px;
     --inputBg: rgba(255,255,255,.06); --rowBg: rgba(255,255,255,.045); --pillBg: rgba(255,255,255,.06);
-    --btnBg: linear-gradient(135deg, #4f8cff, #6d5cff); --btnText: #fff;
-    --btnShadow: 0 6px 18px rgba(79,140,255,.35);
+    --btnBg: linear-gradient(135deg, var(--accent2), var(--accent)); --btnText: #06251f;
+    --btnShadow: 0 6px 18px rgba(20,184,166,.3);
     --qrBg: rgba(255,255,255,.92); --qrInk: #0b1020; --track: rgba(255,255,255,.09);
+    --sidebarW: 240px; --topbarH: 64px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { min-height: 100vh; font-family: var(--font); color: var(--text); background: var(--bg); overflow-x: hidden; }
   .bgfx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; }
-  .wrap { position: relative; z-index: 1; padding: 22px 26px; max-width: 1500px; margin: 0 auto; }
-
-  header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
-  .logo { font-size: 21px; font-weight: 800; letter-spacing: .4px; }
-  .logo em { font-style: normal; color: var(--accent); }
-  .pills { margin-left: auto; display: flex; gap: 8px; }
-  .pill { padding: 4px 13px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: var(--pillBg); color: var(--muted); }
-  .pill.ok { color: var(--good); }
-  .pill.bad { color: var(--bad); }
+  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .5; }
+  svg.icon { width: 18px; height: 18px; flex-shrink: 0; }
+  svg.icon * { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
   .glass {
     background: var(--cardBg); border: 1px solid var(--border); border-radius: var(--radius);
@@ -42,21 +38,150 @@
     backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
   }
 
-  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-  .kpi { padding: 14px 16px; }
-  .kpiVal { font-size: 26px; font-weight: 800; font-family: var(--numFont); }
-  .kpiLbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+  /* ---------- app shell ---------- */
+  .app { position: relative; z-index: 1; display: flex; min-height: 100vh; }
 
+  .sidebar {
+    width: var(--sidebarW); flex-shrink: 0; position: sticky; top: 0; height: 100vh;
+    display: flex; flex-direction: column; padding: 20px 14px;
+    border-right: 1px solid var(--border); background: rgba(6,10,20,.55);
+    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+    z-index: 40; transition: transform .25s ease;
+  }
+  .sbLogo { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; }
+  .sbLogoIcon {
+    width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    background: var(--btnBg); font-size: 17px; flex-shrink: 0; box-shadow: var(--btnShadow);
+  }
+  .sbLogoText { font-size: 15px; font-weight: 800; line-height: 1.2; }
+  .sbLogoText em { font-style: normal; color: var(--accent); }
+  .sbTagline { font-size: 10px; color: var(--muted); }
+
+  .navItem {
+    display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+    padding: 10px 12px; margin-bottom: 3px; border: none; border-radius: 10px;
+    background: transparent; color: var(--muted); font-size: 13.5px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); box-shadow: none;
+  }
+  .navItem:hover { background: var(--rowBg); color: var(--text); }
+  .navItem.active { background: var(--goodSoft); color: var(--good); }
+  .navItem.active svg.icon * { stroke: var(--good); }
+
+  .sbSpacer { flex: 1; }
+  .sbFooter { padding: 16px 14px; text-align: center; margin-top: 10px; overflow: hidden; }
+  .sbFooterIcon { font-size: 22px; margin-bottom: 8px; }
+  .sbFooterTitle { font-size: 13px; font-weight: 700; }
+  .sbFooterSub { font-size: 11px; color: var(--muted); margin-top: 2px; margin-bottom: 10px; }
+  .sbWave { width: 100%; height: 30px; display: block; }
+
+  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+  .topbar {
+    height: var(--topbarH); flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+    padding: 0 22px; border-bottom: 1px solid var(--border); background: rgba(6,10,20,.4);
+    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+    position: sticky; top: 0; z-index: 30;
+  }
+  .hamburger {
+    display: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--rowBg); color: var(--text); align-items: center; justify-content: center;
+    cursor: pointer; margin: 0; flex-shrink: 0; box-shadow: none;
+  }
+  .searchBox {
+    flex: 1; max-width: 420px; display: flex; align-items: center; gap: 9px;
+    padding: 8px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--inputBg);
+    color: var(--muted);
+  }
+  .searchBox svg.icon { width: 16px; height: 16px; }
+  .searchBox input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 13px; font-family: var(--font); }
+  .searchBox input:focus { outline: none; }
+  .searchBox input::placeholder { color: var(--faint); }
+
+  .topRight { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .statusChip { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .statusDot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .statusDot.bad { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
+
+  .bellBtn {
+    position: relative; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--rowBg); color: var(--muted); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; margin: 0; flex-shrink: 0; box-shadow: none;
+  }
+  .bellBadge {
+    position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 3px;
+    border-radius: 999px; background: var(--bad); color: #fff; font-size: 9.5px; font-weight: 800;
+    display: none; align-items: center; justify-content: center; font-family: var(--numFont);
+  }
+
+  .userChip { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--btnBg); color: var(--btnText);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;
+  }
+  .userMeta { line-height: 1.25; }
+  .uName { font-size: 12.5px; font-weight: 700; }
+  .uRole { font-size: 10.5px; color: var(--muted); }
+  .userChip svg.icon { width: 14px; height: 14px; color: var(--muted); }
+
+  .content { padding: 22px 26px 40px; max-width: 1520px; width: 100%; margin: 0 auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .placeholder { padding: 70px 20px; text-align: center; color: var(--muted); }
+  .placeholder .picon { font-size: 40px; margin-bottom: 14px; }
+  .placeholder h3 { color: var(--text); font-size: 17px; margin-bottom: 6px; }
+  .placeholder p { font-size: 13px; }
+
+  /* ---------- greeting header ---------- */
+  .greetHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .greetHeader h1 { font-size: 23px; font-weight: 800; }
+  .greetHeader p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .greetRight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .dateRange {
+    display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--rowBg); font-size: 12.5px; color: var(--text);
+  }
+  .livePill {
+    display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
+    background: var(--goodSoft); color: var(--good); font-size: 12.5px; font-weight: 700;
+  }
+  .livePill i { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 6px var(--good); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+  /* ---------- KPI strip ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi { padding: 16px; }
+  .kpiTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .kpiIcon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .kpiIcon svg.icon { width: 19px; height: 19px; }
+  .kpiVal { font-size: 25px; font-weight: 800; font-family: var(--numFont); }
+  .kpiLbl { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .kpiTrend { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+  .kpiTrend b { font-family: var(--numFont); }
+  .kpiTrend.up { color: var(--good); } .kpiTrend.down { color: var(--bad); } .kpiTrend.flat { color: var(--muted); }
+  .kpiTrendNote { color: var(--faint); font-size: 10.5px; }
+  @media (max-width: 1150px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---------- dashboard grid ---------- */
   .grid { display: grid; grid-template-columns: 290px 330px 1fr; gap: 14px; align-items: start; }
   .col { display: grid; gap: 14px; }
-  @media (max-width: 1150px) { .grid { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1150px) { .grid { grid-template-columns: 1fr; } }
 
   .card { padding: 18px; }
-  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); margin-bottom: 13px; font-weight: 700; }
+  .cardHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); font-weight: 700; }
+  .card h2 .h2icon { margin-right: 6px; }
+  .badge-active {
+    font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    background: var(--goodSoft); color: var(--good);
+  }
+  .linkBtn { font-size: 11.5px; color: var(--accent); cursor: pointer; background: none; border: none; padding: 0; margin: 0; width: auto; box-shadow: none; }
+  .linkBtn:hover { text-decoration: underline; filter: none; }
+
   label { display: block; font-size: 11px; color: var(--muted); margin: 9px 0 4px; }
   input {
     width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--inputBg); color: var(--text); font-size: 14px;
+    background: var(--inputBg); color: var(--text); font-size: 14px; font-family: var(--font);
   }
   input:focus { outline: none; border-color: var(--accent); }
   button {
@@ -65,7 +190,7 @@
     background: var(--btnBg); color: var(--btnText); box-shadow: var(--btnShadow);
     font-family: var(--font);
   }
-  button:hover { filter: brightness(1.12); }
+  button:hover { filter: brightness(1.1); }
   button:disabled { opacity: .5; cursor: default; }
 
   #qrBox { margin: 14px auto 0; width: 180px; padding: 16px; border-radius: 12px; background: var(--qrBg); color: var(--qrInk); display: none; justify-content: center; }
@@ -83,6 +208,12 @@
   .scenario:hover { border-color: var(--accent); filter: none; }
   .scenario .icon { font-size: 19px; }
   .scenario .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .scTextWrap { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .scBadge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+  .sb-safe { background: var(--goodSoft); color: var(--good); }
+  .sb-high { background: var(--badSoft); color: var(--bad); }
+  .sb-medium { background: var(--blueSoft); color: var(--blue); }
+  .sb-low { background: var(--pillBg); color: var(--muted); }
 
   #resultCard { display: none; }
   .verdictRow { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
@@ -126,150 +257,405 @@
   .c-rejected { background: var(--badSoft); color: var(--bad); }
   .sig { font-family: var(--numFont); font-size: 10px; color: var(--muted); }
   .empty { color: var(--muted); padding: 24px; text-align: center; font-size: 13px; }
+
+  /* ---------- responsive: off-canvas sidebar ---------- */
+  .sbBackdrop { display: none; position: fixed; inset: 0; background: rgba(2,4,10,.55); z-index: 35; }
+  @media (max-width: 900px) {
+    .hamburger { display: flex; }
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); box-shadow: 20px 0 50px rgba(0,0,0,.4); }
+    .app.navOpen .sidebar { transform: translateX(0); }
+    .app.navOpen .sbBackdrop { display: block; }
+    .searchBox { display: none; }
+    .userMeta { display: none; }
+    .content { padding: 18px 14px 32px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="bgfx">
   <div class="orb" style="background:#2563eb;width:420px;height:420px;left:-6%;top:-12%"></div>
-  <div class="orb" style="background:#7c3aed;width:380px;height:380px;left:72%;top:-8%"></div>
-  <div class="orb" style="background:#0ea5e9;width:340px;height:340px;left:38%;top:78%"></div>
+  <div class="orb" style="background:#14b8a6;width:380px;height:380px;left:72%;top:-8%"></div>
+  <div class="orb" style="background:#7c3aed;width:340px;height:340px;left:38%;top:78%"></div>
 </div>
 
-<div class="wrap">
+<div class="app" id="app">
+  <div class="sbBackdrop" id="sbBackdrop"></div>
 
-<header>
-  <div class="logo">🛡️ SmartPay <em>Shield</em></div>
-  <div class="pills">
-    <span class="pill" id="pillBackend">backend …</span>
-    <span class="pill" id="pillMl">ml api …</span>
-  </div>
-</header>
-
-<!-- KPI STRIP -->
-<div class="kpis">
-  <div class="kpi glass"><div class="kpiVal" id="kpiScored">–</div><div class="kpiLbl">transactions scored</div></div>
-  <div class="kpi glass"><div class="kpiVal" id="kpiBlocked" style="color:var(--bad)">–</div><div class="kpiLbl">blocked</div></div>
-  <div class="kpi glass"><div class="kpiVal" id="kpiRate">–</div><div class="kpiLbl">block rate</div></div>
-  <div class="kpi glass"><div class="kpiVal" id="kpiAvg">–</div><div class="kpiLbl">avg risk</div></div>
-  <div class="kpi glass"><div class="kpiVal" id="kpiAuc" style="color:var(--accent)">–</div><div class="kpiLbl">model AUC</div></div>
-</div>
-
-<div class="grid">
-
-  <!-- MERCHANT TERMINAL -->
-  <div class="col">
-    <div class="card glass">
-      <h2>Merchant terminal</h2>
-      <label>Merchant</label>
-      <input id="merchantName" value="Mbare Fresh Produce">
-      <label>Amount (USD)</label>
-      <input id="amount" type="number" value="18.50" step="0.5">
-      <button id="btnCreate">Create payment request</button>
-      <div id="qrBox"><div id="qr"></div></div>
-      <div class="tokenLine" id="tokenLine"></div>
-      <div class="expiry" id="expiryLine"></div>
-    </div>
-  </div>
-
-  <!-- ATTACK SIMULATOR -->
-  <div class="col">
-    <div class="card glass">
-      <h2>Customer / attack simulator</h2>
-      <div class="scenarios">
-        <button class="scenario" data-s="normal">
-          <span class="icon">✅</span>
-          <span><b>Legitimate purchase</b><br><span class="desc">Known device, home area, normal hours</span></span>
-        </button>
-        <button class="scenario" data-s="otp">
-          <span class="icon">📵</span>
-          <span><b>OTP interception / SIM swap</b><br><span class="desc">New device, 25s-old session, cycled SIM, public Wi-Fi</span></span>
-        </button>
-        <button class="scenario" data-s="mule">
-          <span class="icon">🕸️</span>
-          <span><b>Mule network payout</b><br><span class="desc">Known mule destination, high-risk receiver</span></span>
-        </button>
-        <button class="scenario" data-s="velocity">
-          <span class="icon">⚡</span>
-          <span><b>Velocity / smurfing attack</b><br><span class="desc">9 cash-ins in 24h, structured small amounts</span></span>
-        </button>
-        <button class="scenario" data-s="travel">
-          <span class="icon">🛰️</span>
-          <span><b>Impossible travel</b><br><span class="desc">450 km/h between transactions, 300 km jump</span></span>
-        </button>
-        <button class="scenario" data-s="replay">
-          <span class="icon">♻️</span>
-          <span><b>Token replay attack</b><br><span class="desc">Same QR token presented twice</span></span>
-        </button>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sbLogo">
+      <div class="sbLogoIcon">🛡️</div>
+      <div>
+        <div class="sbLogoText">SmartPay <em>Shield</em></div>
+        <div class="sbTagline">Secure payments. Safer tomorrow.</div>
       </div>
     </div>
-  </div>
 
-  <!-- VERDICT + FEED -->
-  <div class="col">
-    <div class="card glass" id="resultCard">
-      <h2>Fraud engine verdict</h2>
-      <div class="verdictRow">
-        <svg viewBox="0 0 160 160" width="170" height="170">
-          <circle cx="80" cy="80" r="64" fill="none" stroke="var(--track)" stroke-width="13"/>
-          <circle id="gaugeArc" cx="80" cy="80" r="64" fill="none" stroke="var(--good)" stroke-width="13"
-            stroke-linecap="round" stroke-dasharray="0 402.1" transform="rotate(-90 80 80)"/>
-          <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="gaugeNum">–</text>
-          <text x="80" y="100" text-anchor="middle" class="gaugeLbl">RISK SCORE</text>
-        </svg>
-        <div class="verdictInfo">
-          <span class="decision" id="decisionChip"></span>
-          <div class="reasons" id="reasonChips"></div>
-          <div id="explain"></div>
-          <div class="srcNote" id="srcNote"></div>
+    <nav>
+      <button class="navItem active" data-page="dashboard">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Dashboard
+      </button>
+      <button class="navItem" data-page="transactions">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/></svg>
+        Transactions
+      </button>
+      <button class="navItem" data-page="fraud">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
+        Fraud Monitoring
+      </button>
+      <button class="navItem" data-page="merchants">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 9 L4 4 H20 L21 9"/><path d="M4 9 V20 H20 V9"/><line x1="9" y1="20" x2="9" y2="13"/></svg>
+        Merchants
+      </button>
+      <button class="navItem" data-page="disputes">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.3" r="0.7" fill="currentColor" stroke="none"/></svg>
+        Disputes
+      </button>
+      <button class="navItem" data-page="reports">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+        Reports
+      </button>
+      <button class="navItem" data-page="settings">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <div class="sbSpacer"></div>
+
+    <div class="sbFooter glass">
+      <div class="sbFooterIcon">🛡️</div>
+      <div class="sbFooterTitle">Real-time protection</div>
+      <div class="sbFooterSub">for every transaction.</div>
+      <svg class="sbWave" viewBox="0 0 200 30" preserveAspectRatio="none">
+        <defs><linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--accent2)"/><stop offset="1" stop-color="var(--accent)"/>
+        </linearGradient></defs>
+        <polyline points="0,20 20,14 40,22 60,8 80,18 100,10 120,20 140,6 160,16 180,12 200,18"
+          fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="btnMenu" aria-label="Toggle menu">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="searchBox">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" placeholder="Search transactions, merchants, or IDs…">
+      </div>
+      <div class="topRight">
+        <div class="statusChip"><span class="statusDot" id="statusDot"></span><span id="statusText">Checking…</span></div>
+        <button class="bellBtn" title="Transactions flagged for review">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bellBadge" id="bellBadge">0</span>
+        </button>
+        <div class="userChip">
+          <div class="avatar">WM</div>
+          <div class="userMeta"><div class="uName">Wilmar Macheke</div><div class="uRole">Admin</div></div>
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
       </div>
-    </div>
+    </header>
 
-    <div class="card glass">
-      <h2>Live transaction feed</h2>
-      <div class="charts">
-        <div class="chart">
-          <svg viewBox="0 0 88 88" width="92" height="92" id="donut">
-            <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-            <circle id="donutA" cx="44" cy="44" r="34" fill="none" stroke="var(--amber)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-            <circle id="donutB" cx="44" cy="44" r="34" fill="none" stroke="var(--bad)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-            <text id="donutNum" x="44" y="41" text-anchor="middle" class="donutNum">0</text>
-            <text x="44" y="55" text-anchor="middle" class="donutLbl">scored</text>
-          </svg>
-          <div class="legend">
-            <span><i style="background:var(--good)"></i><span id="lgApproved">approved 0</span></span>
-            <span><i style="background:var(--amber)"></i><span id="lgReview">review 0</span></span>
-            <span><i style="background:var(--bad)"></i><span id="lgBlocked">blocked 0</span></span>
+    <div class="content">
+
+      <!-- ============ DASHBOARD PAGE ============ -->
+      <section class="page active" id="page-dashboard">
+
+        <div class="greetHeader">
+          <div>
+            <h1 id="greetTitle">Good day 👋</h1>
+            <p>Here's what's happening with your payments today.</p>
+          </div>
+          <div class="greetRight">
+            <div class="dateRange">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+              <span id="dateRangeText">—</span>
+            </div>
+            <span class="livePill"><i></i>Live</span>
           </div>
         </div>
-        <div class="chart grow">
-          <div class="chartLbl">risk over time</div>
-          <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="spark">
-            <defs>
-              <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="transparent"/>
-              </linearGradient>
-            </defs>
-            <polygon id="sparkArea" points="" fill="url(#sparkFill)" opacity="0.25"/>
-            <polyline id="sparkLine" points="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-          </svg>
+
+        <!-- KPI STRIP -->
+        <div class="kpis">
+          <div class="kpi glass">
+            <div class="kpiTop">
+              <div class="kpiIcon" style="background:var(--goodSoft);color:var(--good)">
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
+              </div>
+            </div>
+            <div class="kpiVal" id="kpiScored">–</div>
+            <div class="kpiLbl">Transactions Scored</div>
+            <div class="kpiTrend" id="kpiScoredTrend"></div>
+          </div>
+
+          <div class="kpi glass">
+            <div class="kpiTop">
+              <div class="kpiIcon" style="background:var(--badSoft);color:var(--bad)">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              </div>
+            </div>
+            <div class="kpiVal" id="kpiBlocked" style="color:var(--bad)">–</div>
+            <div class="kpiLbl">Blocked</div>
+            <div class="kpiTrend" id="kpiBlockedTrend"></div>
+          </div>
+
+          <div class="kpi glass">
+            <div class="kpiTop">
+              <div class="kpiIcon" style="background:var(--amberSoft);color:var(--amber)">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
+              </div>
+            </div>
+            <div class="kpiVal" id="kpiRate">–</div>
+            <div class="kpiLbl">Block Rate</div>
+            <div class="kpiTrend" id="kpiRateTrend"></div>
+          </div>
+
+          <div class="kpi glass">
+            <div class="kpiTop">
+              <div class="kpiIcon" style="background:var(--purpleSoft);color:var(--purple)">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
+              </div>
+            </div>
+            <div class="kpiVal" id="kpiAvg">–</div>
+            <div class="kpiLbl">Avg. Risk Score</div>
+            <div class="kpiTrend" id="kpiAvgTrend"></div>
+          </div>
+
+          <div class="kpi glass">
+            <div class="kpiTop">
+              <div class="kpiIcon" style="background:var(--blueSoft);color:var(--blue)">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
+              </div>
+            </div>
+            <div class="kpiVal" id="kpiAuc" style="color:var(--blue)">–</div>
+            <div class="kpiLbl">Model Accuracy</div>
+            <div class="kpiTrend flat"><span class="kpiTrendNote">ROC-AUC on held-out test set</span></div>
+          </div>
         </div>
-      </div>
-      <table>
-        <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
-        <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
-      </table>
+
+        <div class="grid">
+
+          <!-- MERCHANT TERMINAL -->
+          <div class="col">
+            <div class="card glass">
+              <div class="cardHead">
+                <h2>Merchant terminal</h2>
+                <span class="badge-active">Active</span>
+              </div>
+              <label>Merchant</label>
+              <input id="merchantName" value="Mbare Fresh Produce">
+              <label>Amount (USD)</label>
+              <input id="amount" type="number" value="18.50" step="0.5">
+              <button id="btnCreate">Create payment request</button>
+              <div id="qrBox"><div id="qr"></div></div>
+              <div class="tokenLine" id="tokenLine"></div>
+              <div class="expiry" id="expiryLine"></div>
+            </div>
+          </div>
+
+          <!-- ATTACK SIMULATOR -->
+          <div class="col">
+            <div class="card glass">
+              <h2>Customer / attack simulator</h2>
+              <div class="scenarios">
+                <button class="scenario" data-s="normal">
+                  <span class="icon">✅</span>
+                  <span class="scTextWrap">
+                    <span><b>Legitimate purchase</b><br><span class="desc">Known device, home area</span></span>
+                    <span class="scBadge sb-safe">Safe</span>
+                  </span>
+                </button>
+                <button class="scenario" data-s="otp">
+                  <span class="icon">📵</span>
+                  <span class="scTextWrap">
+                    <span><b>OTP interception / SIM swap</b><br><span class="desc">New device, 25s session, cycled SIM</span></span>
+                    <span class="scBadge sb-high">High Risk</span>
+                  </span>
+                </button>
+                <button class="scenario" data-s="mule">
+                  <span class="icon">🕸️</span>
+                  <span class="scTextWrap">
+                    <span><b>Mule network payout</b><br><span class="desc">Known mule destination</span></span>
+                    <span class="scBadge sb-medium">Medium</span>
+                  </span>
+                </button>
+                <button class="scenario" data-s="velocity">
+                  <span class="icon">⚡</span>
+                  <span class="scTextWrap">
+                    <span><b>Velocity / smurfing</b><br><span class="desc">9 cash-ins in 24h</span></span>
+                    <span class="scBadge sb-high">High Risk</span>
+                  </span>
+                </button>
+                <button class="scenario" data-s="travel">
+                  <span class="icon">🛰️</span>
+                  <span class="scTextWrap">
+                    <span><b>Impossible travel</b><br><span class="desc">450 km/h between transactions</span></span>
+                    <span class="scBadge sb-medium">Medium</span>
+                  </span>
+                </button>
+                <button class="scenario" data-s="replay">
+                  <span class="icon">♻️</span>
+                  <span class="scTextWrap">
+                    <span><b>Token replay</b><br><span class="desc">Same QR presented twice</span></span>
+                    <span class="scBadge sb-low">Low</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- VERDICT + FEED -->
+          <div class="col">
+            <div class="card glass" id="resultCard">
+              <h2>Fraud engine verdict</h2>
+              <div class="verdictRow">
+                <svg viewBox="0 0 160 160" width="170" height="170">
+                  <circle cx="80" cy="80" r="64" fill="none" stroke="var(--track)" stroke-width="13"/>
+                  <circle id="gaugeArc" cx="80" cy="80" r="64" fill="none" stroke="var(--good)" stroke-width="13"
+                    stroke-linecap="round" stroke-dasharray="0 402.1" transform="rotate(-90 80 80)"/>
+                  <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="gaugeNum">–</text>
+                  <text x="80" y="100" text-anchor="middle" class="gaugeLbl">RISK SCORE</text>
+                </svg>
+                <div class="verdictInfo">
+                  <span class="decision" id="decisionChip"></span>
+                  <div class="reasons" id="reasonChips"></div>
+                  <div id="explain"></div>
+                  <div class="srcNote" id="srcNote"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card glass">
+              <div class="cardHead">
+                <h2>Live transaction feed</h2>
+                <button class="linkBtn" id="btnViewAll">View All →</button>
+              </div>
+              <div class="charts">
+                <div class="chart">
+                  <svg viewBox="0 0 88 88" width="92" height="92" id="donut">
+                    <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <circle id="donutA" cx="44" cy="44" r="34" fill="none" stroke="var(--amber)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <circle id="donutB" cx="44" cy="44" r="34" fill="none" stroke="var(--bad)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <text id="donutNum" x="44" y="41" text-anchor="middle" class="donutNum">0</text>
+                    <text x="44" y="55" text-anchor="middle" class="donutLbl">scored</text>
+                  </svg>
+                  <div class="legend">
+                    <span><i style="background:var(--good)"></i><span id="lgApproved">approved 0</span></span>
+                    <span><i style="background:var(--amber)"></i><span id="lgReview">review 0</span></span>
+                    <span><i style="background:var(--bad)"></i><span id="lgBlocked">blocked 0</span></span>
+                  </div>
+                </div>
+                <div class="chart grow">
+                  <div class="chartLbl">risk over time</div>
+                  <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="spark">
+                    <defs>
+                      <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="transparent"/>
+                      </linearGradient>
+                    </defs>
+                    <polygon id="sparkArea" points="" fill="url(#sparkFill)" opacity="0.25"/>
+                    <polyline id="sparkLine" points="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <table>
+                <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+                <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============ TRANSACTIONS PAGE ============ -->
+      <section class="page" id="page-transactions">
+        <div class="greetHeader">
+          <div><h1>Transactions</h1><p>All recent transactions scored by the fraud engine.</p></div>
+        </div>
+        <div class="card glass">
+          <table>
+            <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+            <tbody id="feedFull"><tr><td colspan="6" class="empty">No transactions yet — run a scenario from the Dashboard.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ PLACEHOLDER PAGES ============ -->
+      <section class="page" id="page-fraud">
+        <div class="card glass placeholder">
+          <div class="picon">🛡️</div><h3>Fraud Monitoring</h3>
+          <p>Deeper rule-tuning and case management — coming soon in this demo build.</p>
+        </div>
+      </section>
+      <section class="page" id="page-merchants">
+        <div class="card glass placeholder">
+          <div class="picon">🏬</div><h3>Merchants</h3>
+          <p>Merchant directory and risk profiles — coming soon in this demo build.</p>
+        </div>
+      </section>
+      <section class="page" id="page-disputes">
+        <div class="card glass placeholder">
+          <div class="picon">⚖️</div><h3>Disputes</h3>
+          <p>Chargeback and dispute workflow — coming soon in this demo build.</p>
+        </div>
+      </section>
+      <section class="page" id="page-reports">
+        <div class="card glass placeholder">
+          <div class="picon">📊</div><h3>Reports</h3>
+          <p>Exportable fraud analytics — coming soon in this demo build.</p>
+        </div>
+      </section>
+      <section class="page" id="page-settings">
+        <div class="card glass placeholder">
+          <div class="picon">⚙️</div><h3>Settings</h3>
+          <p>Thresholds, integrations, and team access — coming soon in this demo build.</p>
+        </div>
+      </section>
+
     </div>
   </div>
-
-</div>
 </div>
 
 <script>
 const $ = (id) => document.getElementById(id);
 let currentPayment = null;
 let expiryTimer = null;
+let lastTxs = [];
+
+/* ---------- greeting + date range (real local time, no fabrication) ---------- */
+(function greet() {
+  const h = new Date().getHours();
+  const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  const name = "Wilmar";
+  $("greetTitle").textContent = `Good ${part}, ${name} 👋`;
+
+  const end = new Date();
+  const start = new Date(); start.setDate(end.getDate() - 6);
+  const fmt = (d, withYear) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: withYear ? "numeric" : undefined });
+  $("dateRangeText").textContent = `${fmt(start, false)} – ${fmt(end, true)}`;
+})();
+
+/* ---------- sidebar nav + off-canvas toggle ---------- */
+document.querySelectorAll(".navItem").forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll(".navItem").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+    btn.classList.add("active");
+    $("page-" + btn.dataset.page).classList.add("active");
+    $("app").classList.remove("navOpen");
+  };
+});
+$("btnMenu").onclick = () => $("app").classList.toggle("navOpen");
+$("sbBackdrop").onclick = () => $("app").classList.remove("navOpen");
+$("btnViewAll").onclick = () => document.querySelector('.navItem[data-page="transactions"]').click();
 
 const SCENARIOS = {
   normal: {
@@ -317,22 +703,17 @@ async function api(method, url, body) {
   return { status: res.status, json: await res.json().catch(() => null) };
 }
 
-/* ---------- health pills + model AUC ---------- */
+/* ---------- system status + model accuracy ---------- */
 async function health() {
-  try {
-    const r = await fetch("/api");
-    setPill("pillBackend", r.ok, "backend");
-  } catch { setPill("pillBackend", false, "backend"); }
+  let backendOk = false, mlOk = false;
+  try { backendOk = (await fetch("/api")).ok; } catch {}
   try {
     const r = await api("POST", "/api/fraud/score", { payment: { amount: 1 }, context: {} });
-    const src = r.json?.result?.source;
-    setPill("pillMl", src === "ml+rules", src === "ml+rules" ? "ml api · LightGBM v4" : "ml api offline · rules fallback");
-  } catch { setPill("pillMl", false, "ml api"); }
-}
-function setPill(id, ok, text) {
-  const el = $(id);
-  el.textContent = (ok ? "● " : "○ ") + text;
-  el.className = "pill " + (ok ? "ok" : "bad");
+    mlOk = r.json?.result?.source === "ml+rules";
+  } catch {}
+  const ok = backendOk && mlOk;
+  $("statusDot").className = "statusDot" + (ok ? "" : " bad");
+  $("statusText").textContent = ok ? "System Online" : (backendOk ? "ML Service Offline" : "Backend Offline");
 }
 async function loadModelInfo() {
   try {
@@ -340,7 +721,7 @@ async function loadModelInfo() {
     const res = await fetch("http://127.0.0.1:8000/model-info");
     const meta = await res.json();
     const auc = meta?.performance?.roc_auc;
-    if (auc) $("kpiAuc").textContent = auc.toFixed(3);
+    if (auc) $("kpiAuc").textContent = (auc * 100).toFixed(1) + "%";
   } catch {}
 }
 
@@ -456,6 +837,24 @@ function showResult(fr, status, label) {
       : `scored by: ${fr.source}`;
 }
 
+/* ---------- trend helper: recent half vs older half of the fetched batch ---------- */
+function renderTrend(elId, txs, valueFn, goodDirection, formatFn) {
+  const el = $(elId);
+  if (txs.length < 4) { el.innerHTML = `<span class="kpiTrendNote">not enough data yet</span>`; return; }
+  const mid = Math.floor(txs.length / 2);
+  // txs are newest-first from the API
+  const recent = txs.slice(0, mid);
+  const older = txs.slice(mid);
+  const vNew = valueFn(recent), vOld = valueFn(older);
+  if (vOld === 0) { el.innerHTML = `<span class="kpiTrendNote">vs previous ${older.length} txns</span>`; return; }
+  const pct = ((vNew - vOld) / vOld) * 100;
+  const dir = pct > 0.5 ? "up" : pct < -0.5 ? "down" : "flat";
+  const good = dir === "flat" ? "flat" : (dir === goodDirection ? "up" : "down"); // reuse up=good color, down=bad color
+  const arrow = dir === "up" ? "▲" : dir === "down" ? "▼" : "●";
+  el.className = "kpiTrend " + good;
+  el.innerHTML = `${arrow} <b>${Math.abs(pct).toFixed(0)}%</b> <span class="kpiTrendNote">vs previous ${older.length} txns</span>`;
+}
+
 /* ---------- KPIs + charts + live feed ---------- */
 function updateKpis(txs) {
   const scored = txs.length;
@@ -469,6 +868,15 @@ function updateKpis(txs) {
   $("kpiRate").textContent = scored ? Math.round((blocked / scored) * 100) + "%" : "0%";
   $("kpiAvg").textContent = Math.round(avg);
   $("kpiAvg").style.color = riskColor(avg);
+
+  $("bellBadge").textContent = review;
+  $("bellBadge").style.display = review > 0 ? "flex" : "none";
+
+  // trend deltas (recent half of fetched batch vs older half)
+  renderTrend("kpiScoredTrend", txs, (l) => l.length, "up");
+  renderTrend("kpiBlockedTrend", txs, (l) => l.filter((t) => t.status === "rejected").length, "up");
+  renderTrend("kpiRateTrend", txs, (l) => l.length ? l.filter((t) => t.status === "rejected").length / l.length : 0, "down");
+  renderTrend("kpiAvgTrend", txs, (l) => l.length ? l.reduce((s, t) => s + (t.fraudResult?.score ?? 0), 0) / l.length : 0, "down");
 
   // donut
   const C = 2 * Math.PI * 34;
@@ -495,29 +903,46 @@ function updateKpis(txs) {
   }
 }
 
+function rowHtml(t) {
+  const score = Math.round(t.fraudResult?.score ?? 0);
+  const color = riskColor(score);
+  const st = t.status || "?";
+  const cls = st === "approved" ? "c-approved" : st === "review" ? "c-review" : "c-rejected";
+  const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
+  return `<tr>
+    <td>${new Date(t.createdAt).toLocaleTimeString()}</td>
+    <td>${t.merchantName || "-"}</td>
+    <td class="num">$${Number(t.amount).toFixed(2)}</td>
+    <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
+    <td><span class="chip ${cls}">${st}</span></td>
+    <td class="sig">${reasons || "—"}</td>
+  </tr>`;
+}
+
+function renderFeedTable(elId, txs, emptyMsg) {
+  $(elId).innerHTML = txs.length
+    ? txs.map(rowHtml).join("")
+    : `<tr><td colspan="6" class="empty">${emptyMsg}</td></tr>`;
+}
+
 async function refreshFeed() {
   try {
     const r = await api("GET", "/api/payments/transactions");
-    const txs = r.json?.transactions || [];
-    updateKpis(txs);
-    if (!txs.length) return;
-    $("feed").innerHTML = txs.map((t) => {
-      const score = Math.round(t.fraudResult?.score ?? 0);
-      const color = riskColor(score);
-      const st = t.status || "?";
-      const cls = st === "approved" ? "c-approved" : st === "review" ? "c-review" : "c-rejected";
-      const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
-      return `<tr>
-        <td>${new Date(t.createdAt).toLocaleTimeString()}</td>
-        <td>${t.merchantName || "-"}</td>
-        <td class="num">$${Number(t.amount).toFixed(2)}</td>
-        <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
-        <td><span class="chip ${cls}">${st}</span></td>
-        <td class="sig">${reasons || "—"}</td>
-      </tr>`;
-    }).join("");
+    lastTxs = r.json?.transactions || [];
+    updateKpis(lastTxs);
+    applySearchFilter();
+    renderFeedTable("feedFull", lastTxs, "No transactions yet — run a scenario from the Dashboard.");
   } catch {}
 }
+
+function applySearchFilter() {
+  const q = ($("searchInput").value || "").trim().toLowerCase();
+  const filtered = q
+    ? lastTxs.filter((t) => (t.merchantName || "").toLowerCase().includes(q) || (t.paymentId || "").toLowerCase().includes(q))
+    : lastTxs;
+  renderFeedTable("feed", filtered, lastTxs.length ? "No matches." : "No transactions yet — run a scenario.");
+}
+$("searchInput").addEventListener("input", applySearchFilter);
 
 health();
 loadModelInfo();
