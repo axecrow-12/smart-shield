@@ -144,6 +144,12 @@ The small trend arrows under the first four compare the more recent half of this
 **3. Merchant terminal** (left column)
 This is where you play the role of a merchant. Enter an amount and merchant name, click **Create payment request**, and it generates a real one-time QR code + token (10-minute expiry, counting down live) by calling the backend's payment API. This is a genuine payment request stored in the Firestore emulator, not a mockup.
 
+**The QR code is scannable — a second device is the intended way to complete it.** It encodes a real link (also printed as text under the QR, in case scanning isn't convenient) that opens `pay.html`, a separate customer-facing checkout page. On that page the "customer" sees the merchant name and amount, and taps **Approve & Pay** to actually call the same `/api/payments/process` endpoint the dashboard uses — a genuine second half of the transaction, not a simulation. It even has its own small "simulate risk signals" toggles (new device / rapid attempts / location mismatch) so you can trigger a real BLOCK from the second device live, not just from the Attack Simulator.
+
+To make this work, **the second device must be on the same Wi-Fi / hotspot as the laptop running the backend.** The server auto-detects its own LAN IP address and bakes it into the QR code — if it picks the wrong network adapter (common on machines with a VPN or virtual-machine software installed), set `PUBLIC_BASE_URL` in `.env` to the correct one, e.g. `PUBLIC_BASE_URL=http://192.168.1.23:5050`. If the expo Wi-Fi has client isolation (common on public/guest networks — devices can't see each other even though they share one network), turn on a mobile hotspot from your own phone and connect the laptop to it instead; you may also need to allow Node.js through Windows Firewall for private networks the first time you try this.
+
+If you don't want to deal with a second device at all, that's fine too — the **Attack simulator** (next column) is the primary way to demo the fraud engine and needs nothing but the one screen.
+
 **4. Attack simulator** (middle column)
 Six buttons, each firing a complete, realistic transaction through the actual fraud pipeline (Node backend → LightGBM ML API → risk engine → back). Use these to demo the system without needing a real payment flow:
 
@@ -170,10 +176,11 @@ If you're presenting this live, a clean run-through is:
 
 1. Open the dashboard, point out the top bar's green "System Online" status and the KPI strip.
 2. Use the **Merchant terminal** to create a real payment request — show the QR code and the live countdown.
-3. Run the **Legitimate purchase** scenario — point out the low score, green approval, and the "why" breakdown showing nothing suspicious.
-4. Run the **Mule network payout** scenario — point out the high score, red rejection, and the specific SHAP feature contributions driving it.
-5. Run **Token replay** last — this is the strongest "aha" moment, since it proves the system won't let the same payment token be used twice even if the fraud score alone wouldn't have caught it.
-6. Scroll to the live feed and point out the donut/sparkline updating in real time as a summary of everything just demoed.
+3. If you have a phone on the same Wi-Fi handy: scan the QR code, show the real checkout page load with the correct amount/merchant, and tap **Approve & Pay** — a completely independent device just completed a live transaction through the same fraud engine. Otherwise, skip straight to step 4.
+4. Run the **Legitimate purchase** scenario — point out the low score, green approval, and the "why" breakdown showing nothing suspicious.
+5. Run the **Mule network payout** scenario — point out the high score, red rejection, and the specific SHAP feature contributions driving it.
+6. Run **Token replay** last — this is the strongest "aha" moment, since it proves the system won't let the same payment token be used twice even if the fraud score alone wouldn't have caught it.
+7. Scroll to the live feed and point out the donut/sparkline updating in real time as a summary of everything just demoed.
 
 ---
 

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pay with SmartPay Shield</title>
+<style>
+  :root {
+    --font: "Segoe UI", system-ui, sans-serif;
+    --numFont: Consolas, Menlo, monospace;
+    --bg: radial-gradient(140% 90% at 50% 0%, #0d1428 0%, #070b16 55%, #04060c 100%);
+    --text: #e9edf8; --muted: #8d97b8; --faint: #5c6690;
+    --accent: #14b8a6; --accent2: #10b981;
+    --good: #2dd4bf; --amber: #fbbf24; --bad: #fb7185;
+    --goodSoft: rgba(45,212,191,.14); --amberSoft: rgba(251,191,36,.14); --badSoft: rgba(251,113,133,.14);
+    --cardBg: rgba(255,255,255,.06); --border: rgba(255,255,255,.14);
+    --cardShadow: 0 8px 32px rgba(2,6,18,.5), inset 0 1px 0 rgba(255,255,255,.09);
+    --blur: 18px; --radius: 18px;
+    --inputBg: rgba(255,255,255,.06); --rowBg: rgba(255,255,255,.045);
+    --btnBg: linear-gradient(135deg, var(--accent2), var(--accent)); --btnText: #06251f;
+    --btnShadow: 0 6px 18px rgba(20,184,166,.3);
+    --track: rgba(255,255,255,.09);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh; font-family: var(--font); color: var(--text); background: var(--bg);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  svg.icon { width: 18px; height: 18px; flex-shrink: 0; }
+  svg.icon * { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .wrap { width: 100%; max-width: 380px; }
+  .brand { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 18px; }
+  .brandIcon {
+    width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: var(--btnBg); color: #fff;
+  }
+  .brandIcon svg.icon { width: 16px; height: 16px; }
+  .brandIcon svg.icon * { stroke-width: 2; }
+  .brandText { font-size: 15px; font-weight: 800; }
+  .brandText em { font-style: normal; color: var(--accent); }
+
+  .card {
+    background: var(--cardBg); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--cardShadow); backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+    padding: 26px 22px; text-align: center;
+  }
+
+  .state { display: none; }
+  .state.active { display: block; }
+
+  .spinner {
+    width: 34px; height: 34px; margin: 6px auto 16px; border-radius: 50%;
+    border: 3px solid var(--track); border-top-color: var(--accent);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loadingText { color: var(--muted); font-size: 13px; }
+
+  .errIcon {
+    width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--badSoft); color: var(--bad);
+  }
+  .errIcon svg.icon { width: 26px; height: 26px; }
+  .errTitle { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .errMsg { font-size: 13px; color: var(--muted); }
+
+  .merchantName { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .amount { font-size: 38px; font-weight: 800; font-family: var(--numFont); margin-bottom: 4px; }
+  .amount small { font-size: 16px; color: var(--muted); font-weight: 600; }
+  .expiryLine { font-size: 12px; color: var(--amber); margin-bottom: 22px; }
+
+  details.advanced { text-align: left; margin-bottom: 18px; }
+  details.advanced summary {
+    cursor: pointer; font-size: 11.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .6px; padding: 6px 0; list-style: none;
+  }
+  details.advanced summary::-webkit-details-marker { display: none; }
+  details.advanced summary::before { content: "▸ "; }
+  details.advanced[open] summary::before { content: "▾ "; }
+  .toggleRow {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 9px 12px; border-radius: 9px; background: var(--rowBg); border: 1px solid var(--border);
+    margin-top: 7px; font-size: 12.5px;
+  }
+  .toggleRow .desc { display: block; font-size: 10.5px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+  .switch { position: relative; width: 38px; height: 21px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; background: var(--track); border-radius: 999px; cursor: pointer;
+    transition: background .2s;
+  }
+  .slider::before {
+    content: ""; position: absolute; width: 15px; height: 15px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: transform .2s;
+  }
+  .switch input:checked + .slider { background: var(--accent); }
+  .switch input:checked + .slider::before { transform: translateX(17px); }
+
+  button {
+    cursor: pointer; border: none; width: 100%; padding: 13px;
+    border-radius: 10px; font-weight: 700; font-size: 15px;
+    background: var(--btnBg); color: var(--btnText); box-shadow: var(--btnShadow);
+    font-family: var(--font);
+  }
+  button:hover { filter: brightness(1.1); }
+  button:disabled { opacity: .5; cursor: default; }
+
+  .verdictIcon {
+    width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .verdictIcon svg.icon { width: 30px; height: 30px; }
+  .v-approved .verdictIcon { background: var(--goodSoft); color: var(--good); }
+  .v-review .verdictIcon { background: var(--amberSoft); color: var(--amber); }
+  .v-rejected .verdictIcon { background: var(--badSoft); color: var(--bad); }
+  .verdictTitle { font-size: 19px; font-weight: 800; margin-bottom: 4px; }
+  .v-approved .verdictTitle { color: var(--good); }
+  .v-review .verdictTitle { color: var(--amber); }
+  .v-rejected .verdictTitle { color: var(--bad); }
+  .verdictSub { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+  .reasons { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 6px; }
+  .reason {
+    font-size: 10px; font-family: var(--numFont); padding: 3px 9px; border-radius: 6px;
+    border: 1px solid var(--border); background: var(--rowBg); color: var(--muted);
+  }
+  .scoreNote { font-size: 11px; color: var(--faint); margin-top: 10px; }
+
+  .footer { text-align: center; font-size: 10.5px; color: var(--faint); margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="brandIcon"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg></div>
+    <div class="brandText">SmartPay <em>Shield</em></div>
+  </div>
+
+  <div class="card">
+
+    <div class="state active" id="stateLoading">
+      <div class="spinner"></div>
+      <div class="loadingText">Loading payment details…</div>
+    </div>
+
+    <div class="state" id="stateError">
+      <div class="errIcon"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></div>
+      <div class="errTitle" id="errTitle">Something went wrong</div>
+      <div class="errMsg" id="errMsg"></div>
+    </div>
+
+    <div class="state" id="statePay">
+      <div class="merchantName" id="payMerchant">—</div>
+      <div class="amount">$<span id="payAmount">0.00</span></div>
+      <div class="expiryLine" id="payExpiry"></div>
+
+      <details class="advanced">
+        <summary>Demo: simulate risk signals</summary>
+        <div class="toggleRow">
+          <span>New device<span class="desc">Unrecognized device login</span></span>
+          <label class="switch"><input type="checkbox" id="tgNewDevice"><span class="slider"></span></label>
+        </div>
+        <div class="toggleRow">
+          <span>Rapid attempts<span class="desc">Multiple payments in quick succession</span></span>
+          <label class="switch"><input type="checkbox" id="tgRapid"><span class="slider"></span></label>
+        </div>
+        <div class="toggleRow">
+          <span>Location mismatch<span class="desc">Unusual distance/travel speed</span></span>
+          <label class="switch"><input type="checkbox" id="tgLocation"><span class="slider"></span></label>
+        </div>
+      </details>
+
+      <button id="btnApprove">Approve &amp; Pay</button>
+    </div>
+
+    <div class="state" id="stateResult">
+      <div class="verdictIcon" id="verdictIcon"></div>
+      <div class="verdictTitle" id="verdictTitle"></div>
+      <div class="verdictSub" id="verdictSub"></div>
+      <div class="reasons" id="verdictReasons"></div>
+      <div class="scoreNote" id="verdictScore"></div>
+    </div>
+
+  </div>
+
+  <div class="footer">Scored live by LightGBM v4 · SmartPay Shield fraud engine</div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const token = new URLSearchParams(location.search).get("token");
+let payment = null;
+let expiryTimer = null;
+
+function showState(id) {
+  document.querySelectorAll(".state").forEach((s) => s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+
+function showError(title, msg) {
+  $("errTitle").textContent = title;
+  $("errMsg").textContent = msg;
+  showState("stateError");
+}
+
+async function api(method, url, body) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return { status: res.status, json: await res.json().catch(() => null) };
+}
+
+async function loadPayment() {
+  if (!token) {
+    return showError("No payment found", "Open this page by scanning a merchant's QR code.");
+  }
+  const r = await api("POST", "/api/payments/validate-token", { token });
+  if (r.status === 404) return showError("Invalid link", "This payment link doesn't match any active request.");
+  if (r.status === 409) return showError("Already paid", "This payment has already been completed.");
+  if (r.status === 410) return showError("Link expired", "Ask the merchant to generate a new payment request.");
+  if (r.status !== 200) return showError("Couldn't load payment", "The payment service is unreachable right now. Try again shortly.");
+
+  payment = r.json.payment;
+  $("payMerchant").textContent = payment.merchantName;
+  $("payAmount").textContent = Number(payment.amount).toFixed(2);
+  showState("statePay");
+
+  clearInterval(expiryTimer);
+  expiryTimer = setInterval(() => {
+    const left = Math.max(0, Math.floor((payment.expiresAt - Date.now()) / 1000));
+    if (left <= 0) {
+      clearInterval(expiryTimer);
+      return showError("Link expired", "Ask the merchant to generate a new payment request.");
+    }
+    $("payExpiry").textContent = `expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  }, 500);
+}
+
+const VERDICT = {
+  approved: {
+    cls: "v-approved", title: "Payment Approved",
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>',
+  },
+  review: {
+    cls: "v-review", title: "Under Review",
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
+  },
+  rejected: {
+    cls: "v-rejected", title: "Payment Declined",
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>',
+  },
+};
+
+$("btnApprove").onclick = async () => {
+  const btn = $("btnApprove");
+  btn.disabled = true;
+  btn.textContent = "Processing…";
+  try {
+    const context = {
+      isNewDevice: $("tgNewDevice").checked,
+      rapidAttempts: $("tgRapid").checked,
+      locationMismatch: $("tgLocation").checked,
+    };
+    const r = await api("POST", "/api/payments/process", { token, context });
+    if (r.status !== 200) throw new Error(r.json?.error || "Payment failed");
+
+    const { status, fraudResult } = r.json;
+    const v = VERDICT[status] || VERDICT.review;
+    showState("stateResult");
+    $("stateResult").classList.add(v.cls);
+    $("verdictIcon").innerHTML = v.icon;
+    $("verdictTitle").textContent = v.title;
+    $("verdictSub").textContent = `${payment.merchantName} · $${Number(payment.amount).toFixed(2)}`;
+    $("verdictReasons").innerHTML = (fraudResult.reasons || [])
+      .map((r) => `<span class="reason">${r}</span>`).join("");
+    $("verdictScore").textContent = `risk score ${Math.round(fraudResult.score)}/100`;
+    showState("stateResult");
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "Approve & Pay";
+    alert(e.message);
+  }
+};
+
+loadPayment();
+</script>
+</body>
+</html>

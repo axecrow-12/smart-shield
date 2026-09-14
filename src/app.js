@@ -21,6 +21,13 @@ app.get("/api", (req, res) => {
   res.json({ message: "SmartPay Shield backend is running" });
 });
 
+// Clean URL for the customer-facing "scan to pay" page (the QR code
+// encodes /pay?token=..., which express.static alone wouldn't resolve
+// since the file on disk is pay.html).
+app.get("/pay", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "pay.html"));
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/fraud", fraudRoutes);

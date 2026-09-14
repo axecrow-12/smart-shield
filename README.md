@@ -2,7 +2,7 @@
 
 Smart fraud detection for Zimbabwe mobile money (EcoCash/OneMoney). Two services:
 
-- **Node/Express backend** (`src/`, port **5050**) — QR payment tokens, payment processing, mock EcoCash provider, Firestore persistence.
+- **Node/Express backend** (`src/`, port **5050**) — QR payment tokens, payment processing, mock EcoCash provider, Firestore persistence. Also serves the merchant dashboard (`public/index.html`) and a real customer-facing checkout page (`public/pay.html`) that a second device can open by scanning the QR code on the same network.
 - **Python ML service** (`ml_core/`, port **8000**) — FastAPI serving a LightGBM v4 fraud model + 8 Zimbabwe-specific rules, with explainable risk scores (0–100), decisions (APPROVE / MONITOR / CHALLENGE / VERIFY / BLOCK), and per-feature SHAP contributions (`top_features`) on every score. Any triggered deterministic rule floors the score at 70 (VERIFY).
 
 Every payment processed by the backend is scored live by the ML service (`ml+rules`); if the ML service is down, the backend falls back to local rules (`rules_fallback`).

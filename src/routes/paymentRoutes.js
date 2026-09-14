@@ -9,6 +9,7 @@ const {
   isExpired,
 } = require("../services/tokenService");
 const { scoreTransaction } = require("../services/fraudService");
+const { getLanUrl } = require("../utils/network");
 const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
 const {
   validateCreatePayment,
@@ -46,7 +47,10 @@ router.post("/create-payment", requireAuthUnlessDemo, validateCreatePayment, asy
       expiresAt,
     });
 
-    const paymentLink = `https://smartpayshield.app/pay?token=${token}`;
+    // Real, reachable link: opens the customer-facing pay page on this
+    // machine's LAN address so a phone on the same network/hotspot can
+    // scan the QR code and actually complete the payment.
+    const paymentLink = `${getLanUrl(req)}/pay?token=${token}`;
 
     const paymentRequest = {
       paymentId,
