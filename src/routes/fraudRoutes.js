@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { logError } = require("../utils/logger");
 const { db } = require("../config/firebase");
 const { scoreTransaction } = require("../services/fraudService");
 const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
@@ -31,10 +32,8 @@ router.post("/score", requireAuthUnlessDemo, validateFraudScore, async (req, res
       result,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Fraud scoring failed",
-      details: error.message,
-    });
+    logError("Fraud scoring failed", error);
+    res.status(500).json({ error: "Fraud scoring failed" });
   }
 });
 

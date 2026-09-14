@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { logError } = require("../utils/logger");
 const { db } = require("../config/firebase");
 const {
   generatePaymentId,
@@ -69,10 +70,8 @@ router.post("/create-payment", requireAuthUnlessDemo, validateCreatePayment, asy
       paymentRequest,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to create payment request",
-      details: error.message,
-    });
+    logError("Failed to create payment request", error);
+    res.status(500).json({ error: "Failed to create payment request" });
   }
 });
 
@@ -110,10 +109,8 @@ router.post("/validate-token", requireAuthUnlessDemo, validateTokenBody, async (
       payment,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Validation failed",
-      details: error.message,
-    });
+    logError("Validation failed", error);
+    res.status(500).json({ error: "Validation failed" });
   }
 });
 
@@ -181,10 +178,8 @@ router.post("/process", requireAuthUnlessDemo, validateTokenBody, async (req, re
       transaction: transactionData,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Payment processing failed",
-      details: error.message,
-    });
+    logError("Payment processing failed", error);
+    res.status(500).json({ error: "Payment processing failed" });
   }
 });
 
@@ -207,10 +202,8 @@ router.get("/transactions", requireAuthUnlessDemo, async (req, res) => {
       transactions,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch transactions",
-      details: error.message,
-    });
+    logError("Failed to fetch transactions", error);
+    res.status(500).json({ error: "Failed to fetch transactions" });
   }
 });
 

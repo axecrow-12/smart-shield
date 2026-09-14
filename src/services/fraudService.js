@@ -146,6 +146,7 @@ async function scoreTransaction(payment, context = {}) {
     reasons,
     mlScore: ml.risk_score,
     mlRiskLevel: ml.risk_level,
+    mlTopFeatures: ml.top_features || [],
     decision: ml.decision,
     source: "ml+rules",
   };

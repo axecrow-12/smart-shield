@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { logError } = require("../utils/logger");
 const { db } = require("../config/firebase");
 const { v4: uuidv4 } = require("uuid");
 const { scoreTransaction } = require("../services/fraudService");
@@ -27,10 +28,8 @@ router.get("/all", requireAuthUnlessDemo, async (req, res) => {
       transactions,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch EcoCash transactions",
-      details: error.message,
-    });
+    logError("Failed to fetch EcoCash transactions", error);
+    res.status(500).json({ error: "Failed to fetch EcoCash transactions" });
   }
 });
 
@@ -74,10 +73,8 @@ router.post("/initiate", requireAuthUnlessDemo, validateEcocashInitiate, async (
       },
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to initiate EcoCash payment",
-      details: error.message,
-    });
+    logError("Failed to initiate EcoCash payment", error);
+    res.status(500).json({ error: "Failed to initiate EcoCash payment" });
   }
 });
 
@@ -214,10 +211,8 @@ router.post("/callback", validateEcocashCallback, async (req, res) => {
       fraudResult,
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to process EcoCash callback",
-      details: error.message,
-    });
+    logError("Failed to process EcoCash callback", error);
+    res.status(500).json({ error: "Failed to process EcoCash callback" });
   }
 });
 
@@ -241,10 +236,8 @@ router.get("/status/:providerReference", requireAuthUnlessDemo, async (req, res)
       transaction: docSnap.data(),
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch EcoCash status",
-      details: error.message,
-    });
+    logError("Failed to fetch EcoCash status", error);
+    res.status(500).json({ error: "Failed to fetch EcoCash status" });
   }
 });
 

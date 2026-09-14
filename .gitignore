@@ -7,21 +7,13 @@ serviceAccountKey.json
 __pycache__/
 .venv/
 .ipynb_checkpoints/
+.pytest_cache/
 *.pyc
-
-# Data & Models
-data/*.csv
-!data/TAPnPAY_fraud_enhanced.csv
-!data/TAPnPAY_fraud_synthetic_dataset.csv
-model/*.txt
-model/*.pkl
-model/*.json
-!model/fraud_detection_model_v4_zimbabwe.txt
-!model/model_metadata_v4_zimbabwe.json
 
 # OS files
 .DS_Store
 Thumbs.db
+
 # Local tooling (portable JDK for Firestore emulator)
 tools/
 firestore-debug.log

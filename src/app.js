@@ -7,8 +7,11 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const fraudRoutes = require("./routes/fraudRoutes");
 const ecocashRoutes = require("./routes/ecocashRoutes");
 
+const { requestLogger } = require("./utils/logger");
+
 const app = express();
 
+app.use(requestLogger);
 app.use(cors());
 app.use(express.json());
 

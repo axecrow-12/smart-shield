@@ -44,14 +44,6 @@ class TAPnPAYRiskEngine:
             'cashout_interval_hours', 'amount', 'transaction_type'
         ]
         
-        # Risk thresholds (EcoCash 2026 - optimized for Zimbabwe market)
-        self.risk_thresholds = {
-            'low': 30,
-            'medium': 50,
-            'high': 70,
-            'critical': 85
-        }
-        
         # Load model if provided
         if model_path:
             self.load_model(model_path)
@@ -69,17 +61,14 @@ class TAPnPAYRiskEngine:
                 pass
     
     def load_model(self, model_path: str):
-        """Load trained LightGBM model"""
-        try:
-            if model_path.endswith('.pkl'):
-                with open(model_path, 'rb') as f:
-                    self.model = pickle.load(f)
-            else:
-                self.model = lgb.Booster(model_file=model_path)
-            print(f"Model loaded from {model_path}")
-        except Exception as e:
-            print(f"Error loading model: {e}")
-            self.model = None
+        """Load trained LightGBM model. Fails loudly: a fraud engine
+        silently running without its model is worse than not starting."""
+        if model_path.endswith('.pkl'):
+            with open(model_path, 'rb') as f:
+                self.model = pickle.load(f)
+        else:
+            self.model = lgb.Booster(model_file=model_path)
+        print(f"Model loaded from {model_path}")
     
     def extract_features(self, transaction: Dict) -> pd.DataFrame:
         """
@@ -187,27 +176,41 @@ class TAPnPAYRiskEngine:
         result = {
             'timestamp': datetime.now().isoformat(),
             'transaction_amount': transaction.get('amount'),
-            'merchant_type': 'vendor' if transaction.get('merchant_type') == 0 else 'individual',
         }
-        
+
         try:
             # Apply rule-based checks
             rule_based_fraud, rule_reasons = self.apply_rule_based_checks(transaction)
-            
+
             result['rule_based_fraud'] = rule_based_fraud
             result['rule_reasons'] = rule_reasons
-            
-            # ML Model scoring
-            if self.model:
-                try:
-                    features_df = self.extract_features(transaction)
-                    ml_score = float(self.model.predict(features_df)[0])
-                    result['ml_fraud_score'] = round(ml_score, 4)
-                except Exception as e:
-                    result['ml_fraud_score'] = None
+
+            # ML model scoring + per-feature explanation (pred_contrib is
+            # LightGBM's native SHAP-value computation)
+            if self.model is not None:
+                features_df = self.extract_features(transaction)
+                ml_score = float(self.model.predict(features_df)[0])
+                result['ml_fraud_score'] = round(ml_score, 4)
+
+                contribs = self.model.predict(features_df, pred_contrib=True)[0]
+                per_feature = sorted(
+                    zip(self.feature_names, contribs[:-1], features_df.iloc[0]),
+                    key=lambda t: -abs(t[1]),
+                )
+                result['top_features'] = [
+                    {
+                        'feature': name,
+                        'value': float(value),
+                        'contribution': round(float(c), 4),
+                        'direction': 'raises risk' if c > 0 else 'lowers risk',
+                    }
+                    for name, c, value in per_feature[:5]
+                    if abs(c) > 0.01
+                ]
             else:
                 result['ml_fraud_score'] = None
-            
+                result['top_features'] = []
+
             # Calculate RISK SCORE (0-100)
             risk_score, context_info = self.calculate_fraud_probability(
                 rule_based_fraud,
@@ -250,43 +253,28 @@ class TAPnPAYRiskEngine:
         Returns:
             (risk_score, context_info) - tuple of score and reasoning
         """
-        context = {
-            'rule_contribution': 0,
-            'ml_contribution': 0,
-            'context_multiplier': 1.0
-        }
-        
-        # Rule-based contribution (40 points max)
+        # Rule-based contribution (40 points max). ML contributes up to 60;
+        # when the model is unavailable it contributes 0 and that is flagged,
+        # never silently assumed to be a coin flip.
         rule_score = 40 if rule_fraud else 0
-        context['rule_contribution'] = rule_score
-        
-        # ML-based contribution (40 points max)
-        ml_score_normalized = (ml_score if ml_score else 0.5) * 40
-        context['ml_contribution'] = ml_score_normalized
-        
-        # Context-based adjustments (20 points)
-        if transaction:
-            context_score = 0
-            
-            # Contextual weighting: Multiple risk factors together
-            if (transaction.get('is_new_device') == 1 and 
-                transaction.get('distance_km', 0) > 10 and 
-                transaction.get('amount', 0) > 100):
-                context_score += 10  # New device + location + high amount
-            
-            if (transaction.get('is_night') == 1 and 
-                transaction.get('is_new_device') == 1):
-                context_score += 5  # Night transaction with new device
-            
-            if transaction.get('time_since_last_tx', 0) < 5:
-                context_score += 3  # Rapid transactions
-            
-            context['context_multiplier'] = 1 + (context_score / 20)
-        
-        # Total risk score (0-100)
-        base_score = rule_score + ml_score_normalized
-        final_score = min(100, base_score * context['context_multiplier'])
-        
+        ml_available = ml_score is not None
+        ml_score_normalized = (ml_score * 60) if ml_available else 0.0
+
+        context = {
+            'rule_contribution': rule_score,
+            'ml_contribution': round(ml_score_normalized, 1),
+            'ml_available': ml_available,
+        }
+
+        final_score = min(100, rule_score + ml_score_normalized)
+
+        # A deterministic rule violation is never below verification
+        # territory (>= 70, i.e. HIGH/VERIFY), even when the ML score
+        # alone is unconvinced.
+        if rule_fraud and final_score < 70:
+            final_score = 70.0
+            context['rule_floor_applied'] = True
+
         return round(final_score, 1), context
     
     def classify_risk_level_by_score(self, risk_score: float) -> str:
@@ -308,20 +296,6 @@ class TAPnPAYRiskEngine:
         elif risk_score >= 50:
             return 'MEDIUM'
         elif risk_score >= 30:
-            return 'LOW'
-        else:
-            return 'NORMAL'
-    
-    def classify_risk_level(self, fraud_probability: float) -> str:
-        """Legacy method - kept for backward compatibility"""
-        
-        if fraud_probability >= self.risk_thresholds['critical']:
-            return 'CRITICAL'
-        elif fraud_probability >= self.risk_thresholds['high']:
-            return 'HIGH'
-        elif fraud_probability >= self.risk_thresholds['medium']:
-            return 'MEDIUM'
-        elif fraud_probability >= self.risk_thresholds['low']:
             return 'LOW'
         else:
             return 'NORMAL'

@@ -110,6 +110,19 @@
     color: var(--muted);
   }
   .srcNote { margin-top: 10px; font-size: 11px; color: var(--muted); }
+  #explain { margin-top: 12px; display: grid; gap: 5px; }
+  .exTitle {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted); margin-bottom: 2px;
+  }
+  .exRow { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+  .exName { width: 170px; font-family: var(--mono); color: var(--muted); text-align: right; }
+  .exTrack {
+    flex: 1; height: 8px; background: var(--panel-2); border-radius: 999px;
+    position: relative; overflow: hidden;
+  }
+  .exTrack i { position: absolute; top: 0; bottom: 0; left: 50%; }
+  .exVal { width: 44px; font-family: var(--mono); }
 
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th {
@@ -197,6 +210,7 @@
       </div>
       <span class="decision" id="decisionChip"></span>
       <div class="reasons" id="reasonChips"></div>
+      <div id="explain"></div>
       <div class="srcNote" id="srcNote"></div>
     </div>
   </div>
@@ -228,7 +242,8 @@ const SCENARIOS = {
     context: {
       isNewDevice: true, timeSinceLoginSeconds: 25,
       mlFeatures: { new_device_login: 1, time_since_login_seconds: 25,
-                    sim_change_frequency: 8, network_type: "public_wifi" },
+                    sim_change_frequency: 8, network_type: "public_wifi",
+                    distance_from_last_cashout_km: 120 },
     },
   },
   mule: {
@@ -360,6 +375,28 @@ function showResult(fr, status, label) {
   chip.className = "decision d-" + (status === "approved" ? "approved" : status === "review" ? "review" : "rejected");
   $("reasonChips").innerHTML = (fr.reasons || []).map((r) => `<span class="reason">${r}</span>`).join("") ||
     `<span class="reason">no risk signals</span>`;
+
+  // Per-feature ML explanation (LightGBM SHAP contributions)
+  const feats = fr.mlTopFeatures || [];
+  if (feats.length) {
+    const maxAbs = Math.max(...feats.map((f) => Math.abs(f.contribution)), 0.001);
+    $("explain").innerHTML =
+      `<div class="exTitle">Why the model thinks so</div>` +
+      feats.map((f) => {
+        const pct = Math.min(50, (Math.abs(f.contribution) / maxAbs) * 50);
+        const pos = f.contribution > 0;
+        const barStyle = pos
+          ? `left:50%;width:${pct}%;background:var(--red)`
+          : `left:${50 - pct}%;width:${pct}%;background:var(--green)`;
+        return `<div class="exRow">
+          <span class="exName">${f.feature}</span>
+          <span class="exTrack"><i style="${barStyle}"></i></span>
+          <span class="exVal" style="color:${pos ? "var(--red)" : "var(--green)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
+        </div>`;
+      }).join("");
+  } else {
+    $("explain").innerHTML = "";
+  }
   $("srcNote").textContent =
     fr.source === "ml+rules"
       ? `scored by LightGBM v4 (ml ${Math.round(fr.mlScore ?? 0)}/100, level ${fr.mlRiskLevel}) + token rules`

@@ -1,4 +1,6 @@
 """TAPnPAY Fraud Detection API v4.0 - Zimbabwe-Optimized"""
+import logging
+import traceback
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,6 +12,9 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 from utils.risk_engine import TAPnPAYRiskEngine
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+logger = logging.getLogger("tapnpay.api")
 
 app = FastAPI(title="TAPnPAY v4.0 Fraud Detection", version="4.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -114,12 +119,16 @@ async def score(tx: ZimbabweTransaction):
             "decision": decision,
             "fraud_probability": round(risk_score / 100.0, 4),
             "reasons": reasons,
+            "top_features": result.get('top_features', []),
             "patterns_detected": len(reasons),
             "confidence": "high" if risk_score > 70 or risk_score < 30 else "medium",
             "timestamp": datetime.now().isoformat()
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Scoring error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("Scoring error: %s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal scoring error")
 
 
 @app.post("/batch-score")
@@ -156,8 +165,11 @@ async def batch_score(request: BatchScoringRequest):
                 "fraud_rate": round(blocked / len(results), 4) if results else 0
             }
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Batch processing error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("Batch processing error: %s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal batch processing error")
 
 
 @app.post("/check-rules")
@@ -184,8 +196,11 @@ async def check_rules(tx: ZimbabweTransaction):
                 "other": sum(1 for r in triggered_rules if not any(x in r for x in ['AMOUNT', 'VELOCITY', 'BURST', 'LOCATION', 'TAKEOVER', 'MERCHANT']))
             }
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Rules evaluation error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("Rules evaluation error: %s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal rules evaluation error")
 
 
 @app.post("/analyze")
@@ -245,8 +260,11 @@ async def analyze(tx: ZimbabweTransaction):
             },
             "timestamp": datetime.now().isoformat()
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis error: {str(e)}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.error("Analysis error: %s", traceback.format_exc())
+        raise HTTPException(status_code=500, detail="Internal analysis error")
 
 
 if __name__ == "__main__":
