@@ -51,8 +51,10 @@
   .sbLogo { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; }
   .sbLogoIcon {
     width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    background: var(--btnBg); font-size: 17px; flex-shrink: 0; box-shadow: var(--btnShadow);
+    background: var(--btnBg); color: #fff; flex-shrink: 0; box-shadow: var(--btnShadow);
   }
+  .sbLogoIcon svg.icon { width: 19px; height: 19px; }
+  .sbLogoIcon svg.icon * { stroke-width: 2; }
   .sbLogoText { font-size: 15px; font-weight: 800; line-height: 1.2; }
   .sbLogoText em { font-style: normal; color: var(--accent); }
   .sbTagline { font-size: 10px; color: var(--muted); }
@@ -69,7 +71,12 @@
 
   .sbSpacer { flex: 1; }
   .sbFooter { padding: 16px 14px; text-align: center; margin-top: 10px; overflow: hidden; }
-  .sbFooterIcon { font-size: 22px; margin-bottom: 8px; }
+  .sbFooterIcon {
+    width: 40px; height: 40px; border-radius: 12px; margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--goodSoft); color: var(--good);
+  }
+  .sbFooterIcon svg.icon { width: 20px; height: 20px; }
   .sbFooterTitle { font-size: 13px; font-weight: 700; }
   .sbFooterSub { font-size: 11px; color: var(--muted); margin-top: 2px; margin-bottom: 10px; }
   .sbWave { width: 100%; height: 30px; display: block; }
@@ -128,7 +135,12 @@
   .page.active { display: block; }
 
   .placeholder { padding: 70px 20px; text-align: center; color: var(--muted); }
-  .placeholder .picon { font-size: 40px; margin-bottom: 14px; }
+  .placeholder .picon {
+    width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--goodSoft); color: var(--good);
+  }
+  .placeholder .picon svg.icon { width: 28px; height: 28px; }
   .placeholder h3 { color: var(--text); font-size: 17px; margin-bottom: 6px; }
   .placeholder p { font-size: 13px; }
 
@@ -206,7 +218,11 @@
     box-shadow: none;
   }
   .scenario:hover { border-color: var(--accent); filter: none; }
-  .scenario .icon { font-size: 19px; }
+  .scIcon {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scIcon svg.icon { width: 17px; height: 17px; }
   .scenario .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
   .scTextWrap { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .scBadge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
@@ -285,7 +301,9 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sbLogo">
-      <div class="sbLogoIcon">🛡️</div>
+      <div class="sbLogoIcon">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+      </div>
       <div>
         <div class="sbLogoText">SmartPay <em>Shield</em></div>
         <div class="sbTagline">Secure payments. Safer tomorrow.</div>
@@ -326,7 +344,9 @@
     <div class="sbSpacer"></div>
 
     <div class="sbFooter glass">
-      <div class="sbFooterIcon">🛡️</div>
+      <div class="sbFooterIcon">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+      </div>
       <div class="sbFooterTitle">Real-time protection</div>
       <div class="sbFooterSub">for every transaction.</div>
       <svg class="sbWave" viewBox="0 0 200 30" preserveAspectRatio="none">
@@ -370,7 +390,7 @@
 
         <div class="greetHeader">
           <div>
-            <h1 id="greetTitle">Good day 👋</h1>
+            <h1 id="greetTitle">Good day</h1>
             <p>Here's what's happening with your payments today.</p>
           </div>
           <div class="greetRight">
@@ -466,42 +486,54 @@
               <h2>Customer / attack simulator</h2>
               <div class="scenarios">
                 <button class="scenario" data-s="normal">
-                  <span class="icon">✅</span>
+                  <span class="scIcon sb-safe">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>Legitimate purchase</b><br><span class="desc">Known device, home area</span></span>
                     <span class="scBadge sb-safe">Safe</span>
                   </span>
                 </button>
                 <button class="scenario" data-s="otp">
-                  <span class="icon">📵</span>
+                  <span class="scIcon sb-high">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>OTP interception / SIM swap</b><br><span class="desc">New device, 25s session, cycled SIM</span></span>
                     <span class="scBadge sb-high">High Risk</span>
                   </span>
                 </button>
                 <button class="scenario" data-s="mule">
-                  <span class="icon">🕸️</span>
+                  <span class="scIcon sb-medium">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18.5" r="2.4"/><circle cx="19" cy="18.5" r="2.4"/><line x1="10.9" y1="7.1" x2="6.2" y2="16.4"/><line x1="13.1" y1="7.1" x2="17.8" y2="16.4"/><line x1="7.4" y1="18.5" x2="16.6" y2="18.5"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>Mule network payout</b><br><span class="desc">Known mule destination</span></span>
                     <span class="scBadge sb-medium">Medium</span>
                   </span>
                 </button>
                 <button class="scenario" data-s="velocity">
-                  <span class="icon">⚡</span>
+                  <span class="scIcon sb-high">
+                    <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 4.5 13.5 11 13.5 10 22 19.5 10.5 13 10.5"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>Velocity / smurfing</b><br><span class="desc">9 cash-ins in 24h</span></span>
                     <span class="scBadge sb-high">High Risk</span>
                   </span>
                 </button>
                 <button class="scenario" data-s="travel">
-                  <span class="icon">🛰️</span>
+                  <span class="scIcon sb-medium">
+                    <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>Impossible travel</b><br><span class="desc">450 km/h between transactions</span></span>
                     <span class="scBadge sb-medium">Medium</span>
                   </span>
                 </button>
                 <button class="scenario" data-s="replay">
-                  <span class="icon">♻️</span>
+                  <span class="scIcon sb-low">
+                    <svg class="icon" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
+                  </span>
                   <span class="scTextWrap">
                     <span><b>Token replay</b><br><span class="desc">Same QR presented twice</span></span>
                     <span class="scBadge sb-low">Low</span>
@@ -591,31 +623,41 @@
       <!-- ============ PLACEHOLDER PAGES ============ -->
       <section class="page" id="page-fraud">
         <div class="card glass placeholder">
-          <div class="picon">🛡️</div><h3>Fraud Monitoring</h3>
+          <div class="picon" style="background:var(--badSoft);color:var(--bad)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16" r="0.7" fill="currentColor" stroke="none"/></svg>
+          </div><h3>Fraud Monitoring</h3>
           <p>Deeper rule-tuning and case management — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-merchants">
         <div class="card glass placeholder">
-          <div class="picon">🏬</div><h3>Merchants</h3>
+          <div class="picon" style="background:var(--blueSoft);color:var(--blue)">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 9 L4 4 H20 L21 9"/><path d="M4 9 V20 H20 V9"/><line x1="9" y1="20" x2="9" y2="13"/></svg>
+          </div><h3>Merchants</h3>
           <p>Merchant directory and risk profiles — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-disputes">
         <div class="card glass placeholder">
-          <div class="picon">⚖️</div><h3>Disputes</h3>
+          <div class="picon" style="background:var(--amberSoft);color:var(--amber)">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="6" x2="20" y2="6"/><path d="M4 6 L2 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(1 0)"/><path d="M20 6 L18 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(-2 0)"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+          </div><h3>Disputes</h3>
           <p>Chargeback and dispute workflow — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-reports">
         <div class="card glass placeholder">
-          <div class="picon">📊</div><h3>Reports</h3>
+          <div class="picon" style="background:var(--purpleSoft);color:var(--purple)">
+            <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+          </div><h3>Reports</h3>
           <p>Exportable fraud analytics — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-settings">
         <div class="card glass placeholder">
-          <div class="picon">⚙️</div><h3>Settings</h3>
+          <div class="picon">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+          </div><h3>Settings</h3>
           <p>Thresholds, integrations, and team access — coming soon in this demo build.</p>
         </div>
       </section>
@@ -635,7 +677,7 @@ let lastTxs = [];
   const h = new Date().getHours();
   const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
   const name = "Wilmar";
-  $("greetTitle").textContent = `Good ${part}, ${name} 👋`;
+  $("greetTitle").textContent = `Good ${part}, ${name}`;
 
   const end = new Date();
   const start = new Date(); start.setDate(end.getDate() - 6);
