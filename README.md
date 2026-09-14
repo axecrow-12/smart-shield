@@ -44,6 +44,22 @@ npm run smoke
 >
 > **Note (emulator):** `npm run emulator` uses a portable JDK 11 + emulator jar from `tools/` when present (works around a Windows bug where JDK 16+ can't open NIO selectors). Without `tools/`, it falls back to `firebase emulators:start` (needs Java 21+).
 
+## Tests
+
+```bash
+npm test
+```
+
+```bash
+cd ml_core && python -m pytest tests/ -q
+```
+
+Node (`tests/`): fraud service ML mapping, fallback and merge logic, request validators. Python (`ml_core/tests/`): risk-engine rules, scoring bounds, train/serve encoding parity, all API endpoints. `npm run smoke` covers the full integration (needs all three services running).
+
+## Auth & validation
+
+All payment/fraud/ecocash endpoints validate input (amount bounds, phone/token/reference formats, status whitelist) and require a Firebase ID token — except in demo mode (`ALLOW_ANON_DEMO=1` in `.env`, the default for the expo). The EcoCash `/callback` is validated but unauthenticated by design (it simulates an external provider webhook).
+
 ## Cloud mode (real Firestore)
 
 Comment out `FIRESTORE_EMULATOR_HOST` in `.env` and either drop `serviceAccountKey.json` at the repo root or set `GOOGLE_APPLICATION_CREDENTIALS`.

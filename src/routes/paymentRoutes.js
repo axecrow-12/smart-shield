@@ -8,6 +8,11 @@ const {
   isExpired,
 } = require("../services/tokenService");
 const { scoreTransaction } = require("../services/fraudService");
+const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
+const {
+  validateCreatePayment,
+  validateTokenBody,
+} = require("../middleware/validate");
 
 router.get("/", async (req, res) => {
   try {
@@ -17,7 +22,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/create-payment", async (req, res) => {
+router.post("/create-payment", requireAuthUnlessDemo, validateCreatePayment, async (req, res) => {
   try {
     const { amount, merchantName, customerPhone } = req.body;
 
@@ -71,7 +76,7 @@ router.post("/create-payment", async (req, res) => {
   }
 });
 
-router.post("/validate-token", async (req, res) => {
+router.post("/validate-token", requireAuthUnlessDemo, validateTokenBody, async (req, res) => {
   try {
     const { token } = req.body;
 
@@ -112,7 +117,7 @@ router.post("/validate-token", async (req, res) => {
   }
 });
 
-router.post("/process", async (req, res) => {
+router.post("/process", requireAuthUnlessDemo, validateTokenBody, async (req, res) => {
   try {
     const { token, context } = req.body;
 
@@ -183,7 +188,7 @@ router.post("/process", async (req, res) => {
   }
 });
 
-router.get("/transactions", async (req, res) => {
+router.get("/transactions", requireAuthUnlessDemo, async (req, res) => {
   try {
     const snapshot = await db
       .collection("transactions")

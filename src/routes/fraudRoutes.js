@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
 const { scoreTransaction } = require("../services/fraudService");
+const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
+const { validateFraudScore } = require("../middleware/validate");
 
 router.get("/", (req, res) => {
   res.json({ message: "Fraud route working" });
 });
 
-router.post("/score", async (req, res) => {
+router.post("/score", requireAuthUnlessDemo, validateFraudScore, async (req, res) => {
   try {
     const { payment, context } = req.body;
 

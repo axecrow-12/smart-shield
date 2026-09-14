@@ -3,12 +3,17 @@ const router = express.Router();
 const { db } = require("../config/firebase");
 const { v4: uuidv4 } = require("uuid");
 const { scoreTransaction } = require("../services/fraudService");
+const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
+const {
+  validateEcocashInitiate,
+  validateEcocashCallback,
+} = require("../middleware/validate");
 
 router.get("/", (req, res) => {
   res.json({ message: "EcoCash mock route working" });
 });
 
-router.get("/all", async (req, res) => {
+router.get("/all", requireAuthUnlessDemo, async (req, res) => {
   try {
     const snapshot = await db.collection("ecocashTransactions").get();
 
@@ -29,7 +34,7 @@ router.get("/all", async (req, res) => {
   }
 });
 
-router.post("/initiate", async (req, res) => {
+router.post("/initiate", requireAuthUnlessDemo, validateEcocashInitiate, async (req, res) => {
   try {
     const { amount, customerPhone, merchantName, paymentId } = req.body;
 
@@ -76,7 +81,7 @@ router.post("/initiate", async (req, res) => {
   }
 });
 
-router.post("/callback", async (req, res) => {
+router.post("/callback", validateEcocashCallback, async (req, res) => {
   try {
     const {
       providerReference,
@@ -216,7 +221,7 @@ router.post("/callback", async (req, res) => {
   }
 });
 
-router.get("/status/:providerReference", async (req, res) => {
+router.get("/status/:providerReference", requireAuthUnlessDemo, async (req, res) => {
   try {
     const { providerReference } = req.params;
 

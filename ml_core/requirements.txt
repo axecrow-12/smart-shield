@@ -13,5 +13,8 @@ matplotlib>=3.8
 seaborn>=0.13
 jupyter>=1.0
 
+# Tests
+pytest>=8.0
+
 # API test script
 requests>=2.31
