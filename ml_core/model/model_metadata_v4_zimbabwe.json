@@ -1,25 +1,97 @@
 {
-    "version": "4.0.0",
-    "features": [
-        "sim_change_frequency",
-        "network_type",
-        "new_device_login",
-        "time_since_login_seconds",
-        "is_smurf_pattern",
-        "recent_cashins_24h",
-        "is_post_downtime",
-        "receiver_risk_score",
-        "is_legit_merchant",
-        "is_mule_destination",
-        "merchant_name_risk",
-        "Token_latency_seconds",
-        "geo_velocity_kmh",
-        "distance_from_last_cashout_km",
-        "transaction_hour",
-        "is_night_transaction",
-        "cashout_interval_hours",
-        "amount",
-        "transaction_type"
-    ],
-    "trained_at": "2026-04-13T01:07:29.822334"
+  "version": "4.1.0",
+  "model": "LightGBM",
+  "focus": "Zimbabwe-Optimized",
+  "trained_at": "2026-09-14T13:27:35.253518",
+  "dataset": "TAPnPAY_fraud_enhanced.csv",
+  "dataset_size": 10000,
+  "fraud_rate": 0.4303,
+  "test_size": 2000,
+  "threshold": 0.5,
+  "num_trees": 107,
+  "performance": {
+    "roc_auc": 0.9455,
+    "f1_score": 0.8419,
+    "precision": 0.8008,
+    "recall": 0.8873,
+    "confusion_matrix": {
+      "tn": 949,
+      "fp": 190,
+      "fn": 97,
+      "tp": 764
+    }
+  },
+  "top_features_by_gain": [
+    {
+      "feature": "is_legit_merchant",
+      "gain": 25506.3
+    },
+    {
+      "feature": "amount",
+      "gain": 14026.2
+    },
+    {
+      "feature": "geo_velocity_kmh",
+      "gain": 12826.2
+    },
+    {
+      "feature": "network_type",
+      "gain": 8771.3
+    },
+    {
+      "feature": "merchant_name_risk",
+      "gain": 4940.0
+    },
+    {
+      "feature": "is_mule_destination",
+      "gain": 3298.4
+    },
+    {
+      "feature": "receiver_risk_score",
+      "gain": 3062.1
+    },
+    {
+      "feature": "sim_change_frequency",
+      "gain": 2218.7
+    },
+    {
+      "feature": "recent_cashins_24h",
+      "gain": 1728.1
+    },
+    {
+      "feature": "cashout_interval_hours",
+      "gain": 1661.1
+    }
+  ],
+  "features": [
+    "sim_change_frequency",
+    "network_type",
+    "new_device_login",
+    "time_since_login_seconds",
+    "is_smurf_pattern",
+    "recent_cashins_24h",
+    "is_post_downtime",
+    "receiver_risk_score",
+    "is_legit_merchant",
+    "is_mule_destination",
+    "merchant_name_risk",
+    "Token_latency_seconds",
+    "geo_velocity_kmh",
+    "distance_from_last_cashout_km",
+    "transaction_hour",
+    "is_night_transaction",
+    "cashout_interval_hours",
+    "amount",
+    "transaction_type"
+  ],
+  "categorical_encodings": {
+    "transaction_type": {
+      "airtime_topup": 0,
+      "bill_payment": 1,
+      "cash_in_agent": 2,
+      "cash_out_agent": 3,
+      "merchant_payment": 4,
+      "p2p_transfer": 5
+    }
+  }
 }

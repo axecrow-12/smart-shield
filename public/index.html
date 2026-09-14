@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPay Shield</title>
+<script src="vendor/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1020;
+    --panel: #131a2e;
+    --panel-2: #1a2340;
+    --border: #253052;
+    --text: #e8ecf8;
+    --muted: #8b96b8;
+    --accent: #4f8cff;
+    --green: #2fd483;
+    --amber: #ffb648;
+    --red: #ff5d6c;
+    --mono: "Consolas", "Menlo", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    min-height: 100vh; padding: 20px;
+  }
+  header {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .logo { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+  .logo span { color: var(--accent); }
+  .pills { display: flex; gap: 8px; margin-left: auto; }
+  .pill {
+    padding: 4px 12px; border-radius: 999px; font-size: 12px;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--muted);
+  }
+  .pill.ok { color: var(--green); border-color: rgba(47,212,131,.4); }
+  .pill.bad { color: var(--red); border-color: rgba(255,93,108,.4); }
+  .grid {
+    display: grid; gap: 16px;
+    grid-template-columns: 320px 360px 1fr;
+    align-items: start;
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px;
+  }
+  .card h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted); margin-bottom: 14px;
+  }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  input {
+    width: 100%; padding: 9px 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--panel-2);
+    color: var(--text); font-size: 14px;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  button {
+    cursor: pointer; border: none; border-radius: 8px;
+    padding: 10px 14px; font-size: 14px; font-weight: 600;
+    background: var(--accent); color: #fff; width: 100%; margin-top: 14px;
+  }
+  button:hover { filter: brightness(1.12); }
+  button:disabled { opacity: .5; cursor: default; }
+  #qrBox {
+    margin-top: 14px; display: none; text-align: center;
+    background: #fff; border-radius: 10px; padding: 14px;
+  }
+  #qrBox img, #qrBox canvas { margin: 0 auto; }
+  .tokenLine {
+    margin-top: 10px; font-family: var(--mono); font-size: 11px;
+    color: var(--muted); word-break: break-all; text-align: center;
+  }
+  .expiry { text-align: center; font-size: 12px; color: var(--amber); margin-top: 6px; }
+
+  .scenarios { display: grid; gap: 8px; }
+  .scenario {
+    display: flex; align-items: center; gap: 10px; text-align: left;
+    background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px; margin: 0; width: 100%;
+    color: var(--text); font-weight: 500;
+  }
+  .scenario:hover { border-color: var(--accent); filter: none; }
+  .scenario .icon { font-size: 20px; }
+  .scenario .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+  #resultCard { display: none; }
+  .gaugeWrap { display: flex; align-items: center; gap: 16px; }
+  .score { font-size: 42px; font-weight: 800; font-family: var(--mono); }
+  .bar {
+    flex: 1; height: 10px; border-radius: 999px; background: var(--panel-2);
+    overflow: hidden; border: 1px solid var(--border);
+  }
+  .bar i { display: block; height: 100%; width: 0; transition: width .6s ease; }
+  .decision {
+    display: inline-block; margin-top: 10px; padding: 5px 14px; border-radius: 8px;
+    font-weight: 700; font-size: 14px;
+  }
+  .d-approved { background: rgba(47,212,131,.15); color: var(--green); }
+  .d-review   { background: rgba(255,182,72,.15); color: var(--amber); }
+  .d-rejected { background: rgba(255,93,108,.15); color: var(--red); }
+  .reasons { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .reason {
+    font-size: 11px; font-family: var(--mono); padding: 3px 8px;
+    border-radius: 6px; background: var(--panel-2); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .srcNote { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 8px; border-bottom: 1px solid rgba(37,48,82,.5); vertical-align: top; }
+  .chip {
+    padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    display: inline-block;
+  }
+  .riskbar {
+    width: 90px; height: 7px; background: var(--panel-2); border-radius: 999px;
+    overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 6px;
+  }
+  .riskbar i { display: block; height: 100%; }
+  .feedReasons { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+  .empty { color: var(--muted); padding: 24px; text-align: center; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🛡️ SmartPay <span>Shield</span></div>
+  <div class="pills">
+    <span class="pill" id="pillBackend">backend …</span>
+    <span class="pill" id="pillMl">ml api …</span>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- MERCHANT TERMINAL -->
+  <div class="card">
+    <h2>Merchant terminal</h2>
+    <label>Merchant</label>
+    <input id="merchantName" value="Mbare Fresh Produce">
+    <label>Amount (USD)</label>
+    <input id="amount" type="number" value="18.50" step="0.5">
+    <button id="btnCreate">Create payment request</button>
+    <div id="qrBox"><div id="qr"></div></div>
+    <div class="tokenLine" id="tokenLine"></div>
+    <div class="expiry" id="expiryLine"></div>
+  </div>
+
+  <!-- ATTACK SIMULATOR -->
+  <div>
+    <div class="card">
+      <h2>Customer / attack simulator</h2>
+      <div class="scenarios">
+        <button class="scenario" data-s="normal">
+          <span class="icon">✅</span>
+          <span>Legitimate purchase<br><span class="desc">Known device, home area, normal hours</span></span>
+        </button>
+        <button class="scenario" data-s="otp">
+          <span class="icon">📵</span>
+          <span>OTP interception / SIM swap<br><span class="desc">New device, 25s-old session, cycled SIM, public Wi-Fi</span></span>
+        </button>
+        <button class="scenario" data-s="mule">
+          <span class="icon">🕸️</span>
+          <span>Mule network payout<br><span class="desc">Known mule destination, high-risk receiver</span></span>
+        </button>
+        <button class="scenario" data-s="velocity">
+          <span class="icon">⚡</span>
+          <span>Velocity / smurfing attack<br><span class="desc">9 cash-ins in 24h, structured small amounts</span></span>
+        </button>
+        <button class="scenario" data-s="travel">
+          <span class="icon">🛰️</span>
+          <span>Impossible travel<br><span class="desc">450 km/h between transactions, 300 km jump</span></span>
+        </button>
+        <button class="scenario" data-s="replay">
+          <span class="icon">♻️</span>
+          <span>Token replay attack<br><span class="desc">Same QR token presented twice</span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="card" id="resultCard" style="margin-top:16px">
+      <h2>Fraud engine verdict</h2>
+      <div class="gaugeWrap">
+        <div class="score" id="scoreNum">–</div>
+        <div class="bar"><i id="scoreBar"></i></div>
+      </div>
+      <span class="decision" id="decisionChip"></span>
+      <div class="reasons" id="reasonChips"></div>
+      <div class="srcNote" id="srcNote"></div>
+    </div>
+  </div>
+
+  <!-- LIVE FEED -->
+  <div class="card">
+    <h2>Live transaction feed</h2>
+    <table>
+      <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+      <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let currentPayment = null;
+let expiryTimer = null;
+let qrObj = null;
+
+const SCENARIOS = {
+  normal: {
+    label: "Legitimate purchase", amount: 18.5, merchant: "Mbare Fresh Produce",
+    context: { isNewDevice: false, rapidAttempts: false, locationMismatch: false },
+  },
+  otp: {
+    label: "OTP interception / SIM swap", amount: 350, merchant: "Quick Cash Agent",
+    context: {
+      isNewDevice: true, timeSinceLoginSeconds: 25,
+      mlFeatures: { new_device_login: 1, time_since_login_seconds: 25,
+                    sim_change_frequency: 8, network_type: "public_wifi" },
+    },
+  },
+  mule: {
+    label: "Mule network payout", amount: 420, merchant: "Unknown Vendor 47",
+    context: {
+      mlFeatures: { is_mule_destination: 1, receiver_risk_score: 0.95,
+                    merchant_name_risk: "RISKY", is_legit_merchant: 0 },
+    },
+  },
+  velocity: {
+    label: "Velocity / smurfing attack", amount: 95, merchant: "Split Deposit Agent",
+    context: {
+      rapidAttempts: true,
+      mlFeatures: { recent_cashins_24h: 9, is_smurf_pattern: 1 },
+    },
+  },
+  travel: {
+    label: "Impossible travel", amount: 240, merchant: "Border Electronics",
+    context: {
+      locationMismatch: true,
+      mlFeatures: { geo_velocity_kmh: 450, distance_from_last_cashout_km: 300 },
+    },
+  },
+};
+
+async function api(method, url, body) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return { status: res.status, json: await res.json().catch(() => null) };
+}
+
+/* ---------- health pills ---------- */
+async function health() {
+  try {
+    const r = await fetch("/api");
+    setPill("pillBackend", r.ok, "backend");
+  } catch { setPill("pillBackend", false, "backend"); }
+  try {
+    const r = await api("POST", "/api/fraud/score", { payment: { amount: 1 }, context: {} });
+    const src = r.json?.result?.source;
+    setPill("pillMl", src === "ml+rules", src === "ml+rules" ? "ml api · LightGBM v4" : "ml api offline · rules fallback");
+  } catch { setPill("pillMl", false, "ml api"); }
+}
+function setPill(id, ok, text) {
+  const el = $(id);
+  el.textContent = (ok ? "● " : "○ ") + text;
+  el.className = "pill " + (ok ? "ok" : "bad");
+}
+
+/* ---------- merchant terminal ---------- */
+async function createPayment(amount, merchantName) {
+  const r = await api("POST", "/api/payments/create-payment", {
+    amount, merchantName, customerPhone: "+263771234567",
+  });
+  if (r.status !== 201) throw new Error(r.json?.error || "create failed");
+  currentPayment = r.json.paymentRequest;
+  renderPayment();
+  return currentPayment;
+}
+
+function renderPayment() {
+  const p = currentPayment;
+  $("qrBox").style.display = "block";
+  $("qr").innerHTML = "";
+  qrObj = new QRCode($("qr"), { text: p.qrPayload, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
+  $("tokenLine").textContent = "token " + p.token;
+  clearInterval(expiryTimer);
+  expiryTimer = setInterval(() => {
+    const left = Math.max(0, Math.floor((p.expiresAt - Date.now()) / 1000));
+    $("expiryLine").textContent = p.used ? "token consumed" :
+      left > 0 ? `expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` : "token expired";
+  }, 500);
+}
+
+$("btnCreate").onclick = async () => {
+  try {
+    await createPayment(Number($("amount").value), $("merchantName").value || "Demo Merchant");
+  } catch (e) { alert(e.message); }
+};
+
+/* ---------- scenarios ---------- */
+document.querySelectorAll(".scenario").forEach((btn) => {
+  btn.onclick = () => runScenario(btn.dataset.s, btn);
+});
+
+async function runScenario(key, btn) {
+  btn.disabled = true;
+  try {
+    if (key === "replay") return await runReplay();
+    const s = SCENARIOS[key];
+    const p = await createPayment(s.amount, s.merchant);
+    const r = await api("POST", "/api/payments/process", { token: p.token, context: s.context });
+    if (r.status !== 200) throw new Error(r.json?.error || "process failed");
+    currentPayment.used = true;
+    showResult(r.json.fraudResult, r.json.status, s.label);
+    refreshFeed();
+  } catch (e) { alert(e.message); }
+  finally { btn.disabled = false; }
+}
+
+async function runReplay() {
+  const p = await createPayment(32, "Corner Grocery");
+  await api("POST", "/api/payments/process", { token: p.token, context: {} });
+  const second = await api("POST", "/api/payments/process", { token: p.token, context: {} });
+  currentPayment.used = true;
+  showResult(
+    { score: 100, reasons: ["TOKEN_ALREADY_USED", `HTTP ${second.status}: ${second.json?.error || ""}`], source: "token integrity" },
+    "rejected",
+    "Token replay attack"
+  );
+  refreshFeed();
+}
+
+/* ---------- verdict panel ---------- */
+function showResult(fr, status, label) {
+  $("resultCard").style.display = "block";
+  const score = Math.round(fr.score);
+  $("scoreNum").textContent = score;
+  const color = score >= 70 ? "var(--red)" : score >= 40 ? "var(--amber)" : "var(--green)";
+  $("scoreNum").style.color = color;
+  const bar = $("scoreBar");
+  bar.style.width = score + "%";
+  bar.style.background = color;
+  const chip = $("decisionChip");
+  chip.textContent = `${label} → ${status.toUpperCase()}` + (fr.decision ? ` (${fr.decision})` : "");
+  chip.className = "decision d-" + (status === "approved" ? "approved" : status === "review" ? "review" : "rejected");
+  $("reasonChips").innerHTML = (fr.reasons || []).map((r) => `<span class="reason">${r}</span>`).join("") ||
+    `<span class="reason">no risk signals</span>`;
+  $("srcNote").textContent =
+    fr.source === "ml+rules"
+      ? `scored by LightGBM v4 (ml ${Math.round(fr.mlScore ?? 0)}/100, level ${fr.mlRiskLevel}) + token rules`
+      : `scored by: ${fr.source}`;
+}
+
+/* ---------- live feed ---------- */
+async function refreshFeed() {
+  try {
+    const r = await api("GET", "/api/payments/transactions");
+    const txs = r.json?.transactions || [];
+    const tbody = $("feed");
+    if (!txs.length) return;
+    tbody.innerHTML = txs.map((t) => {
+      const score = Math.round(t.fraudResult?.score ?? 0);
+      const color = score >= 70 ? "var(--red)" : score >= 40 ? "var(--amber)" : "var(--green)";
+      const st = t.status || "?";
+      const cls = st === "approved" ? "d-approved" : st === "review" ? "d-review" : "d-rejected";
+      const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
+      return `<tr>
+        <td>${new Date(t.createdAt).toLocaleTimeString()}</td>
+        <td>${t.merchantName || "-"}</td>
+        <td>$${Number(t.amount).toFixed(2)}</td>
+        <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span>${score}</td>
+        <td><span class="chip ${cls}">${st}</span></td>
+        <td class="feedReasons">${reasons || "—"}</td>
+      </tr>`;
+    }).join("");
+  } catch {}
+}
+
+health();
+refreshFeed();
+setInterval(health, 10000);
+setInterval(refreshFeed, 3000);
+</script>
+</body>
+</html>

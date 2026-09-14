@@ -90,16 +90,26 @@ class TAPnPAYRiskEngine:
             val = transaction.get(field, 0)
             # Handle categorical factorizing (simple encoding for inference)
             if isinstance(val, str):
-                # Simple hash or mapping for network/type if needed
-                # For v4, the model expects numeric. We'll simulate the factorization.
+                # Encodings must match training exactly. The v4 model was trained
+                # on TAPnPAY_fraud_enhanced.csv with sklearn LabelEncoder
+                # (alphabetical): transaction_type has 6 categories; network_type
+                # and merchant_name_risk were already binary 0/1 in the dataset.
                 if field == 'network_type':
-                    mapping = {'ecoz_mobile': 0, 'public_wifi': 1, 'vpn': 2}
-                    val = mapping.get(val, 3)
+                    # trained values: 0 = mobile network, 1 = other (wifi/vpn)
+                    mapping = {'ecoz_mobile': 0, 'public_wifi': 1, 'vpn': 1}
+                    val = mapping.get(val, 1)
                 elif field == 'transaction_type':
-                    mapping = {'p2p': 0, 'merchant': 1, 'cashout': 2}
-                    val = mapping.get(val, 3)
+                    mapping = {
+                        'airtime_topup': 0, 'bill_payment': 1,
+                        'cash_in_agent': 2, 'cash_out_agent': 3,
+                        'merchant_payment': 4, 'p2p_transfer': 5,
+                        # API-friendly aliases
+                        'p2p': 5, 'merchant': 4, 'cashout': 3, 'cashin': 2,
+                    }
+                    val = mapping.get(val, 5)
                 elif field == 'merchant_name_risk':
-                    mapping = {'LEGIT': 0, 'SUSPICIOUS': 1, 'RISKY': 2}
+                    # trained values: 0 = legit, 1 = risky
+                    mapping = {'LEGIT': 0, 'SUSPICIOUS': 1, 'RISKY': 1}
                     val = mapping.get(val, 1)
                 else:
                     val = 0
