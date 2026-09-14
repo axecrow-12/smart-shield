@@ -141,7 +141,7 @@ router.post("/process", async (req, res) => {
       return res.status(410).json({ error: "Token expired" });
     }
 
-    const fraudResult = scoreTransaction(payment, context);
+    const fraudResult = await scoreTransaction(payment, context);
 
     let status = "approved";
     if (fraudResult.level === "HIGH") {

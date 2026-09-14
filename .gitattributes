@@ -1,0 +1,5 @@
+# LightGBM native model files are line-sensitive text; CRLF conversion corrupts them.
+*.lgb -text
+*.pkl binary
+*.ipynb text eol=lf
+*.csv text eol=lf

@@ -22,3 +22,7 @@ model/*.json
 # OS files
 .DS_Store
 Thumbs.db
+# Local tooling (portable JDK for Firestore emulator)
+tools/
+firestore-debug.log
+*.log

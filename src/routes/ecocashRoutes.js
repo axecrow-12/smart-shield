@@ -64,7 +64,7 @@ router.post("/initiate", async (req, res) => {
       message: "EcoCash payment initiated",
       ecocashTransaction,
       mockInstructions: {
-        callbackUrl: "http://localhost:5000/api/ecocash/callback",
+        callbackUrl: "http://127.0.0.1:5050/api/ecocash/callback",
         providerReference,
       },
     });
@@ -121,7 +121,7 @@ router.post("/callback", async (req, res) => {
           locationMismatch: false,
         };
 
-        fraudResult = scoreTransaction(payment, scoringContext);
+        fraudResult = await scoreTransaction(payment, scoringContext);
 
         if (status === "SUCCESS") {
           if (fraudResult.level === "HIGH") {

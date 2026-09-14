@@ -15,7 +15,7 @@ router.post("/score", async (req, res) => {
       return res.status(400).json({ error: "payment is required" });
     }
 
-    const result = scoreTransaction(payment, context);
+    const result = await scoreTransaction(payment, context);
 
     await db.collection("fraudLogs").add({
       paymentId: payment.paymentId || null,
