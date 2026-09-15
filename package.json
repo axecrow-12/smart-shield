@@ -8,7 +8,10 @@
     "start": "node src/server.js",
     "test": "node --test",
     "smoke": "node scripts/smoke_e2e.js",
-    "emulator": "node scripts/start_emulator.js"
+    "emulator": "node scripts/start_emulator.js",
+    "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/tailwind.css --watch",
+    "postinstall": "npm run build:css"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -19,6 +22,8 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@tailwindcss/cli": "^4.3.3",
+    "nodemon": "^3.1.14",
+    "tailwindcss": "^4.3.3"
   }
 }

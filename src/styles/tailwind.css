@@ -1,0 +1,142 @@
+/* ============================================================
+   SmartPay Shield — Tailwind v4 source.
+   One shared stylesheet for every page in public/ (index.html,
+   pay.html). Build with `npm run build:css`, or `npm run watch:css`
+   while editing. Compiled output: public/tailwind.css (committed,
+   so a fresh clone renders correctly even before anyone rebuilds).
+
+   Most markup uses plain Tailwind utility classes directly. The
+   handful of named classes below exist only where JavaScript does a
+   full `element.className = "..."` reassignment (status dots, decision
+   chips, KPI trend arrows, nav/page active states) — those classes
+   must carry their ENTIRE style on their own, since nothing else
+   survives that reassignment.
+   ============================================================ */
+
+@import "tailwindcss";
+
+/* Scan these for class names — explicit rather than relying on
+   automatic detection, so the build is predictable from any cwd. */
+@source "../../public/index.html";
+@source "../../public/pay.html";
+
+/* ---------- design tokens ("Frost Sentinel") ---------- */
+@theme {
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-mono: Consolas, Menlo, monospace;
+
+  --color-ink: #e9edf8;
+  --color-muted: #8d97b8;
+  --color-faint: #5c6690;
+
+  --color-accent: #14b8a6;
+  --color-accent-2: #10b981;
+  --color-good: #2dd4bf;
+  --color-amber: #fbbf24;
+  --color-bad: #fb7185;
+  --color-purple: #8b5cf6;
+  --color-blue: #3b82f6;
+
+  --animate-pulse-dot: pulse-dot 1.6s ease-in-out infinite;
+  --animate-spin-ring: spin-ring 1s linear infinite;
+  --animate-card-in: card-in .45s cubic-bezier(.2,.8,.2,1);
+  --animate-fade-in: fade-in .3s ease;
+
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  @keyframes spin-ring { to { transform: rotate(360deg); } }
+  @keyframes card-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+}
+
+@layer base {
+  html { color-scheme: dark; }
+  body { @apply min-h-screen overflow-x-hidden text-ink font-sans; }
+}
+
+@layer components {
+  /* ---------- shared primitives (every page) ---------- */
+  .glass {
+    @apply bg-white/[.055] border border-white/[.13] rounded-2xl
+           shadow-[0_8px_32px_rgba(2,6,18,.45),inset_0_1px_0_rgba(255,255,255,.09)]
+           backdrop-blur-[18px];
+  }
+  .icon { @apply w-[18px] h-[18px] shrink-0 block; }
+  .icon * { @apply stroke-current fill-none [stroke-width:1.8px] [stroke-linecap:round] [stroke-linejoin:round]; }
+
+  .btn-primary {
+    @apply w-full py-[15px] rounded-[11px] font-bold text-[15.5px] text-[#06251f]
+           bg-gradient-to-br from-accent-2 to-accent
+           shadow-[0_10px_24px_rgba(20,184,166,.32)]
+           flex items-center justify-center gap-2
+           hover:brightness-110 active:scale-[.98]
+           disabled:opacity-55 disabled:cursor-default
+           cursor-pointer transition;
+  }
+
+  /* ---------- dynamically-reassigned classes (see file header) ---------- */
+  .statusDot { @apply inline-block w-2 h-2 rounded-full bg-good shadow-[0_0_8px_var(--color-good)]; }
+  .statusDot.bad { @apply bg-bad shadow-[0_0_8px_var(--color-bad)]; }
+
+  .decision { @apply inline-block px-3.5 py-1.5 rounded-[9px] font-bold text-[13px]; }
+  .d-approved { @apply bg-good/[.14] text-good; }
+  .d-review { @apply bg-amber/[.14] text-amber; }
+  .d-rejected { @apply bg-bad/[.14] text-bad; }
+
+  .chip { @apply px-2.5 py-0.5 rounded-full text-[10.5px] font-bold inline-block; }
+  .c-approved { @apply bg-good/[.14] text-good; }
+  .c-review { @apply bg-amber/[.14] text-amber; }
+  .c-rejected { @apply bg-bad/[.14] text-bad; }
+
+  .kpiTrend { @apply text-[11px] mt-2 flex items-center gap-1.5; }
+  .kpiTrend b { @apply font-mono; }
+  .kpiTrend.up { @apply text-good; }
+  .kpiTrend.down { @apply text-bad; }
+  .kpiTrend.flat { @apply text-muted; }
+
+  .navItem { @apply flex items-center gap-2.5 w-full text-left px-3 py-2.5 mb-0.5 rounded-[10px] bg-transparent text-muted text-[13.5px] font-semibold cursor-pointer hover:bg-white/[.045] hover:text-ink; }
+  .navItem.active { @apply bg-good/[.14] text-good; }
+  .navItem.active .icon * { @apply stroke-good; }
+
+  .page { @apply hidden; }
+  .page.active { @apply block; }
+  .state { @apply hidden; }
+  .state.active { @apply block animate-fade-in; }
+
+  .bellBadge { @apply hidden absolute -top-1 -right-1 min-w-4 h-4 px-[3px] rounded-full bg-bad text-white text-[9.5px] font-extrabold items-center justify-center font-mono; }
+
+  /* ---------- small reused presentational classes ---------- */
+  .riskbar { @apply w-[74px] h-[7px] bg-white/[.09] rounded-full overflow-hidden inline-block align-middle mr-1.5; }
+  .riskbar i { @apply block h-full rounded-full not-italic; }
+  .reason { @apply text-[10px] font-mono px-2.5 py-0.5 rounded-md border border-white/[.13] bg-white/[.045] text-muted; }
+  .empty { @apply text-muted py-6 text-center text-[13px]; }
+  .num { @apply font-mono; }
+  .sig { @apply font-mono text-[10px] text-muted; }
+
+  /* scenario risk badges (static per scenario, reused by icon + label) */
+  .sb-safe { @apply bg-good/[.14] text-good; }
+  .sb-high { @apply bg-bad/[.14] text-bad; }
+  .sb-medium { @apply bg-blue/[.14] text-blue; }
+  .sb-low { @apply bg-white/[.06] text-muted; }
+
+  /* pay.html verdict tones — .v-approved / .v-review / .v-rejected on the state container */
+  .v-approved .verdictIcon { @apply bg-good/[.14] text-good; }
+  .v-review .verdictIcon { @apply bg-amber/[.14] text-amber; }
+  .v-rejected .verdictIcon { @apply bg-bad/[.14] text-bad; }
+  .v-approved .verdictTitle { @apply text-good; }
+  .v-review .verdictTitle { @apply text-amber; }
+  .v-rejected .verdictTitle { @apply text-bad; }
+  .errIcon.tone-amber { @apply bg-amber/[.14] text-amber; }
+  .errIcon.tone-muted { @apply bg-white/[.045] text-muted; }
+
+  /* toggle switch (pay.html demo signals) */
+  .switch { @apply relative w-[38px] h-[21px] shrink-0; }
+  .switch input { @apply opacity-0 w-0 h-0; }
+  .slider { @apply absolute inset-0 bg-white/[.09] rounded-full cursor-pointer transition-colors; }
+  .slider::before { content: ""; @apply absolute w-[15px] h-[15px] left-[3px] top-[3px] bg-white rounded-full transition-transform; }
+  .switch input:checked + .slider { @apply bg-accent; }
+  .switch input:checked + .slider::before { transform: translateX(17px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}

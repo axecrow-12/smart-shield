@@ -4,311 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SmartPay Shield</title>
+<link rel="stylesheet" href="tailwind.css">
 <script src="vendor/qrcode.min.js"></script>
-<style>
-  /* ---- Frost Sentinel design tokens (teal accent, app-shell layout) ---- */
-  :root {
-    --font: "Segoe UI", system-ui, sans-serif;
-    --numFont: Consolas, Menlo, monospace;
-    --bg: radial-gradient(120% 120% at 20% 0%, #0d1428 0%, #070b16 55%, #04060c 100%);
-    --text: #e9edf8; --muted: #8d97b8; --faint: #5c6690;
-    --accent: #14b8a6; --accent2: #10b981;
-    --good: #2dd4bf; --amber: #fbbf24; --bad: #fb7185; --purple: #8b5cf6; --blue: #3b82f6;
-    --goodSoft: rgba(45,212,191,.14); --amberSoft: rgba(251,191,36,.14); --badSoft: rgba(251,113,133,.14);
-    --purpleSoft: rgba(139,92,246,.14); --blueSoft: rgba(59,130,246,.14);
-    --cardBg: rgba(255,255,255,.055); --border: rgba(255,255,255,.13); --rowBorder: rgba(255,255,255,.06);
-    --cardShadow: 0 8px 32px rgba(2,6,18,.45), inset 0 1px 0 rgba(255,255,255,.09);
-    --blur: 18px; --radius: 16px;
-    --inputBg: rgba(255,255,255,.06); --rowBg: rgba(255,255,255,.045); --pillBg: rgba(255,255,255,.06);
-    --btnBg: linear-gradient(135deg, var(--accent2), var(--accent)); --btnText: #06251f;
-    --btnShadow: 0 6px 18px rgba(20,184,166,.3);
-    --qrBg: rgba(255,255,255,.92); --qrInk: #0b1020; --track: rgba(255,255,255,.09);
-    --sidebarW: 240px; --topbarH: 64px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { min-height: 100vh; font-family: var(--font); color: var(--text); background: var(--bg); overflow-x: hidden; }
-  .bgfx { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-  .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .5; }
-  svg.icon { width: 18px; height: 18px; flex-shrink: 0; }
-  svg.icon * { stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-
-  .glass {
-    background: var(--cardBg); border: 1px solid var(--border); border-radius: var(--radius);
-    box-shadow: var(--cardShadow);
-    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
-  }
-
-  /* ---------- app shell ---------- */
-  .app { position: relative; z-index: 1; display: flex; min-height: 100vh; }
-
-  .sidebar {
-    width: var(--sidebarW); flex-shrink: 0; position: sticky; top: 0; height: 100vh;
-    display: flex; flex-direction: column; padding: 20px 14px;
-    border-right: 1px solid var(--border); background: rgba(6,10,20,.55);
-    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
-    z-index: 40; transition: transform .25s ease;
-  }
-  .sbLogo { display: flex; align-items: center; gap: 10px; padding: 6px 10px 22px; }
-  .sbLogoIcon {
-    width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    background: var(--btnBg); color: #fff; flex-shrink: 0; box-shadow: var(--btnShadow);
-  }
-  .sbLogoIcon svg.icon { width: 19px; height: 19px; }
-  .sbLogoIcon svg.icon * { stroke-width: 2; }
-  .sbLogoText { font-size: 15px; font-weight: 800; line-height: 1.2; }
-  .sbLogoText em { font-style: normal; color: var(--accent); }
-  .sbTagline { font-size: 10px; color: var(--muted); }
-
-  .navItem {
-    display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
-    padding: 10px 12px; margin-bottom: 3px; border: none; border-radius: 10px;
-    background: transparent; color: var(--muted); font-size: 13.5px; font-weight: 600;
-    cursor: pointer; font-family: var(--font); box-shadow: none;
-  }
-  .navItem:hover { background: var(--rowBg); color: var(--text); }
-  .navItem.active { background: var(--goodSoft); color: var(--good); }
-  .navItem.active svg.icon * { stroke: var(--good); }
-
-  .sbSpacer { flex: 1; }
-  .sbFooter { padding: 16px 14px; text-align: center; margin-top: 10px; overflow: hidden; }
-  .sbFooterIcon {
-    width: 40px; height: 40px; border-radius: 12px; margin: 0 auto 10px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--goodSoft); color: var(--good);
-  }
-  .sbFooterIcon svg.icon { width: 20px; height: 20px; }
-  .sbFooterTitle { font-size: 13px; font-weight: 700; }
-  .sbFooterSub { font-size: 11px; color: var(--muted); margin-top: 2px; margin-bottom: 10px; }
-  .sbWave { width: 100%; height: 30px; display: block; }
-
-  .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-
-  .topbar {
-    height: var(--topbarH); flex-shrink: 0; display: flex; align-items: center; gap: 14px;
-    padding: 0 22px; border-bottom: 1px solid var(--border); background: rgba(6,10,20,.4);
-    backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
-    position: sticky; top: 0; z-index: 30;
-  }
-  .hamburger {
-    display: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--rowBg); color: var(--text); align-items: center; justify-content: center;
-    cursor: pointer; margin: 0; flex-shrink: 0; box-shadow: none;
-  }
-  .searchBox {
-    flex: 1; max-width: 420px; display: flex; align-items: center; gap: 9px;
-    padding: 8px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--inputBg);
-    color: var(--muted);
-  }
-  .searchBox svg.icon { width: 16px; height: 16px; }
-  .searchBox input { flex: 1; background: transparent; border: none; color: var(--text); font-size: 13px; font-family: var(--font); }
-  .searchBox input:focus { outline: none; }
-  .searchBox input::placeholder { color: var(--faint); }
-
-  .topRight { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-  .statusChip { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
-  .statusDot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 8px var(--good); }
-  .statusDot.bad { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
-
-  .bellBtn {
-    position: relative; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--rowBg); color: var(--muted); display: flex; align-items: center; justify-content: center;
-    cursor: pointer; margin: 0; flex-shrink: 0; box-shadow: none;
-  }
-  .bellBadge {
-    position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px; padding: 0 3px;
-    border-radius: 999px; background: var(--bad); color: #fff; font-size: 9.5px; font-weight: 800;
-    display: none; align-items: center; justify-content: center; font-family: var(--numFont);
-  }
-
-  .userChip { display: flex; align-items: center; gap: 9px; cursor: pointer; }
-  .avatar {
-    width: 34px; height: 34px; border-radius: 50%; background: var(--btnBg); color: var(--btnText);
-    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0;
-  }
-  .userMeta { line-height: 1.25; }
-  .uName { font-size: 12.5px; font-weight: 700; }
-  .uRole { font-size: 10.5px; color: var(--muted); }
-  .userChip svg.icon { width: 14px; height: 14px; color: var(--muted); }
-
-  .content { padding: 22px 26px 40px; max-width: 1520px; width: 100%; margin: 0 auto; }
-  .page { display: none; }
-  .page.active { display: block; }
-
-  .placeholder { padding: 70px 20px; text-align: center; color: var(--muted); }
-  .placeholder .picon {
-    width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 16px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--goodSoft); color: var(--good);
-  }
-  .placeholder .picon svg.icon { width: 28px; height: 28px; }
-  .placeholder h3 { color: var(--text); font-size: 17px; margin-bottom: 6px; }
-  .placeholder p { font-size: 13px; }
-
-  /* ---------- greeting header ---------- */
-  .greetHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .greetHeader h1 { font-size: 23px; font-weight: 800; }
-  .greetHeader p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .greetRight { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .dateRange {
-    display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--rowBg); font-size: 12.5px; color: var(--text);
-  }
-  .livePill {
-    display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px;
-    background: var(--goodSoft); color: var(--good); font-size: 12.5px; font-weight: 700;
-  }
-  .livePill i { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 6px var(--good); animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-
-  /* ---------- KPI strip ---------- */
-  .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
-  .kpi { padding: 16px; }
-  .kpiTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .kpiIcon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-  .kpiIcon svg.icon { width: 19px; height: 19px; }
-  .kpiVal { font-size: 25px; font-weight: 800; font-family: var(--numFont); }
-  .kpiLbl { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
-  .kpiTrend { font-size: 11px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
-  .kpiTrend b { font-family: var(--numFont); }
-  .kpiTrend.up { color: var(--good); } .kpiTrend.down { color: var(--bad); } .kpiTrend.flat { color: var(--muted); }
-  .kpiTrendNote { color: var(--faint); font-size: 10.5px; }
-  @media (max-width: 1150px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-
-  /* ---------- dashboard grid ---------- */
-  .grid { display: grid; grid-template-columns: 290px 330px 1fr; gap: 14px; align-items: start; }
-  .col { display: grid; gap: 14px; }
-  @media (max-width: 1150px) { .grid { grid-template-columns: 1fr; } }
-
-  .card { padding: 18px; }
-  .cardHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
-  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); font-weight: 700; }
-  .card h2 .h2icon { margin-right: 6px; }
-  .badge-active {
-    font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
-    background: var(--goodSoft); color: var(--good);
-  }
-  .linkBtn { font-size: 11.5px; color: var(--accent); cursor: pointer; background: none; border: none; padding: 0; margin: 0; width: auto; box-shadow: none; }
-  .linkBtn:hover { text-decoration: underline; filter: none; }
-
-  label { display: block; font-size: 11px; color: var(--muted); margin: 9px 0 4px; }
-  input {
-    width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--inputBg); color: var(--text); font-size: 14px; font-family: var(--font);
-  }
-  input:focus { outline: none; border-color: var(--accent); }
-  button {
-    cursor: pointer; border: none; width: 100%; margin-top: 14px; padding: 11px;
-    border-radius: 8px; font-weight: 700; font-size: 14px;
-    background: var(--btnBg); color: var(--btnText); box-shadow: var(--btnShadow);
-    font-family: var(--font);
-  }
-  button:hover { filter: brightness(1.1); }
-  button:disabled { opacity: .5; cursor: default; }
-
-  #qrBox { margin: 14px auto 0; width: 180px; padding: 16px; border-radius: 12px; background: var(--qrBg); color: var(--qrInk); display: none; justify-content: center; }
-  #qrBox img, #qrBox canvas { display: block; margin: 0 auto; }
-  .tokenLine { margin-top: 10px; text-align: center; font-family: var(--numFont); font-size: 10px; color: var(--muted); word-break: break-all; }
-  .payLinkNote { margin-top: 8px; text-align: center; font-size: 10.5px; color: var(--muted); line-height: 1.5; }
-  .payLinkNote a { color: var(--accent); word-break: break-all; }
-  .expiry { text-align: center; font-size: 12px; color: var(--amber); margin-top: 5px; }
-
-  .scenarios { display: grid; gap: 9px; }
-  .scenario {
-    display: flex; gap: 11px; align-items: center; text-align: left; width: 100%; margin: 0;
-    padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
-    background: var(--rowBg); color: var(--text); font-size: 13px; font-weight: 500;
-    box-shadow: none;
-  }
-  .scenario:hover { border-color: var(--accent); filter: none; }
-  .scIcon {
-    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .scIcon svg.icon { width: 17px; height: 17px; }
-  .scenario .desc { font-size: 11px; color: var(--muted); font-weight: 400; }
-  .scTextWrap { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .scBadge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
-  .sb-safe { background: var(--goodSoft); color: var(--good); }
-  .sb-high { background: var(--badSoft); color: var(--bad); }
-  .sb-medium { background: var(--blueSoft); color: var(--blue); }
-  .sb-low { background: var(--pillBg); color: var(--muted); }
-
-  #resultCard { display: none; }
-  .verdictRow { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-  .gaugeNum { font-size: 40px; font-weight: 800; fill: var(--text); font-family: var(--numFont); transition: fill .4s; }
-  .gaugeLbl { font-size: 9px; letter-spacing: 2px; fill: var(--muted); }
-  #gaugeArc { transition: stroke-dasharray .8s ease, stroke .4s; }
-  .verdictInfo { flex: 1; min-width: 280px; }
-  .decision { display: inline-block; padding: 6px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; }
-  .d-approved { background: var(--goodSoft); color: var(--good); }
-  .d-review { background: var(--amberSoft); color: var(--amber); }
-  .d-rejected { background: var(--badSoft); color: var(--bad); }
-  .reasons { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 6px; }
-  .reason { font-size: 10px; font-family: var(--numFont); padding: 3px 9px; border-radius: 6px; border: 1px solid var(--border); background: var(--rowBg); color: var(--muted); }
-  .exTitle { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 10px 0 6px; }
-  .exRow { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 4px; }
-  .exName { width: 165px; text-align: right; font-family: var(--numFont); color: var(--muted); font-size: 10px; }
-  .exTrack { flex: 1; height: 8px; border-radius: 999px; background: var(--track); position: relative; overflow: hidden; }
-  .exTrack i { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
-  .exVal { width: 44px; font-family: var(--numFont); font-size: 11px; }
-  .srcNote { margin-top: 10px; font-size: 11px; color: var(--muted); }
-
-  .charts { display: flex; gap: 22px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-  .chart { display: flex; gap: 12px; align-items: center; }
-  .chart.grow { flex: 1; min-width: 220px; display: block; }
-  .chartLbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 4px; }
-  .spark { width: 100%; height: 54px; display: block; }
-  .donutNum { font-size: 20px; font-weight: 800; fill: var(--text); font-family: var(--numFont); }
-  .donutLbl { font-size: 8px; fill: var(--muted); letter-spacing: 1px; }
-  .legend { display: grid; gap: 5px; font-size: 11px; color: var(--muted); }
-  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
-
-  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border); }
-  td { padding: 8px; border-bottom: 1px solid var(--rowBorder); vertical-align: top; }
-  .num { font-family: var(--numFont); }
-  .riskbar { width: 74px; height: 7px; background: var(--track); border-radius: 999px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 7px; }
-  .riskbar i { display: block; height: 100%; border-radius: 999px; }
-  .chip { padding: 2px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; display: inline-block; }
-  .c-approved { background: var(--goodSoft); color: var(--good); }
-  .c-review { background: var(--amberSoft); color: var(--amber); }
-  .c-rejected { background: var(--badSoft); color: var(--bad); }
-  .sig { font-family: var(--numFont); font-size: 10px; color: var(--muted); }
-  .empty { color: var(--muted); padding: 24px; text-align: center; font-size: 13px; }
-
-  /* ---------- responsive: off-canvas sidebar ---------- */
-  .sbBackdrop { display: none; position: fixed; inset: 0; background: rgba(2,4,10,.55); z-index: 35; }
-  @media (max-width: 900px) {
-    .hamburger { display: flex; }
-    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); box-shadow: 20px 0 50px rgba(0,0,0,.4); }
-    .app.navOpen .sidebar { transform: translateX(0); }
-    .app.navOpen .sbBackdrop { display: block; }
-    .searchBox { display: none; }
-    .userMeta { display: none; }
-    .content { padding: 18px 14px 32px; }
-  }
-</style>
 </head>
-<body>
+<body class="bg-[radial-gradient(120%_120%_at_20%_0%,#0d1428_0%,#070b16_55%,#04060c_100%)]">
 
-<div class="bgfx">
-  <div class="orb" style="background:#2563eb;width:420px;height:420px;left:-6%;top:-12%"></div>
-  <div class="orb" style="background:#14b8a6;width:380px;height:380px;left:72%;top:-8%"></div>
-  <div class="orb" style="background:#7c3aed;width:340px;height:340px;left:38%;top:78%"></div>
+<div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#2563eb] w-[420px] h-[420px] left-[-6%] top-[-12%]"></div>
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-accent w-[380px] h-[380px] left-[72%] top-[-8%]"></div>
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#7c3aed] w-[340px] h-[340px] left-[38%] top-[78%]"></div>
 </div>
 
-<div class="app" id="app">
-  <div class="sbBackdrop" id="sbBackdrop"></div>
+<div class="group relative z-10 flex min-h-screen" id="app">
+  <div class="hidden max-[899px]:group-[.navOpen]:block fixed inset-0 bg-[#02040a]/55 z-[35]" id="sbBackdrop"></div>
 
   <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sbLogo">
-      <div class="sbLogoIcon">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+  <aside class="w-[240px] shrink-0 sticky top-0 h-screen flex flex-col py-5 px-3.5 border-r border-white/[.13] bg-[#060a14]/55 backdrop-blur-[18px] z-40 transition-transform duration-200 max-[899px]:fixed max-[899px]:left-0 max-[899px]:top-0 max-[899px]:-translate-x-full max-[899px]:shadow-[20px_0_50px_rgba(0,0,0,.4)] max-[899px]:group-[.navOpen]:translate-x-0">
+    <div class="flex items-center gap-2.5 px-2.5 pt-1.5 pb-[22px]">
+      <div class="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center bg-gradient-to-br from-accent-2 to-accent text-white shrink-0 shadow-[0_6px_18px_rgba(20,184,166,.3)]">
+        <svg class="icon w-[19px] h-[19px] [&_*]:stroke-2" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
       </div>
       <div>
-        <div class="sbLogoText">SmartPay <em>Shield</em></div>
-        <div class="sbTagline">Secure payments. Safer tomorrow.</div>
+        <div class="text-[15px] font-extrabold leading-tight">SmartPay <em class="not-italic text-accent">Shield</em></div>
+        <div class="text-[10px] text-muted">Secure payments. Safer tomorrow.</div>
       </div>
     </div>
 
@@ -343,17 +61,17 @@
       </button>
     </nav>
 
-    <div class="sbSpacer"></div>
+    <div class="flex-1"></div>
 
-    <div class="sbFooter glass">
-      <div class="sbFooterIcon">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+    <div class="glass text-center mt-2.5 py-4 px-3.5 overflow-hidden">
+      <div class="w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center bg-good/[.14] text-good">
+        <svg class="icon w-5 h-5" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
       </div>
-      <div class="sbFooterTitle">Real-time protection</div>
-      <div class="sbFooterSub">for every transaction.</div>
-      <svg class="sbWave" viewBox="0 0 200 30" preserveAspectRatio="none">
+      <div class="text-[13px] font-bold">Real-time protection</div>
+      <div class="text-[11px] text-muted mt-0.5 mb-2.5">for every transaction.</div>
+      <svg class="w-full h-[30px] block" viewBox="0 0 200 30" preserveAspectRatio="none">
         <defs><linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="var(--accent2)"/><stop offset="1" stop-color="var(--accent)"/>
+          <stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/>
         </linearGradient></defs>
         <polyline points="0,20 20,14 40,22 60,8 80,18 100,10 120,20 140,6 160,16 180,12 200,18"
           fill="none" stroke="url(#waveGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -362,184 +80,192 @@
   </aside>
 
   <!-- MAIN -->
-  <div class="main">
-    <header class="topbar">
-      <button class="hamburger" id="btnMenu" aria-label="Toggle menu">
+  <div class="flex-1 min-w-0 flex flex-col">
+    <header class="h-16 shrink-0 flex items-center gap-3.5 px-[22px] border-b border-white/[.13] bg-[#060a14]/40 backdrop-blur-[18px] sticky top-0 z-30">
+      <button class="hidden max-[899px]:flex w-[34px] h-[34px] rounded-lg border border-white/[.13] bg-white/[.045] text-ink items-center justify-center cursor-pointer shrink-0" id="btnMenu" aria-label="Toggle menu">
         <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="searchBox">
-        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="searchInput" placeholder="Search transactions, merchants, or IDs…">
+      <div class="flex-1 max-w-[420px] flex items-center gap-[9px] py-2 px-[13px] rounded-[10px] border border-white/[.13] bg-white/[.06] text-muted max-[899px]:hidden">
+        <svg class="icon w-4 h-4" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" placeholder="Search transactions, merchants, or IDs…" class="flex-1 bg-transparent border-0 text-ink text-[13px] font-sans outline-none placeholder:text-faint">
       </div>
-      <div class="topRight">
-        <div class="statusChip"><span class="statusDot" id="statusDot"></span><span id="statusText">Checking…</span></div>
-        <button class="bellBtn" title="Transactions flagged for review">
+      <div class="ml-auto flex items-center gap-4">
+        <div class="flex items-center gap-[7px] text-[12.5px] text-muted whitespace-nowrap">
+          <span class="statusDot" id="statusDot"></span>
+          <span id="statusText">Checking…</span>
+        </div>
+        <button class="relative w-9 h-9 rounded-[10px] border border-white/[.13] bg-white/[.045] text-muted flex items-center justify-center cursor-pointer shrink-0" title="Transactions flagged for review">
           <svg class="icon" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
           <span class="bellBadge" id="bellBadge">0</span>
         </button>
-        <div class="userChip">
-          <div class="avatar">WM</div>
-          <div class="userMeta"><div class="uName">Wilmar Macheke</div><div class="uRole">Admin</div></div>
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="flex items-center gap-2.5 cursor-pointer">
+          <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-accent-2 to-accent text-[#06251f] flex items-center justify-center text-xs font-extrabold shrink-0">WM</div>
+          <div class="leading-[1.25] max-[899px]:hidden">
+            <div class="text-[12.5px] font-bold">Wilmar Macheke</div>
+            <div class="text-[10.5px] text-muted">Admin</div>
+          </div>
+          <svg class="icon w-3.5 h-3.5 text-muted" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
       </div>
     </header>
 
-    <div class="content">
+    <div class="p-[22px] px-[26px] pb-10 max-w-[1520px] w-full mx-auto max-[899px]:px-3.5 max-[899px]:pb-8 max-[899px]:pt-[18px]">
 
       <!-- ============ DASHBOARD PAGE ============ -->
       <section class="page active" id="page-dashboard">
 
-        <div class="greetHeader">
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div>
-            <h1 id="greetTitle">Good day</h1>
-            <p>Here's what's happening with your payments today.</p>
+            <h1 class="text-[23px] font-extrabold" id="greetTitle">Good day</h1>
+            <p class="text-[13px] text-muted mt-1">Here's what's happening with your payments today.</p>
           </div>
-          <div class="greetRight">
-            <div class="dateRange">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <div class="flex items-center gap-2 py-2 px-3.5 rounded-[10px] border border-white/[.13] bg-white/[.045] text-[12.5px] text-ink">
               <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
               <span id="dateRangeText">—</span>
             </div>
-            <span class="livePill"><i></i>Live</span>
+            <span class="flex items-center gap-1.5 py-[7px] px-3.5 rounded-full bg-good/[.14] text-good text-[12.5px] font-bold">
+              <i class="w-[7px] h-[7px] rounded-full bg-good shadow-[0_0_6px_var(--color-good)] animate-pulse-dot"></i>Live
+            </span>
           </div>
         </div>
 
         <!-- KPI STRIP -->
-        <div class="kpis">
-          <div class="kpi glass">
-            <div class="kpiTop">
-              <div class="kpiIcon" style="background:var(--goodSoft);color:var(--good)">
-                <svg class="icon" viewBox="0 0 24 24"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
+        <div class="grid grid-cols-5 gap-3 mb-[18px] max-[1150px]:grid-cols-2">
+          <div class="kpi glass p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-good/[.14] text-good">
+                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
               </div>
             </div>
-            <div class="kpiVal" id="kpiScored">–</div>
-            <div class="kpiLbl">Transactions Scored</div>
+            <div class="text-2xl font-extrabold font-mono" id="kpiScored">–</div>
+            <div class="text-[11.5px] text-muted mt-0.5">Transactions Scored</div>
             <div class="kpiTrend" id="kpiScoredTrend"></div>
           </div>
 
-          <div class="kpi glass">
-            <div class="kpiTop">
-              <div class="kpiIcon" style="background:var(--badSoft);color:var(--bad)">
-                <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <div class="kpi glass p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-bad/[.14] text-bad">
+                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
               </div>
             </div>
-            <div class="kpiVal" id="kpiBlocked" style="color:var(--bad)">–</div>
-            <div class="kpiLbl">Blocked</div>
+            <div class="text-2xl font-extrabold font-mono text-bad" id="kpiBlocked">–</div>
+            <div class="text-[11.5px] text-muted mt-0.5">Blocked</div>
             <div class="kpiTrend" id="kpiBlockedTrend"></div>
           </div>
 
-          <div class="kpi glass">
-            <div class="kpiTop">
-              <div class="kpiIcon" style="background:var(--amberSoft);color:var(--amber)">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
+          <div class="kpi glass p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-amber/[.14] text-amber">
+                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
               </div>
             </div>
-            <div class="kpiVal" id="kpiRate">–</div>
-            <div class="kpiLbl">Block Rate</div>
+            <div class="text-2xl font-extrabold font-mono" id="kpiRate">–</div>
+            <div class="text-[11.5px] text-muted mt-0.5">Block Rate</div>
             <div class="kpiTrend" id="kpiRateTrend"></div>
           </div>
 
-          <div class="kpi glass">
-            <div class="kpiTop">
-              <div class="kpiIcon" style="background:var(--purpleSoft);color:var(--purple)">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
+          <div class="kpi glass p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-purple/[.14] text-purple">
+                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
               </div>
             </div>
-            <div class="kpiVal" id="kpiAvg">–</div>
-            <div class="kpiLbl">Avg. Risk Score</div>
+            <div class="text-2xl font-extrabold font-mono" id="kpiAvg">–</div>
+            <div class="text-[11.5px] text-muted mt-0.5">Avg. Risk Score</div>
             <div class="kpiTrend" id="kpiAvgTrend"></div>
           </div>
 
-          <div class="kpi glass">
-            <div class="kpiTop">
-              <div class="kpiIcon" style="background:var(--blueSoft);color:var(--blue)">
-                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
+          <div class="kpi glass p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-blue/[.14] text-blue">
+                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
               </div>
             </div>
-            <div class="kpiVal" id="kpiAuc" style="color:var(--blue)">–</div>
-            <div class="kpiLbl">Model Accuracy</div>
-            <div class="kpiTrend flat"><span class="kpiTrendNote">ROC-AUC on held-out test set</span></div>
+            <div class="text-2xl font-extrabold font-mono text-blue" id="kpiAuc">–</div>
+            <div class="text-[11.5px] text-muted mt-0.5">Model Accuracy</div>
+            <div class="kpiTrend flat"><span class="text-faint text-[10.5px]">ROC-AUC on held-out test set</span></div>
           </div>
         </div>
 
-        <div class="grid">
+        <div class="grid grid-cols-[290px_330px_1fr] gap-3.5 items-start max-[1150px]:grid-cols-1">
 
           <!-- MERCHANT TERMINAL -->
-          <div class="col">
-            <div class="card glass">
-              <div class="cardHead">
-                <h2>Merchant terminal</h2>
-                <span class="badge-active">Active</span>
+          <div class="grid gap-3.5">
+            <div class="card glass p-[18px]">
+              <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Merchant terminal</h2>
+                <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-good/[.14] text-good">Active</span>
               </div>
-              <label>Merchant</label>
-              <input id="merchantName" value="Mbare Fresh Produce">
-              <label>Amount (USD)</label>
-              <input id="amount" type="number" value="18.50" step="0.5">
-              <button id="btnCreate">Create payment request</button>
-              <div id="qrBox"><div id="qr"></div></div>
-              <div class="tokenLine" id="tokenLine"></div>
-              <div class="expiry" id="expiryLine"></div>
-              <div class="payLinkNote" id="payLinkNote"></div>
+              <label class="block text-[11px] text-muted mt-2.5 mb-1">Merchant</label>
+              <input id="merchantName" value="Mbare Fresh Produce" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <label class="block text-[11px] text-muted mt-2.5 mb-1">Amount (USD)</label>
+              <input id="amount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <button id="btnCreate" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Create payment request</button>
+              <div id="qrBox" class="hidden mt-3.5 mx-auto w-[180px] p-4 rounded-xl bg-white/90 text-[#0b1020] justify-center"><div id="qr"></div></div>
+              <div class="mt-2.5 text-center font-mono text-[10px] text-muted break-all" id="tokenLine"></div>
+              <div class="text-center text-xs text-amber mt-[5px]" id="expiryLine"></div>
+              <div class="mt-2 text-center text-[10.5px] text-muted leading-normal [&_a]:text-accent [&_a]:break-all" id="payLinkNote"></div>
             </div>
           </div>
 
           <!-- ATTACK SIMULATOR -->
-          <div class="col">
-            <div class="card glass">
-              <h2>Customer / attack simulator</h2>
-              <div class="scenarios">
-                <button class="scenario" data-s="normal">
-                  <span class="scIcon sb-safe">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>
+          <div class="grid gap-3.5">
+            <div class="card glass p-[18px]">
+              <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Customer / attack simulator</h2>
+              <div class="grid gap-[9px]">
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="normal">
+                  <span class="sb-safe w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>
                   </span>
-                  <span class="scTextWrap">
-                    <span><b>Legitimate purchase</b><br><span class="desc">Known device, home area</span></span>
-                    <span class="scBadge sb-safe">Safe</span>
-                  </span>
-                </button>
-                <button class="scenario" data-s="otp">
-                  <span class="scIcon sb-high">
-                    <svg class="icon" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
-                  </span>
-                  <span class="scTextWrap">
-                    <span><b>OTP interception / SIM swap</b><br><span class="desc">New device, 25s session, cycled SIM</span></span>
-                    <span class="scBadge sb-high">High Risk</span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Legitimate purchase</b><br><span class="text-[11px] text-muted font-normal">Known device, home area</span></span>
+                    <span class="sb-safe text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Safe</span>
                   </span>
                 </button>
-                <button class="scenario" data-s="mule">
-                  <span class="scIcon sb-medium">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18.5" r="2.4"/><circle cx="19" cy="18.5" r="2.4"/><line x1="10.9" y1="7.1" x2="6.2" y2="16.4"/><line x1="13.1" y1="7.1" x2="17.8" y2="16.4"/><line x1="7.4" y1="18.5" x2="16.6" y2="18.5"/></svg>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="otp">
+                  <span class="sb-high w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
                   </span>
-                  <span class="scTextWrap">
-                    <span><b>Mule network payout</b><br><span class="desc">Known mule destination</span></span>
-                    <span class="scBadge sb-medium">Medium</span>
-                  </span>
-                </button>
-                <button class="scenario" data-s="velocity">
-                  <span class="scIcon sb-high">
-                    <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 4.5 13.5 11 13.5 10 22 19.5 10.5 13 10.5"/></svg>
-                  </span>
-                  <span class="scTextWrap">
-                    <span><b>Velocity / smurfing</b><br><span class="desc">9 cash-ins in 24h</span></span>
-                    <span class="scBadge sb-high">High Risk</span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>OTP interception / SIM swap</b><br><span class="text-[11px] text-muted font-normal">New device, 25s session, cycled SIM</span></span>
+                    <span class="sb-high text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">High Risk</span>
                   </span>
                 </button>
-                <button class="scenario" data-s="travel">
-                  <span class="scIcon sb-medium">
-                    <svg class="icon" viewBox="0 0 24 24"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="mule">
+                  <span class="sb-medium w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18.5" r="2.4"/><circle cx="19" cy="18.5" r="2.4"/><line x1="10.9" y1="7.1" x2="6.2" y2="16.4"/><line x1="13.1" y1="7.1" x2="17.8" y2="16.4"/><line x1="7.4" y1="18.5" x2="16.6" y2="18.5"/></svg>
                   </span>
-                  <span class="scTextWrap">
-                    <span><b>Impossible travel</b><br><span class="desc">450 km/h between transactions</span></span>
-                    <span class="scBadge sb-medium">Medium</span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Mule network payout</b><br><span class="text-[11px] text-muted font-normal">Known mule destination</span></span>
+                    <span class="sb-medium text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Medium</span>
                   </span>
                 </button>
-                <button class="scenario" data-s="replay">
-                  <span class="scIcon sb-low">
-                    <svg class="icon" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="velocity">
+                  <span class="sb-high w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polygon points="13 2 4.5 13.5 11 13.5 10 22 19.5 10.5 13 10.5"/></svg>
                   </span>
-                  <span class="scTextWrap">
-                    <span><b>Token replay</b><br><span class="desc">Same QR presented twice</span></span>
-                    <span class="scBadge sb-low">Low</span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Velocity / smurfing</b><br><span class="text-[11px] text-muted font-normal">9 cash-ins in 24h</span></span>
+                    <span class="sb-high text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">High Risk</span>
+                  </span>
+                </button>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="travel">
+                  <span class="sb-medium w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>
+                  </span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Impossible travel</b><br><span class="text-[11px] text-muted font-normal">450 km/h between transactions</span></span>
+                    <span class="sb-medium text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Medium</span>
+                  </span>
+                </button>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="replay">
+                  <span class="sb-low w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
+                  </span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Token replay</b><br><span class="text-[11px] text-muted font-normal">Same QR presented twice</span></span>
+                    <span class="sb-low text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Low</span>
                   </span>
                 </button>
               </div>
@@ -547,61 +273,68 @@
           </div>
 
           <!-- VERDICT + FEED -->
-          <div class="col">
-            <div class="card glass" id="resultCard">
-              <h2>Fraud engine verdict</h2>
-              <div class="verdictRow">
+          <div class="grid gap-3.5">
+            <div class="card glass p-[18px] hidden" id="resultCard">
+              <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Fraud engine verdict</h2>
+              <div class="flex gap-5 items-center flex-wrap">
                 <svg viewBox="0 0 160 160" width="170" height="170">
-                  <circle cx="80" cy="80" r="64" fill="none" stroke="var(--track)" stroke-width="13"/>
-                  <circle id="gaugeArc" cx="80" cy="80" r="64" fill="none" stroke="var(--good)" stroke-width="13"
-                    stroke-linecap="round" stroke-dasharray="0 402.1" transform="rotate(-90 80 80)"/>
-                  <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="gaugeNum">–</text>
-                  <text x="80" y="100" text-anchor="middle" class="gaugeLbl">RISK SCORE</text>
+                  <circle cx="80" cy="80" r="64" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="13"/>
+                  <circle id="gaugeArc" cx="80" cy="80" r="64" fill="none" stroke="var(--color-good)" stroke-width="13"
+                    stroke-linecap="round" stroke-dasharray="0 402.1" transform="rotate(-90 80 80)" class="transition-[stroke-dasharray,stroke] duration-700 ease-out"/>
+                  <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="font-mono font-extrabold text-[40px] transition-[fill] duration-300" style="fill:var(--color-ink)">–</text>
+                  <text x="80" y="100" text-anchor="middle" class="text-[9px] tracking-[2px]" style="fill:var(--color-muted)">RISK SCORE</text>
                 </svg>
-                <div class="verdictInfo">
+                <div class="flex-1 min-w-[280px]">
                   <span class="decision" id="decisionChip"></span>
-                  <div class="reasons" id="reasonChips"></div>
+                  <div class="my-2.5 flex flex-wrap gap-1.5" id="reasonChips"></div>
                   <div id="explain"></div>
-                  <div class="srcNote" id="srcNote"></div>
+                  <div class="mt-2.5 text-[11px] text-muted" id="srcNote"></div>
                 </div>
               </div>
             </div>
 
-            <div class="card glass">
-              <div class="cardHead">
-                <h2>Live transaction feed</h2>
-                <button class="linkBtn" id="btnViewAll">View All →</button>
+            <div class="card glass p-[18px]">
+              <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Live transaction feed</h2>
+                <button class="text-[11.5px] text-accent bg-transparent border-0 p-0 hover:underline cursor-pointer" id="btnViewAll">View All →</button>
               </div>
-              <div class="charts">
-                <div class="chart">
+              <div class="flex gap-[22px] items-center mb-3.5 flex-wrap">
+                <div class="flex gap-3 items-center">
                   <svg viewBox="0 0 88 88" width="92" height="92" id="donut">
-                    <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-                    <circle id="donutA" cx="44" cy="44" r="34" fill="none" stroke="var(--amber)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-                    <circle id="donutB" cx="44" cy="44" r="34" fill="none" stroke="var(--bad)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
-                    <text id="donutNum" x="44" y="41" text-anchor="middle" class="donutNum">0</text>
-                    <text x="44" y="55" text-anchor="middle" class="donutLbl">scored</text>
+                    <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--color-good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <circle id="donutA" cx="44" cy="44" r="34" fill="none" stroke="var(--color-amber)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <circle id="donutB" cx="44" cy="44" r="34" fill="none" stroke="var(--color-bad)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
+                    <text id="donutNum" x="44" y="41" text-anchor="middle" class="font-mono font-extrabold text-xl" style="fill:var(--color-ink)">0</text>
+                    <text x="44" y="55" text-anchor="middle" class="text-[8px] tracking-wide" style="fill:var(--color-muted)">scored</text>
                   </svg>
-                  <div class="legend">
-                    <span><i style="background:var(--good)"></i><span id="lgApproved">approved 0</span></span>
-                    <span><i style="background:var(--amber)"></i><span id="lgReview">review 0</span></span>
-                    <span><i style="background:var(--bad)"></i><span id="lgBlocked">blocked 0</span></span>
+                  <div class="grid gap-[5px] text-[11px] text-muted">
+                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-good"></i><span id="lgApproved">approved 0</span></span>
+                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-amber"></i><span id="lgReview">review 0</span></span>
+                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-bad"></i><span id="lgBlocked">blocked 0</span></span>
                   </div>
                 </div>
-                <div class="chart grow">
-                  <div class="chartLbl">risk over time</div>
-                  <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="spark">
+                <div class="flex-1 min-w-[220px]">
+                  <div class="text-[10px] uppercase tracking-wide text-muted mb-1">risk over time</div>
+                  <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="w-full h-[54px] block">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="transparent"/>
+                        <stop offset="0" stop-color="var(--color-accent)"/><stop offset="1" stop-color="transparent"/>
                       </linearGradient>
                     </defs>
                     <polygon id="sparkArea" points="" fill="url(#sparkFill)" opacity="0.25"/>
-                    <polyline id="sparkLine" points="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                    <polyline id="sparkLine" points="" fill="none" stroke="var(--color-accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
                   </svg>
                 </div>
               </div>
-              <table>
-                <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+              <table class="w-full border-collapse text-[12.5px]">
+                <thead><tr>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th>
+                </tr></thead>
                 <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
               </table>
             </div>
@@ -612,12 +345,19 @@
 
       <!-- ============ TRANSACTIONS PAGE ============ -->
       <section class="page" id="page-transactions">
-        <div class="greetHeader">
-          <div><h1>Transactions</h1><p>All recent transactions scored by the fraud engine.</p></div>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Transactions</h1><p class="text-[13px] text-muted mt-1">All recent transactions scored by the fraud engine.</p></div>
         </div>
-        <div class="card glass">
-          <table>
-            <thead><tr><th>Time</th><th>Merchant</th><th>Amount</th><th>Risk</th><th>Status</th><th>Signals</th></tr></thead>
+        <div class="card glass p-[18px]">
+          <table class="w-full border-collapse text-[12.5px]">
+            <thead><tr>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th>
+            </tr></thead>
             <tbody id="feedFull"><tr><td colspan="6" class="empty">No transactions yet — run a scenario from the Dashboard.</td></tr></tbody>
           </table>
         </div>
@@ -625,43 +365,48 @@
 
       <!-- ============ PLACEHOLDER PAGES ============ -->
       <section class="page" id="page-fraud">
-        <div class="card glass placeholder">
-          <div class="picon" style="background:var(--badSoft);color:var(--bad)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16" r="0.7" fill="currentColor" stroke="none"/></svg>
-          </div><h3>Fraud Monitoring</h3>
-          <p>Deeper rule-tuning and case management — coming soon in this demo build.</p>
+        <div class="card glass py-[70px] px-5 text-center text-muted">
+          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-bad/[.14] text-bad">
+            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16" r="0.7" fill="currentColor" stroke="none"/></svg>
+          </div>
+          <h3 class="text-ink text-[17px] mb-1.5">Fraud Monitoring</h3>
+          <p class="text-[13px]">Deeper rule-tuning and case management — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-merchants">
-        <div class="card glass placeholder">
-          <div class="picon" style="background:var(--blueSoft);color:var(--blue)">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3 9 L4 4 H20 L21 9"/><path d="M4 9 V20 H20 V9"/><line x1="9" y1="20" x2="9" y2="13"/></svg>
-          </div><h3>Merchants</h3>
-          <p>Merchant directory and risk profiles — coming soon in this demo build.</p>
+        <div class="card glass py-[70px] px-5 text-center text-muted">
+          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-blue/[.14] text-blue">
+            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><path d="M3 9 L4 4 H20 L21 9"/><path d="M4 9 V20 H20 V9"/><line x1="9" y1="20" x2="9" y2="13"/></svg>
+          </div>
+          <h3 class="text-ink text-[17px] mb-1.5">Merchants</h3>
+          <p class="text-[13px]">Merchant directory and risk profiles — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-disputes">
-        <div class="card glass placeholder">
-          <div class="picon" style="background:var(--amberSoft);color:var(--amber)">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="6" x2="20" y2="6"/><path d="M4 6 L2 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(1 0)"/><path d="M20 6 L18 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(-2 0)"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
-          </div><h3>Disputes</h3>
-          <p>Chargeback and dispute workflow — coming soon in this demo build.</p>
+        <div class="card glass py-[70px] px-5 text-center text-muted">
+          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-amber/[.14] text-amber">
+            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="6" x2="20" y2="6"/><path d="M4 6 L2 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(1 0)"/><path d="M20 6 L18 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(-2 0)"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+          </div>
+          <h3 class="text-ink text-[17px] mb-1.5">Disputes</h3>
+          <p class="text-[13px]">Chargeback and dispute workflow — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-reports">
-        <div class="card glass placeholder">
-          <div class="picon" style="background:var(--purpleSoft);color:var(--purple)">
-            <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
-          </div><h3>Reports</h3>
-          <p>Exportable fraud analytics — coming soon in this demo build.</p>
+        <div class="card glass py-[70px] px-5 text-center text-muted">
+          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-purple/[.14] text-purple">
+            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+          </div>
+          <h3 class="text-ink text-[17px] mb-1.5">Reports</h3>
+          <p class="text-[13px]">Exportable fraud analytics — coming soon in this demo build.</p>
         </div>
       </section>
       <section class="page" id="page-settings">
-        <div class="card glass placeholder">
-          <div class="picon">
-            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
-          </div><h3>Settings</h3>
-          <p>Thresholds, integrations, and team access — coming soon in this demo build.</p>
+        <div class="card glass py-[70px] px-5 text-center text-muted">
+          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-white/[.045] text-muted">
+            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+          </div>
+          <h3 class="text-ink text-[17px] mb-1.5">Settings</h3>
+          <p class="text-[13px]">Thresholds, integrations, and team access — coming soon in this demo build.</p>
         </div>
       </section>
 
@@ -783,7 +528,8 @@ async function createPayment(amount, merchantName) {
 
 function renderPayment() {
   const p = currentPayment;
-  $("qrBox").style.display = "flex";
+  $("qrBox").classList.remove("hidden");
+  $("qrBox").classList.add("flex");
   $("qr").innerHTML = "";
   // Real, scannable link — opens the customer-facing pay page on this
   // machine's LAN address so a phone on the same Wi-Fi can complete it.
@@ -805,7 +551,7 @@ $("btnCreate").onclick = async () => {
 };
 
 /* ---------- scenarios ---------- */
-document.querySelectorAll(".scenario").forEach((btn) => {
+document.querySelectorAll("[data-s]").forEach((btn) => {
   btn.onclick = () => runScenario(btn.dataset.s, btn);
 });
 
@@ -839,11 +585,11 @@ async function runReplay() {
 
 /* ---------- verdict panel ---------- */
 function riskColor(score) {
-  return score >= 70 ? "var(--bad)" : score >= 40 ? "var(--amber)" : "var(--good)";
+  return score >= 70 ? "var(--color-bad)" : score >= 40 ? "var(--color-amber)" : "var(--color-good)";
 }
 
 function showResult(fr, status, label) {
-  $("resultCard").style.display = "block";
+  $("resultCard").classList.remove("hidden");
   const score = Math.round(fr.score);
   const C = 2 * Math.PI * 64;
   $("gaugeArc").setAttribute("stroke-dasharray", `${(C * score / 100).toFixed(1)} ${C.toFixed(1)}`);
@@ -862,17 +608,17 @@ function showResult(fr, status, label) {
   if (feats.length) {
     const maxAbs = Math.max(...feats.map((f) => Math.abs(f.contribution)), 0.001);
     $("explain").innerHTML =
-      `<div class="exTitle">Why the model thinks so</div>` +
+      `<div class="text-[10px] uppercase tracking-[1.2px] text-muted mt-2.5 mb-1.5">Why the model thinks so</div>` +
       feats.map((f) => {
         const pct = Math.min(50, (Math.abs(f.contribution) / maxAbs) * 50);
         const pos = f.contribution > 0;
         const barStyle = pos
-          ? `left:50%;width:${pct}%;background:var(--bad)`
-          : `left:${50 - pct}%;width:${pct}%;background:var(--good)`;
-        return `<div class="exRow">
-          <span class="exName">${f.feature}</span>
-          <span class="exTrack"><i style="${barStyle}"></i></span>
-          <span class="exVal" style="color:${pos ? "var(--bad)" : "var(--good)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
+          ? `left:50%;width:${pct}%;background:var(--color-bad)`
+          : `left:${50 - pct}%;width:${pct}%;background:var(--color-good)`;
+        return `<div class="flex items-center gap-2 text-[11px] mt-1">
+          <span class="w-[165px] text-right font-mono text-muted text-[10px]">${f.feature}</span>
+          <span class="flex-1 h-2 rounded-full bg-white/[.09] relative overflow-hidden"><i class="absolute top-0 bottom-0 rounded-full not-italic" style="${barStyle}"></i></span>
+          <span class="w-11 font-mono text-[11px]" style="color:${pos ? "var(--color-bad)" : "var(--color-good)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
         </div>`;
       }).join("");
   } else {
@@ -886,21 +632,21 @@ function showResult(fr, status, label) {
 }
 
 /* ---------- trend helper: recent half vs older half of the fetched batch ---------- */
-function renderTrend(elId, txs, valueFn, goodDirection, formatFn) {
+function renderTrend(elId, txs, valueFn, goodDirection) {
   const el = $(elId);
-  if (txs.length < 4) { el.innerHTML = `<span class="kpiTrendNote">not enough data yet</span>`; return; }
+  if (txs.length < 4) { el.innerHTML = `<span class="text-faint text-[10.5px]">not enough data yet</span>`; return; }
   const mid = Math.floor(txs.length / 2);
   // txs are newest-first from the API
   const recent = txs.slice(0, mid);
   const older = txs.slice(mid);
   const vNew = valueFn(recent), vOld = valueFn(older);
-  if (vOld === 0) { el.innerHTML = `<span class="kpiTrendNote">vs previous ${older.length} txns</span>`; return; }
+  if (vOld === 0) { el.innerHTML = `<span class="text-faint text-[10.5px]">vs previous ${older.length} txns</span>`; return; }
   const pct = ((vNew - vOld) / vOld) * 100;
   const dir = pct > 0.5 ? "up" : pct < -0.5 ? "down" : "flat";
   const good = dir === "flat" ? "flat" : (dir === goodDirection ? "up" : "down"); // reuse up=good color, down=bad color
   const arrow = dir === "up" ? "▲" : dir === "down" ? "▼" : "●";
   el.className = "kpiTrend " + good;
-  el.innerHTML = `${arrow} <b>${Math.abs(pct).toFixed(0)}%</b> <span class="kpiTrendNote">vs previous ${older.length} txns</span>`;
+  el.innerHTML = `${arrow} <b>${Math.abs(pct).toFixed(0)}%</b> <span class="text-faint text-[10.5px]">vs previous ${older.length} txns</span>`;
 }
 
 /* ---------- KPIs + charts + live feed ---------- */
@@ -958,12 +704,12 @@ function rowHtml(t) {
   const cls = st === "approved" ? "c-approved" : st === "review" ? "c-review" : "c-rejected";
   const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
   return `<tr>
-    <td>${new Date(t.createdAt).toLocaleTimeString()}</td>
-    <td>${t.merchantName || "-"}</td>
-    <td class="num">$${Number(t.amount).toFixed(2)}</td>
-    <td><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
-    <td><span class="chip ${cls}">${st}</span></td>
-    <td class="sig">${reasons || "—"}</td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top">${t.merchantName || "-"}</td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top num">$${Number(t.amount).toFixed(2)}</td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${cls}">${st}</span></td>
+    <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${reasons || "—"}</td>
   </tr>`;
 }
 

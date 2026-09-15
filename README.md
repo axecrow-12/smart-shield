@@ -27,6 +27,8 @@ pip install -r ml_core/requirements.txt
 cp .env.example .env
 ```
 
+`npm install` also compiles the Tailwind stylesheet automatically (a `postinstall` hook). The compiled `public/tailwind.css` is committed too, so a fresh clone renders correctly even before `npm install` finishes — see [Styling](#styling) below.
+
 Then run **three terminals**:
 
 ```bash
@@ -65,6 +67,20 @@ cd ml_core && python -m pytest tests/ -q
 ```
 
 Node (`tests/`): fraud service ML mapping, fallback and merge logic, request validators. Python (`ml_core/tests/`): risk-engine rules, scoring bounds, train/serve encoding parity, all API endpoints. `npm run smoke` covers the full integration (needs all three services running).
+
+## Styling
+
+Both `public/index.html` and `public/pay.html` are styled with [Tailwind CSS v4](https://tailwindcss.com), built via the standalone CLI (no PostCSS config, no `tailwind.config.js` — v4's config lives directly in CSS). One shared source compiles to one shared stylesheet for both pages:
+
+- Source: [src/styles/tailwind.css](src/styles/tailwind.css) — the "Frost Sentinel" design tokens (colors, fonts, animations) live in an `@theme` block; a handful of named `@layer components` classes exist only where JavaScript does a full `element.className = "..."` reassignment (status dot, decision chips, KPI trend arrows, nav/page active states) and so must carry their entire style on their own.
+- Compiled output: `public/tailwind.css` (committed — see above).
+
+```bash
+npm run build:css    # one-shot rebuild after editing src/styles/tailwind.css
+npm run watch:css     # rebuilds automatically while you edit
+```
+
+No other build step exists in this project — the HTML/JS are plain static files served by Express, same as always.
 
 ## Auth & validation
 

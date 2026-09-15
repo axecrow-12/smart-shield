@@ -1,12 +1,13 @@
 # SmartPay Shield — project notes for Claude Code
 
-Fraud-detection demo app: Node/Express backend (port **5050**) + Python FastAPI ML service (port 8000, LightGBM v4) + Firestore emulator (port **8765**). Frontend is `public/index.html` (Frost Sentinel glassmorphism theme), served by the backend. See README.md for full setup.
+Fraud-detection demo app: Node/Express backend (port **5050**) + Python FastAPI ML service (port 8000, LightGBM v4) + Firestore emulator (port **8765**). Frontend is `public/index.html` (dashboard) + `public/pay.html` (customer checkout, opened by scanning the merchant QR on the same network) — Frost Sentinel glassmorphism theme, styled with Tailwind CSS v4, served by the backend. See README.md for full setup.
 
 ## Run / verify
 
 - `npm run emulator` · `cd ml_core && python api/app.py` · `npm run dev` (three terminals)
 - Verify: `npm run smoke` (18-check e2e), `npm test` (Node), `cd ml_core && python -m pytest tests/ -q`
 - Retrain model: `cd ml_core && python scripts/train_model.py` (writes metrics into model metadata)
+- Frontend styling: `npm run build:css` (one-shot) / `npm run watch:css` after editing `src/styles/tailwind.css`. Compiled `public/tailwind.css` is committed — a fresh clone renders correctly even before rebuilding, but edits to the source won't show until you rebuild.
 
 ## This machine's quirks (Windows laptop)
 
@@ -21,3 +22,4 @@ Fraud-detection demo app: Node/Express backend (port **5050**) + Python FastAPI 
 - Scoring: rules contribute 40, ML 60; any triggered deterministic rule floors the score at 70 (VERIFY). ML unavailable ⇒ contributes 0 (flagged), never a silent default.
 - Auth: payment/fraud/ecocash routes require a Firebase ID token unless `ALLOW_ANON_DEMO=1` (demo default in `.env`). EcoCash `/callback` is validated but unauthenticated by design (external webhook mock).
 - 500 responses stay generic; details go to server-side logs only.
+- A handful of classes in `src/styles/tailwind.css` (`.statusDot`, `.decision`+`.d-*`, `.chip`+`.c-*`, `.kpiTrend`+`.up/.down/.flat`, `.navItem.active`, `.page.active`, `.state.active`, pay.html's `.v-*`/`.errIcon.tone-*`) exist because JS does a full `element.className = "..."` reassignment on those elements — they MUST stay self-contained (carry their entire style via `@apply`, not rely on sibling utility classes) or a reassignment will silently wipe styling.
