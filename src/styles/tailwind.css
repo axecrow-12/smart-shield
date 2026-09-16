@@ -116,6 +116,7 @@
   .sb-safe { @apply bg-good/[.14] text-good; }
   .sb-high { @apply bg-bad/[.14] text-bad; }
   .sb-medium { @apply bg-blue/[.14] text-blue; }
+  .sb-verify { @apply bg-amber/[.14] text-amber; }
   .sb-low { @apply bg-white/[.06] text-muted; }
 
   /* pay.html verdict tones — .v-approved / .v-review / .v-rejected on the state container */

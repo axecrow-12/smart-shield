@@ -14,6 +14,7 @@ const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
 const {
   validateCreatePayment,
   validateTokenBody,
+  validateVerify,
 } = require("../middleware/validate");
 
 router.get("/", async (req, res) => {
@@ -149,31 +150,43 @@ router.post("/process", requireAuthUnlessDemo, validateTokenBody, async (req, re
 
     const fraudResult = await scoreTransaction(payment, context);
 
-    let status = "approved";
-    if (fraudResult.level === "HIGH") {
-      status = "rejected";
-    } else if (fraudResult.level === "MEDIUM") {
-      status = "review";
+    // MEDIUM risk doesn't dead-end into a silent "review" anymore — the
+    // customer becomes an active participant: we hold the token open
+    // (NOT marking it used yet) and require them to clear a verification
+    // challenge on pay.html before the transaction finalizes either way.
+    if (fraudResult.level === "MEDIUM") {
+      const code = String(Math.floor(100000 + Math.random() * 900000));
+      const verifyExpiresAt = Date.now() + 2 * 60 * 1000;
+
+      await db.collection("paymentRequests").doc(payment.paymentId).update({
+        verification: { code, expiresAt: verifyExpiresAt, attempts: 0, fraudResult },
+      });
+
+      await db.collection("fraudLogs").add({
+        paymentId: payment.paymentId,
+        result: fraudResult,
+        context: context || {},
+        stage: "verification_required",
+        createdAt: Date.now(),
+      });
+
+      return res.json({
+        message: "Verification required before this payment can complete",
+        status: "verification_required",
+        fraudResult,
+        verification: {
+          expiresAt: verifyExpiresAt,
+          // No SMS/USSD provider is wired up in this demo — the code that
+          // would normally be delivered out-of-band is returned directly
+          // so the customer-facing page can display it plainly. Never do
+          // this in a real deployment.
+          demoCode: code,
+        },
+      });
     }
 
-    const transactionData = {
-      paymentId: payment.paymentId,
-      token: payment.token,
-      amount: payment.amount,
-      merchantName: payment.merchantName,
-      merchantUid: payment.merchantUid,
-      customerPhone: payment.customerPhone || null,
-      fraudResult,
-      status,
-      createdAt: Date.now(),
-    };
-
-    await db.collection("transactions").add(transactionData);
-
-    await db.collection("paymentRequests").doc(payment.paymentId).update({
-      used: true,
-      status,
-    });
+    const status = fraudResult.level === "HIGH" ? "rejected" : "approved";
+    const transactionData = await finalizePayment(payment, fraudResult, status);
 
     res.json({
       message: "Payment processed",
@@ -184,6 +197,89 @@ router.post("/process", requireAuthUnlessDemo, validateTokenBody, async (req, re
   } catch (error) {
     logError("Payment processing failed", error);
     res.status(500).json({ error: "Payment processing failed" });
+  }
+});
+
+async function finalizePayment(payment, fraudResult, status) {
+  const transactionData = {
+    paymentId: payment.paymentId,
+    token: payment.token,
+    amount: payment.amount,
+    merchantName: payment.merchantName,
+    merchantUid: payment.merchantUid,
+    customerPhone: payment.customerPhone || null,
+    fraudResult,
+    status,
+    createdAt: Date.now(),
+  };
+
+  await db.collection("transactions").add(transactionData);
+  await db.collection("paymentRequests").doc(payment.paymentId).update({
+    used: true,
+    status,
+  });
+
+  return transactionData;
+}
+
+// Customer resolves a MEDIUM-risk challenge: either confirms the code
+// (correct code -> approved) or explicitly declines ("this wasn't me" ->
+// rejected). Three wrong code attempts also auto-rejects, same as a real
+// OTP flow locking out after repeated failures.
+router.post("/verify", requireAuthUnlessDemo, validateVerify, async (req, res) => {
+  try {
+    const { token, code, deny } = req.body || {};
+    if (typeof token !== "string" || !token) {
+      return res.status(400).json({ error: "token is required" });
+    }
+
+    const snapshot = await db.collection("paymentRequests").where("token", "==", token).limit(1).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "Invalid token" });
+    }
+
+    const doc = snapshot.docs[0];
+    const payment = doc.data();
+
+    if (payment.used) {
+      return res.status(409).json({ error: "Token already used" });
+    }
+    if (!payment.verification) {
+      return res.status(400).json({ error: "No verification is pending for this token" });
+    }
+
+    const { code: expected, expiresAt, attempts, fraudResult } = payment.verification;
+
+    if (deny) {
+      const transactionData = await finalizePayment(payment, fraudResult, "rejected");
+      return res.json({ status: "rejected", fraudResult, transaction: transactionData, reason: "customer_declined" });
+    }
+
+    if (Date.now() > expiresAt) {
+      const transactionData = await finalizePayment(payment, fraudResult, "rejected");
+      return res.json({ status: "rejected", fraudResult, transaction: transactionData, reason: "verification_expired" });
+    }
+
+    if (String(code) !== expected) {
+      const nextAttempts = attempts + 1;
+      if (nextAttempts >= 3) {
+        const transactionData = await finalizePayment(payment, fraudResult, "rejected");
+        return res.json({ status: "rejected", fraudResult, transaction: transactionData, reason: "too_many_attempts" });
+      }
+      await db.collection("paymentRequests").doc(payment.paymentId).update({
+        "verification.attempts": nextAttempts,
+      });
+      return res.status(400).json({
+        error: "Incorrect code",
+        attemptsRemaining: 3 - nextAttempts,
+      });
+    }
+
+    const transactionData = await finalizePayment(payment, fraudResult, "approved");
+    res.json({ status: "approved", fraudResult, transaction: transactionData });
+  } catch (error) {
+    logError("Payment verification failed", error);
+    res.status(500).json({ error: "Payment verification failed" });
   }
 });
 

@@ -10,17 +10,17 @@
 <body class="bg-[radial-gradient(120%_120%_at_20%_0%,#0d1428_0%,#070b16_55%,#04060c_100%)]">
 
 <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#2563eb] w-[420px] h-[420px] left-[-6%] top-[-12%]"></div>
-  <div class="absolute rounded-full blur-[90px] opacity-50 bg-accent w-[380px] h-[380px] left-[72%] top-[-8%]"></div>
-  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#7c3aed] w-[340px] h-[340px] left-[38%] top-[78%]"></div>
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#2563eb] w-105 h-105 left-[-6%] top-[-12%]"></div>
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-accent w-95 h-95 left-[72%] top-[-8%]"></div>
+  <div class="absolute rounded-full blur-[90px] opacity-50 bg-[#7c3aed] w-85 h-85 left-[38%] top-[78%]"></div>
 </div>
 
 <div class="group relative z-10 flex min-h-screen" id="app">
-  <div class="hidden max-[899px]:group-[.navOpen]:block fixed inset-0 bg-[#02040a]/55 z-[35]" id="sbBackdrop"></div>
+  <div class="hidden max-[899px]:group-[.navOpen]:block fixed inset-0 bg-[#02040a]/55 z-35" id="sbBackdrop"></div>
 
   <!-- SIDEBAR -->
-  <aside class="w-[240px] shrink-0 sticky top-0 h-screen flex flex-col py-5 px-3.5 border-r border-white/[.13] bg-[#060a14]/55 backdrop-blur-[18px] z-40 transition-transform duration-200 max-[899px]:fixed max-[899px]:left-0 max-[899px]:top-0 max-[899px]:-translate-x-full max-[899px]:shadow-[20px_0_50px_rgba(0,0,0,.4)] max-[899px]:group-[.navOpen]:translate-x-0">
-    <div class="flex items-center gap-2.5 px-2.5 pt-1.5 pb-[22px]">
+  <aside class="w-60 shrink-0 sticky top-0 h-screen flex flex-col py-5 px-3.5 border-r border-white/13 bg-[#060a14]/55 backdrop-blur-[18px] z-40 transition-transform duration-200 max-[899px]:fixed max-[899px]:left-0 max-[899px]:top-0 max-[899px]:-translate-x-full max-[899px]:shadow-[20px_0_50px_rgba(0,0,0,.4)] max-[899px]:group-[.navOpen]:translate-x-0">
+    <div class="flex items-center gap-2.5 px-2.5 pt-1.5 pb-5.5">
       <div class="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center bg-gradient-to-br from-accent-2 to-accent text-white shrink-0 shadow-[0_6px_18px_rgba(20,184,166,.3)]">
         <svg class="icon w-[19px] h-[19px] [&_*]:stroke-2" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
       </div>
@@ -273,6 +273,15 @@
                     <span class="sb-medium text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Medium</span>
                   </span>
                 </button>
+                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="unverified">
+                  <span class="sb-verify w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><circle cx="12" cy="13" r="0.7" fill="currentColor" stroke="none"/><path d="M12 8.5c1.3 0 2.2 1 2.2 2 0 1.3-2.2 1.5-2.2 3.2" stroke-linecap="round"/></svg>
+                  </span>
+                  <span class="flex-1 flex items-center justify-between gap-2">
+                    <span><b>Unverified merchant</b><br><span class="text-[11px] text-muted font-normal">Borderline — customer must confirm</span></span>
+                    <span class="sb-verify text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Verify</span>
+                  </span>
+                </button>
                 <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="replay">
                   <span class="sb-low w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
                     <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
@@ -496,6 +505,12 @@ const SCENARIOS = {
       mlFeatures: { geo_velocity_kmh: 450, distance_from_last_cashout_km: 300 },
     },
   },
+  unverified: {
+    label: "Unverified merchant", amount: 150, merchant: "New Vendor Kiosk",
+    context: {
+      mlFeatures: { is_legit_merchant: 0 },
+    },
+  },
 };
 
 async function api(method, url, body) {
@@ -612,8 +627,10 @@ function showResult(fr, status, label) {
   $("gaugeNum").style.fill = riskColor(score);
 
   const chip = $("decisionChip");
-  chip.textContent = `${label} → ${status.toUpperCase()}` + (fr.decision ? ` (${fr.decision})` : "");
-  chip.className = "decision d-" + (status === "approved" ? "approved" : status === "review" ? "review" : "rejected");
+  const statusLabel = status === "verification_required" ? "AWAITING CUSTOMER VERIFICATION" : status.toUpperCase();
+  chip.textContent = `${label} → ${statusLabel}` + (fr.decision ? ` (${fr.decision})` : "");
+  chip.className = "decision d-" +
+    (status === "approved" ? "approved" : status === "verification_required" || status === "review" ? "review" : "rejected");
   $("reasonChips").innerHTML = (fr.reasons || []).map((r) => `<span class="reason">${r}</span>`).join("") ||
     `<span class="reason">no risk signals</span>`;
 
@@ -640,9 +657,10 @@ function showResult(fr, status, label) {
   }
 
   $("srcNote").textContent =
-    fr.source === "ml+rules"
+    (status === "verification_required" ? "This transaction can't be shown as approved or rejected from the merchant side — the customer has to clear a verification challenge on their own device (pay.html) before it finalizes. " : "") +
+    (fr.source === "ml+rules"
       ? `scored by LightGBM v4 (ml ${Math.round(fr.mlScore ?? 0)}/100, level ${fr.mlRiskLevel}) + token rules`
-      : `scored by: ${fr.source}`;
+      : `scored by: ${fr.source}`);
 }
 
 /* ---------- trend helper: recent half vs older half of the fetched batch ---------- */

@@ -71,6 +71,22 @@ function validateFraudScore(req, res, next) {
   next();
 }
 
+function validateVerify(req, res, next) {
+  const { token, code, deny } = req.body || {};
+  if (typeof token !== "string" || !TOKEN_RE.test(token)) {
+    return bad(res, "token must be a 32-character hex string");
+  }
+  if (!deny) {
+    if (typeof code !== "string" && typeof code !== "number") {
+      return bad(res, "code is required unless deny is true");
+    }
+    if (!/^[0-9]{6}$/.test(String(code))) {
+      return bad(res, "code must be a 6-digit number");
+    }
+  }
+  next();
+}
+
 function validateEcocashInitiate(req, res, next) {
   const { amount, customerPhone, merchantName } = req.body || {};
   if (checkAmount(res, amount) === null) return;
@@ -98,6 +114,7 @@ function validateEcocashCallback(req, res, next) {
 module.exports = {
   validateCreatePayment,
   validateTokenBody,
+  validateVerify,
   validateFraudScore,
   validateEcocashInitiate,
   validateEcocashCallback,
