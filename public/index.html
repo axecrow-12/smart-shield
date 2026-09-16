@@ -207,6 +207,20 @@
               <div class="text-center text-xs text-amber mt-[5px]" id="expiryLine"></div>
               <div class="mt-2 text-center text-[10.5px] text-muted leading-normal [&_a]:text-accent [&_a]:break-all" id="payLinkNote"></div>
             </div>
+
+            <!-- ECOCASH LIVE SANDBOX -->
+            <div class="card glass p-[18px]">
+              <div class="flex items-center justify-between mb-3.5">
+                <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">EcoCash Sandbox (Live)</h2>
+                <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-blue/[.14] text-blue">Real API</span>
+              </div>
+              <label class="block text-[11px] text-muted mt-2.5 mb-1">Sandbox MSISDN</label>
+              <input id="eipPhone" placeholder="263771234567" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <label class="block text-[11px] text-muted mt-2.5 mb-1">Amount (USD)</label>
+              <input id="eipAmount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <button id="btnEipCharge" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-white bg-gradient-to-br from-blue to-[#2563eb] shadow-[0_6px_18px_rgba(59,130,246,.3)] hover:brightness-110 cursor-pointer">Charge (Live Sandbox)</button>
+              <div class="mt-3" id="eipResult"></div>
+            </div>
           </div>
 
           <!-- ATTACK SIMULATOR -->
@@ -737,6 +751,86 @@ function applySearchFilter() {
   renderFeedTable("feed", filtered, lastTxs.length ? "No matches." : "No transactions yet — run a scenario.");
 }
 $("searchInput").addEventListener("input", applySearchFilter);
+
+/* ---------- EcoCash live sandbox ---------- */
+let eipPollTimer = null;
+
+async function loadEipConfig() {
+  try {
+    const res = await fetch("/api/ecocash-eip/config");
+    const cfg = await res.json();
+    if (cfg.defaultEndUserId) $("eipPhone").value = cfg.defaultEndUserId;
+  } catch {}
+}
+
+function eipRenderVerdict(fr) {
+  const cls = fr.level === "HIGH" || fr.level === "MEDIUM" ? "d-rejected" : "d-approved";
+  const reasonsHtml = (fr.reasons || []).map((r) => `<span class="reason">${r}</span>`).join("") ||
+    `<span class="reason">no risk signals</span>`;
+  return `<span class="decision ${cls}">risk ${Math.round(fr.score)} · ${fr.level}</span>
+    <div class="flex flex-wrap gap-1.5 mt-2">${reasonsHtml}</div>`;
+}
+
+async function eipPollStatus(clientCorrelator, endUserId) {
+  const start = Date.now();
+  clearInterval(eipPollTimer);
+  eipPollTimer = setInterval(async () => {
+    if (Date.now() - start > 60000) {
+      clearInterval(eipPollTimer);
+      $("eipStatusLine").textContent = "Timed out waiting for the sandbox to resolve — check /status manually.";
+      return;
+    }
+    try {
+      const r = await api("GET", `/api/ecocash-eip/status/${encodeURIComponent(clientCorrelator)}?endUserId=${encodeURIComponent(endUserId)}`);
+      const st = r.json?.transactionOperationStatus || "UNKNOWN";
+      if (st === "COMPLETED") {
+        clearInterval(eipPollTimer);
+        $("eipStatusLine").innerHTML = `<span class="text-good font-bold">✅ COMPLETED</span> — ref ${r.json.ecocashReference || "—"}`;
+      } else if (st === "FAILED") {
+        clearInterval(eipPollTimer);
+        $("eipStatusLine").innerHTML = `<span class="text-bad font-bold">❌ FAILED</span> — subscriber declined or the sandbox rejected it`;
+      } else {
+        $("eipStatusLine").textContent = `Waiting for subscriber approval on ${endUserId}… (${st})`;
+      }
+    } catch {
+      $("eipStatusLine").textContent = "Polling error — will retry.";
+    }
+  }, 2500);
+}
+
+$("btnEipCharge").onclick = async () => {
+  const btn = $("btnEipCharge");
+  const endUserId = ($("eipPhone").value || "").trim();
+  const amount = Number($("eipAmount").value);
+  clearInterval(eipPollTimer);
+  btn.disabled = true;
+  try {
+    const r = await api("POST", "/api/ecocash-eip/charge", { amount, endUserId });
+    if (r.status !== 200) throw new Error(r.json?.error || "charge failed");
+
+    const { status, fraudResult, ecocash } = r.json;
+    let html = eipRenderVerdict(fraudResult);
+
+    if (status === "blocked") {
+      html += `<div class="mt-2 text-[11px] text-muted">Blocked before reaching EcoCash — no real charge was sent.</div>`;
+      $("eipResult").innerHTML = html;
+    } else if (status === "forwarded") {
+      html += `<div class="mt-2 text-[11px] text-muted">Forwarded to the real sandbox · clientCorrelator ${ecocash.clientCorrelator}</div>
+        <div class="mt-1 text-[12px]" id="eipStatusLine">Waiting for subscriber approval on ${endUserId}…</div>`;
+      $("eipResult").innerHTML = html;
+      eipPollStatus(ecocash.clientCorrelator, endUserId);
+    } else {
+      html += `<div class="mt-2 text-[11px] text-bad">EcoCash sandbox rejected the request.</div>`;
+      $("eipResult").innerHTML = html;
+    }
+  } catch (e) {
+    $("eipResult").innerHTML = `<div class="text-[12px] text-bad">${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+loadEipConfig();
 
 health();
 loadModelInfo();
