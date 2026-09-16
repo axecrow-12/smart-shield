@@ -1,3 +1,9 @@
+# Normalize all text files to LF in the repo, regardless of core.autocrlf on
+# any given machine. Without this, git on Windows repeatedly warns "LF will
+# be replaced by CRLF" on every commit, and — as happened with the .lgb model
+# below — can silently corrupt line-sensitive files that don't tolerate CRLF.
+* text=auto eol=lf
+
 # LightGBM native model files are line-sensitive text; CRLF conversion corrupts them.
 *.lgb -text
 *.pkl binary
