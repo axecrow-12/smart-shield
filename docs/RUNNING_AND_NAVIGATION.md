@@ -114,15 +114,15 @@ Once `http://127.0.0.1:5050/` is open, here's what's on screen and what each par
 
 | Page | Status | What's there |
 |---|---|---|
-| **Dashboard** | Fully live | Everything described below. This is where you'll spend the whole demo. |
+| **Dashboard** | Fully live | Everything described below. This is where you'll spend the most demo time. |
 | **Transactions** | Fully live | The same live feed as the Dashboard, but full-width and unfiltered — a bigger view of every transaction scored this session. |
-| **Fraud Monitoring** | Placeholder | Not built for this demo. Honest "coming soon" message — there's no fake data behind it. |
-| **Merchants** | Placeholder | Same — no merchant directory exists in the backend yet. |
-| **Disputes** | Placeholder | Same — no dispute/chargeback workflow exists yet. |
-| **Reports** | Placeholder | Same — no export/analytics backend exists yet. |
-| **Settings** | Placeholder | Same — no configurable thresholds/integrations UI exists yet. |
+| **Fraud Monitoring** | Fully live | Signal frequency, a risk-score histogram, and a table of every blocked transaction with its top ML driver — all derived from real transactions, nothing canned. |
+| **Merchants** | Fully live | Per-merchant aggregates (volume, approved/blocked counts, block rate, avg risk) computed from real transactions — there's no merchant directory backend, so this is derived rather than stored, but every number is real. |
+| **Disputes** | Fully live | A real workflow: open a dispute against any transaction (false positive, false negative, customer complaint, chargeback), then resolve it (upheld/overturned/refunded). Backed by its own Firestore collection. |
+| **Reports** | Fully live | Session totals, decision/signal breakdowns, the live model's own metrics from `/model-info`, and a real CSV export button. |
+| **Settings** | Fully live | Presenter preferences (your name, default merchant, feed refresh rate — saved in this browser) plus a read-only view of the backend's actual runtime config. No secrets are ever shown. |
 
-The five placeholder pages are intentional — they exist so the sidebar reads as a complete product, but nothing on them is faked. Everything with real numbers lives on Dashboard and Transactions.
+Every page is backed by real data — nothing on the sidebar is a mockup anymore. The five pages beyond Dashboard/Transactions are all *derived* from the same transaction stream rather than their own dedicated backend tables (there's no separate "merchants" database, for instance) — worth saying out loud if someone asks how deep it goes.
 
 ### Dashboard page, top to bottom
 
@@ -186,6 +186,14 @@ When a transaction scores MEDIUM risk (either the "Unverified merchant" scenario
 3. Only at that point does the transaction show up in the merchant dashboard's live feed.
 
 This is the one part of the system that's genuinely customer-facing rather than merchant-facing — everywhere else, the customer only ever sees a final approve/decline.
+
+### The other sidebar pages
+
+- **Fraud Monitoring** — a signal-frequency bar chart (which reasons fire most often), a risk-score histogram across every transaction, and a table of just the blocked ones with their single biggest ML driver called out.
+- **Merchants** — one row per merchant name seen this session: transaction count, total volume, approved/blocked counts, block rate, and average risk. There's no separate merchant database — this is computed live from the transaction stream every time you open the page.
+- **Disputes** — pick any transaction from the dropdown, give a reason (false positive, false negative, customer complaint, chargeback), and open a dispute. Each one gets three resolve buttons (upheld / overturned / refunded); a transaction can't have two open disputes at once. Good for demoing "what happens when the model gets it wrong" as its own workflow rather than just a hypothetical.
+- **Reports** — session totals (scored/approved/blocked/rate/volume), decision and signal breakdowns, the live model's own metrics pulled from the ML service's `/model-info` (real AUC/F1, not the demo defaults), and an **Export CSV** button that downloads every transaction currently loaded.
+- **Settings** — two independent things on one page: presenter preferences on the left (your name feeds the greeting, default merchant pre-fills the terminal, feed refresh rate controls the polling interval — all saved to this browser via `localStorage`, so they follow you across reloads but not across machines), and a read-only dump of the backend's actual environment config on the right (ports, ML timeout, Firestore mode, the scoring policy's fixed weights, EcoCash sandbox merchant identity). The right side never shows a PIN, password, or API key — check `GET /api/system/config` yourself if you want to confirm.
 
 ---
 

@@ -107,6 +107,8 @@ Backend (`http://127.0.0.1:5050`):
 | `GET /api/ecocash-eip/config` | Non-secret UI hints (e.g. default test MSISDN) |
 | `POST /api/fraud/score` | Score an arbitrary payment + context |
 | `GET /api/auth/me` | Verify a Firebase ID token |
+| `GET /api/disputes` / `POST /api/disputes` / `POST /api/disputes/:id/resolve` | Open and resolve disputes against a finalized transaction |
+| `GET /api/system/config` | Non-secret runtime config for the Settings page |
 
 ML service (`http://127.0.0.1:8000`, full OpenAPI docs at `/docs`):
 `/score`, `/batch-score`, `/check-rules`, `/analyze`, `/model-info`, `/health`.

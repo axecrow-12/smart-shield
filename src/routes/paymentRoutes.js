@@ -285,10 +285,12 @@ router.post("/verify", requireAuthUnlessDemo, validateVerify, async (req, res) =
 
 router.get("/transactions", requireAuthUnlessDemo, async (req, res) => {
   try {
+    // Default 20 for the live feed; analytics pages ask for more (capped).
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 200);
     const snapshot = await db
       .collection("transactions")
       .orderBy("createdAt", "desc")
-      .limit(20)
+      .limit(limit)
       .get();
 
     const transactions = snapshot.docs.map((doc) => ({

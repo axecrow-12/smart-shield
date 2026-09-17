@@ -151,6 +151,58 @@ async function main() {
   check("Transactions list (200)", txs.status === 200);
   check("Transactions recorded", (txs.json?.count ?? 0) >= 2, `count=${txs.json?.count}`);
 
+  const txsBig = await req("GET", `${BASE}/api/payments/transactions?limit=200`);
+  check("Transactions list respects ?limit", txsBig.status === 200 && (txsBig.json?.count ?? 0) >= (txs.json?.count ?? 0));
+
+  // 8. Disputes — open against a real transaction, reject duplicates/bad
+  //    input, then resolve
+  const disputedTxId = txs.json?.transactions?.[0]?.id;
+  const openDispute = await req("POST", `${BASE}/api/disputes`, {
+    transactionId: disputedTxId,
+    reason: "false_positive",
+    note: "smoke test",
+  });
+  check("Open dispute (201)", openDispute.status === 201, JSON.stringify(openDispute.json));
+  const disputeId = openDispute.json?.id;
+
+  const dupeDispute = await req("POST", `${BASE}/api/disputes`, {
+    transactionId: disputedTxId,
+    reason: "chargeback",
+  });
+  check("Duplicate open dispute blocked (409)", dupeDispute.status === 409);
+
+  const badReason = await req("POST", `${BASE}/api/disputes`, {
+    transactionId: disputedTxId,
+    reason: "not_a_real_reason",
+  });
+  check("Invalid dispute reason rejected (400)", badReason.status === 400);
+
+  const resolveDispute = await req("POST", `${BASE}/api/disputes/${disputeId}/resolve`, {
+    resolution: "overturned",
+  });
+  check(
+    "Resolve dispute (200)",
+    resolveDispute.status === 200 && resolveDispute.json?.status === "resolved",
+    JSON.stringify(resolveDispute.json)
+  );
+
+  const reResolve = await req("POST", `${BASE}/api/disputes/${disputeId}/resolve`, {
+    resolution: "upheld",
+  });
+  check("Re-resolving a resolved dispute blocked (409)", reResolve.status === 409);
+
+  const disputesList = await req("GET", `${BASE}/api/disputes`);
+  check("Disputes list (200)", disputesList.status === 200 && (disputesList.json?.count ?? 0) >= 1);
+
+  // 9. System config — must never leak the EcoCash PIN/password
+  const sysConfig = await req("GET", `${BASE}/api/system/config`);
+  const configText = JSON.stringify(sysConfig.json || {});
+  check("System config (200)", sysConfig.status === 200);
+  check(
+    "System config leaks no secrets",
+    !/mobiquity|"merchantPin"|2222/i.test(configText)
+  );
+
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed > 0 ? 1 : 0);
 }

@@ -386,50 +386,147 @@
         </div>
       </section>
 
-      <!-- ============ PLACEHOLDER PAGES ============ -->
+      <!-- ============ FRAUD MONITORING ============ -->
       <section class="page" id="page-fraud">
-        <div class="card glass py-[70px] px-5 text-center text-muted">
-          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-bad/[.14] text-bad">
-            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16" r="0.7" fill="currentColor" stroke="none"/></svg>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Fraud Monitoring</h1><p class="text-[13px] text-muted mt-1">Every signal the engine fired this session, and every transaction it stopped.</p></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 mb-[18px] max-[1150px]:grid-cols-1">
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="fmBlocked">–</div><div class="text-[11.5px] text-muted mt-0.5">Transactions blocked</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="fmSignals">–</div><div class="text-[11.5px] text-muted mt-0.5">Signals fired (total)</div></div>
+          <div class="glass p-4"><div class="text-[15px] font-extrabold font-mono truncate" id="fmTopSignal">–</div><div class="text-[11.5px] text-muted mt-0.5">Most common signal</div></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5 mb-3.5 max-[1150px]:grid-cols-1">
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Signal frequency</h2>
+            <div id="fmSignalBars" class="grid gap-2"></div>
           </div>
-          <h3 class="text-ink text-[17px] mb-1.5">Fraud Monitoring</h3>
-          <p class="text-[13px]">Deeper rule-tuning and case management — coming soon in this demo build.</p>
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Risk score distribution</h2>
+            <div id="fmHistogram" class="flex items-end gap-1.5 h-[120px]"></div>
+            <div class="flex justify-between text-[10px] text-faint mt-1.5 font-mono"><span>0</span><span>50</span><span>100</span></div>
+          </div>
+        </div>
+        <div class="card glass p-[18px]">
+          <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Blocked transactions</h2>
+          <table class="w-full border-collapse text-[12.5px]">
+            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Top ML driver</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th></tr></thead>
+            <tbody id="fmTable"><tr><td colspan="6" class="empty">Nothing blocked yet.</td></tr></tbody>
+          </table>
         </div>
       </section>
+
+      <!-- ============ MERCHANTS ============ -->
       <section class="page" id="page-merchants">
-        <div class="card glass py-[70px] px-5 text-center text-muted">
-          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-blue/[.14] text-blue">
-            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><path d="M3 9 L4 4 H20 L21 9"/><path d="M4 9 V20 H20 V9"/><line x1="9" y1="20" x2="9" y2="13"/></svg>
-          </div>
-          <h3 class="text-ink text-[17px] mb-1.5">Merchants</h3>
-          <p class="text-[13px]">Merchant directory and risk profiles — coming soon in this demo build.</p>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Merchants</h1><p class="text-[13px] text-muted mt-1">Risk profile per merchant, derived from every transaction scored this session.</p></div>
+        </div>
+
+        <div class="card glass p-[18px]">
+          <table class="w-full border-collapse text-[12.5px]">
+            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Txns</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Volume</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Approved</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Blocked</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Block rate</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Avg risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Last seen</th></tr></thead>
+            <tbody id="mtTable"><tr><td colspan="8" class="empty">No merchants yet — run a scenario from the Dashboard.</td></tr></tbody>
+          </table>
         </div>
       </section>
+
+      <!-- ============ DISPUTES ============ -->
       <section class="page" id="page-disputes">
-        <div class="card glass py-[70px] px-5 text-center text-muted">
-          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-amber/[.14] text-amber">
-            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="6" x2="20" y2="6"/><path d="M4 6 L2 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(1 0)"/><path d="M20 6 L18 12 a3.2 3.2 0 0 0 6.4 0 Z" transform="translate(-2 0)"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Disputes</h1><p class="text-[13px] text-muted mt-1">Challenge a verdict the engine got wrong, or log a customer complaint against a completed transaction.</p></div>
+        </div>
+
+        <div class="grid grid-cols-[340px_1fr] gap-3.5 items-start max-[1150px]:grid-cols-1">
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Open a dispute</h2>
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Transaction</label>
+            <select id="dpTx" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent"></select>
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Reason</label>
+            <select id="dpReason" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <option value="false_positive">False positive — legitimate payment was blocked</option>
+              <option value="false_negative">False negative — fraud got through</option>
+              <option value="customer_complaint">Customer complaint</option>
+              <option value="chargeback">Chargeback request</option>
+            </select>
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Note (optional)</label>
+            <input id="dpNote" maxlength="500" placeholder="What happened?" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <button id="btnDispute" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-amber to-[#f59e0b] shadow-[0_6px_18px_rgba(251,191,36,.3)] hover:brightness-110 cursor-pointer">Open dispute</button>
+            <div class="mt-2.5 text-[11px]" id="dpMsg"></div>
           </div>
-          <h3 class="text-ink text-[17px] mb-1.5">Disputes</h3>
-          <p class="text-[13px]">Chargeback and dispute workflow — coming soon in this demo build.</p>
+          <div class="grid gap-3.5">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-amber" id="dpOpen">–</div><div class="text-[11.5px] text-muted mt-0.5">Open</div></div>
+              <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="dpResolved">–</div><div class="text-[11.5px] text-muted mt-0.5">Resolved</div></div>
+            </div>
+            <div class="card glass p-[18px]">
+              <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">All disputes</h2>
+              <table class="w-full border-collapse text-[12.5px]">
+                <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Opened</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Original verdict</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Reason</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Resolve</th></tr></thead>
+                <tbody id="dpTable"><tr><td colspan="7" class="empty">No disputes opened yet.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
+
+      <!-- ============ REPORTS ============ -->
       <section class="page" id="page-reports">
-        <div class="card glass py-[70px] px-5 text-center text-muted">
-          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-purple/[.14] text-purple">
-            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Reports</h1><p class="text-[13px] text-muted mt-1">Session summary across every transaction scored, plus the live model's own metrics.</p></div>
+          <button id="btnExportCsv" class="w-auto mt-0 py-2 px-3.5 rounded-lg font-bold text-[12.5px] text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer flex items-center gap-2">
+            <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M4 17v3h16v-3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <div class="grid grid-cols-6 gap-3 mb-[18px] max-[1150px]:grid-cols-2">
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="rpTotal">–</div><div class="text-[11.5px] text-muted mt-0.5">Scored</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-good" id="rpApproved">–</div><div class="text-[11.5px] text-muted mt-0.5">Approved</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="rpBlocked">–</div><div class="text-[11.5px] text-muted mt-0.5">Blocked</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="rpRate">–</div><div class="text-[11.5px] text-muted mt-0.5">Block rate</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="rpVolume">–</div><div class="text-[11.5px] text-muted mt-0.5">Volume approved</div></div>
+          <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="rpStopped">–</div><div class="text-[11.5px] text-muted mt-0.5">Volume stopped</div></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3.5 max-[1150px]:grid-cols-1">
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Decisions</h2>
+            <div id="rpDecisions" class="grid gap-2 mb-5"></div>
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Signals</h2>
+            <div id="rpSignals" class="grid gap-2"></div>
           </div>
-          <h3 class="text-ink text-[17px] mb-1.5">Reports</h3>
-          <p class="text-[13px]">Exportable fraud analytics — coming soon in this demo build.</p>
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Model — LightGBM v4</h2>
+            <div id="rpModel" class="text-[12.5px] text-muted">Loading from the ML service…</div>
+          </div>
         </div>
       </section>
+
+      <!-- ============ SETTINGS ============ -->
       <section class="page" id="page-settings">
-        <div class="card glass py-[70px] px-5 text-center text-muted">
-          <div class="w-[60px] h-[60px] rounded-2xl mx-auto mb-4 flex items-center justify-center bg-white/[.045] text-muted">
-            <svg class="icon w-7 h-7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
+        <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
+          <div><h1 class="text-[23px] font-extrabold">Settings</h1><p class="text-[13px] text-muted mt-1">Presenter preferences (saved in this browser) and the backend's live runtime configuration.</p></div>
+        </div>
+
+        <div class="grid grid-cols-[360px_1fr] gap-3.5 items-start max-[1150px]:grid-cols-1">
+          <div class="card glass p-[18px]">
+            <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Presenter preferences</h2>
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Your name (used in the greeting)</label>
+            <input id="stName" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Default merchant name</label>
+            <input id="stMerchant" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <label class="block text-[11px] text-muted mt-2.5 mb-1">Live feed refresh (seconds)</label>
+            <input id="stPoll" type="number" min="1" max="60" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <button id="btnSavePrefs" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Save preferences</button>
+            <div class="mt-2.5 text-[11px] text-good" id="stMsg"></div>
           </div>
-          <h3 class="text-ink text-[17px] mb-1.5">Settings</h3>
-          <p class="text-[13px]">Thresholds, integrations, and team access — coming soon in this demo build.</p>
+          <div class="card glass p-[18px]">
+            <div class="flex items-center justify-between mb-3.5">
+              <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Runtime configuration</h2>
+              <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-white/[.06] text-muted">read-only · no secrets</span>
+            </div>
+            <div id="stConfig" class="grid gap-4 text-[12.5px]">Loading…</div>
+          </div>
         </div>
       </section>
 
@@ -445,11 +542,7 @@ let lastTxs = [];
 
 /* ---------- greeting + date range (real local time, no fabrication) ---------- */
 (function greet() {
-  const h = new Date().getHours();
-  const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
-  const name = "Wilmar";
-  $("greetTitle").textContent = `Good ${part}, ${name}`;
-
+  // Name comes from presenter preferences (Settings page); applyPrefs() sets the text.
   const end = new Date();
   const start = new Date(); start.setDate(end.getDate() - 6);
   const fmt = (d, withYear) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: withYear ? "numeric" : undefined });
@@ -464,6 +557,11 @@ document.querySelectorAll(".navItem").forEach((btn) => {
     btn.classList.add("active");
     $("page-" + btn.dataset.page).classList.add("active");
     $("app").classList.remove("navOpen");
+    // Pages backed by their own endpoints load on open (the transaction-derived
+    // pages are already kept fresh by the feed polling cycle).
+    if (btn.dataset.page === "disputes") loadDisputes();
+    if (btn.dataset.page === "reports") loadModelReport();
+    if (btn.dataset.page === "settings") loadSystemConfig();
   };
 });
 $("btnMenu").onclick = () => $("app").classList.toggle("navOpen");
@@ -753,11 +851,13 @@ function renderFeedTable(elId, txs, emptyMsg) {
 
 async function refreshFeed() {
   try {
-    const r = await api("GET", "/api/payments/transactions");
+    // Up to 200 for the analytics pages; the dashboard feed shows the first 20.
+    const r = await api("GET", "/api/payments/transactions?limit=200");
     lastTxs = r.json?.transactions || [];
     updateKpis(lastTxs);
     applySearchFilter();
     renderFeedTable("feedFull", lastTxs, "No transactions yet — run a scenario from the Dashboard.");
+    renderAnalytics(lastTxs);
   } catch {}
 }
 
@@ -765,10 +865,262 @@ function applySearchFilter() {
   const q = ($("searchInput").value || "").trim().toLowerCase();
   const filtered = q
     ? lastTxs.filter((t) => (t.merchantName || "").toLowerCase().includes(q) || (t.paymentId || "").toLowerCase().includes(q))
-    : lastTxs;
+    : lastTxs.slice(0, 20);
   renderFeedTable("feed", filtered, lastTxs.length ? "No matches." : "No transactions yet — run a scenario.");
 }
 $("searchInput").addEventListener("input", applySearchFilter);
+
+/* ---------- analytics pages (Fraud Monitoring / Merchants / Reports) ---------- */
+function countBy(items, keyFn) {
+  const m = new Map();
+  for (const it of items) {
+    const k = keyFn(it);
+    if (k === undefined || k === null) continue;
+    m.set(k, (m.get(k) || 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function barList(entries, total, color) {
+  if (!entries.length) return `<div class="text-[12px] text-muted">Nothing yet.</div>`;
+  const max = entries[0][1] || 1;
+  return entries.map(([label, n]) => `
+    <div class="flex items-center gap-2 text-[11px]">
+      <span class="w-[190px] text-right font-mono text-muted text-[10px] truncate" title="${label}">${label}</span>
+      <span class="flex-1 h-2 rounded-full bg-white/[.09] overflow-hidden"><i class="block h-full rounded-full not-italic" style="width:${(n / max) * 100}%;background:${color}"></i></span>
+      <span class="w-14 font-mono text-[11px]">${n}${total ? ` <span class="text-faint">· ${Math.round((n / total) * 100)}%</span>` : ""}</span>
+    </div>`).join("");
+}
+
+function money(n) {
+  return "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function renderAnalytics(txs) {
+  const blocked = txs.filter((t) => t.status === "rejected");
+  const approved = txs.filter((t) => t.status === "approved");
+  const allReasons = txs.flatMap((t) => t.fraudResult?.reasons || []);
+  const signalCounts = countBy(allReasons, (r) => r);
+
+  // ---- Fraud Monitoring ----
+  $("fmBlocked").textContent = blocked.length;
+  $("fmSignals").textContent = allReasons.length;
+  $("fmTopSignal").textContent = signalCounts[0]?.[0] || "–";
+  $("fmSignalBars").innerHTML = barList(signalCounts, txs.length, "var(--color-bad)");
+
+  const buckets = new Array(10).fill(0);
+  for (const t of txs) buckets[Math.min(9, Math.floor((t.fraudResult?.score ?? 0) / 10))]++;
+  const maxB = Math.max(...buckets, 1);
+  $("fmHistogram").innerHTML = buckets.map((n, i) => {
+    const mid = i * 10 + 5;
+    return `<div class="flex-1 rounded-t-[4px]" style="height:${Math.max(3, (n / maxB) * 100)}%;background:${riskColor(mid)};opacity:${n ? 1 : .25}" title="${i * 10}–${i * 10 + 9}: ${n}"></div>`;
+  }).join("");
+
+  $("fmTable").innerHTML = blocked.length
+    ? blocked.slice(0, 50).map((t) => {
+        const score = Math.round(t.fraudResult?.score ?? 0);
+        const top = (t.fraudResult?.mlTopFeatures || [])[0];
+        return `<tr>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top">${t.merchantName || "-"}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(t.amount)}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${score}%;background:${riskColor(score)}"></i></span><span class="num">${score}</span></td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${top ? `${top.feature} <span class="text-bad">${top.contribution > 0 ? "+" : ""}${top.contribution.toFixed(2)}</span>` : "—"}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${(t.fraudResult?.reasons || []).join("<br>") || "—"}</td>
+        </tr>`;
+      }).join("")
+    : `<tr><td colspan="6" class="empty">Nothing blocked yet.</td></tr>`;
+
+  // ---- Merchants ----
+  const byMerchant = new Map();
+  for (const t of txs) {
+    const k = t.merchantName || "(unknown)";
+    const m = byMerchant.get(k) || { n: 0, volume: 0, approved: 0, blocked: 0, riskSum: 0, last: 0 };
+    m.n++; m.volume += Number(t.amount) || 0; m.riskSum += t.fraudResult?.score ?? 0;
+    if (t.status === "approved") m.approved++;
+    if (t.status === "rejected") m.blocked++;
+    m.last = Math.max(m.last, t.createdAt || 0);
+    byMerchant.set(k, m);
+  }
+  const merchants = [...byMerchant.entries()].sort((a, b) => b[1].volume - a[1].volume);
+  $("mtTable").innerHTML = merchants.length
+    ? merchants.map(([name, m]) => {
+        const rate = Math.round((m.blocked / m.n) * 100);
+        const avg = Math.round(m.riskSum / m.n);
+        return `<tr>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top font-semibold">${name}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${m.n}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(m.volume)}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num text-good">${m.approved}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num text-bad">${m.blocked}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${rate}%;background:${riskColor(rate)}"></i></span><span class="num">${rate}%</span></td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top num" style="color:${riskColor(avg)}">${avg}</td>
+          <td class="py-2 px-2 border-b border-white/[.06] align-top text-muted">${new Date(m.last).toLocaleTimeString()}</td>
+        </tr>`;
+      }).join("")
+    : `<tr><td colspan="8" class="empty">No merchants yet — run a scenario from the Dashboard.</td></tr>`;
+
+  // ---- Reports ----
+  const review = txs.filter((t) => t.status === "review");
+  $("rpTotal").textContent = txs.length;
+  $("rpApproved").textContent = approved.length;
+  $("rpBlocked").textContent = blocked.length;
+  $("rpRate").textContent = txs.length ? Math.round((blocked.length / txs.length) * 100) + "%" : "0%";
+  $("rpVolume").textContent = money(approved.reduce((s, t) => s + (Number(t.amount) || 0), 0));
+  $("rpStopped").textContent = money(blocked.reduce((s, t) => s + (Number(t.amount) || 0), 0));
+  $("rpDecisions").innerHTML = barList(
+    [["approved", approved.length], ["rejected", blocked.length], ["review", review.length]].filter((e) => e[1] > 0).sort((a, b) => b[1] - a[1]),
+    txs.length, "var(--color-accent)"
+  );
+  $("rpSignals").innerHTML = barList(signalCounts.slice(0, 8), txs.length, "var(--color-amber)");
+
+  // Disputes dropdown reflects the latest transactions
+  const sel = $("dpTx");
+  if (sel && document.activeElement !== sel) {
+    const current = sel.value;
+    sel.innerHTML = txs.length
+      ? txs.slice(0, 100).map((t) => `<option value="${t.id}">${new Date(t.createdAt).toLocaleTimeString()} · ${t.merchantName} · ${money(t.amount)} · ${t.status}</option>`).join("")
+      : `<option value="">No transactions yet</option>`;
+    if (current && [...sel.options].some((o) => o.value === current)) sel.value = current;
+  }
+}
+
+async function loadModelReport() {
+  try {
+    const res = await fetch("http://127.0.0.1:8000/model-info");
+    const m = await res.json();
+    const p = m.performance || {};
+    const row = (k, v) => `<div class="flex justify-between gap-3 py-1.5 border-b border-white/[.06]"><span class="text-muted">${k}</span><span class="font-mono text-ink">${v}</span></div>`;
+    $("rpModel").innerHTML =
+      row("ROC-AUC (held-out)", p.roc_auc ?? "–") + row("F1", p.f1_score ?? "–") +
+      row("Precision", p.precision ?? "–") + row("Recall", p.recall ?? "–") +
+      row("Trees", m.num_trees ?? "–") + row("Training rows", m.dataset_size ?? "–") +
+      row("Trained", m.trained_at ? new Date(m.trained_at).toLocaleDateString() : "–") +
+      `<div class="text-[10px] uppercase tracking-[1.2px] text-muted mt-4 mb-2">Top features by gain</div>` +
+      barList((m.top_features_by_gain || []).slice(0, 8).map((f) => [f.feature, Math.round(f.gain)]), 0, "var(--color-purple)");
+  } catch {
+    $("rpModel").textContent = "ML service unreachable — start it to see model metrics.";
+  }
+}
+
+$("btnExportCsv").onclick = () => {
+  const cols = ["createdAt", "paymentId", "merchantName", "amount", "status", "score", "level", "decision", "source", "reasons"];
+  const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [cols.join(",")].concat(lastTxs.map((t) => [
+    new Date(t.createdAt).toISOString(), t.paymentId, t.merchantName, t.amount, t.status,
+    t.fraudResult?.score, t.fraudResult?.level, t.fraudResult?.decision, t.fraudResult?.source,
+    (t.fraudResult?.reasons || []).join("|"),
+  ].map(esc).join(",")));
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `smartpay-shield-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+/* ---------- disputes ---------- */
+const REASON_LABEL = { false_positive: "False positive", false_negative: "False negative", customer_complaint: "Customer complaint", chargeback: "Chargeback" };
+
+async function loadDisputes() {
+  try {
+    const r = await api("GET", "/api/disputes");
+    const list = r.json?.disputes || [];
+    const open = list.filter((d) => d.status === "open");
+    $("dpOpen").textContent = open.length;
+    $("dpResolved").textContent = list.length - open.length;
+    $("dpTable").innerHTML = list.length
+      ? list.map((d) => {
+          const vCls = d.originalStatus === "approved" ? "c-approved" : d.originalStatus === "review" ? "c-review" : "c-rejected";
+          const actions = d.status === "open"
+            ? ["upheld", "overturned", "refunded"].map((res) =>
+                `<button class="w-auto mt-0 mr-1 py-1 px-2 rounded-md text-[10.5px] font-bold border border-white/[.13] bg-white/[.045] text-ink shadow-none hover:border-accent cursor-pointer" data-resolve="${d.id}" data-res="${res}">${res}</button>`).join("")
+            : `<span class="text-muted text-[11px]">${d.resolution}</span>`;
+          return `<tr>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(d.openedAt).toLocaleTimeString()}</td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top">${d.merchantName || "-"}</td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(d.amount)}</td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${vCls}">${d.originalStatus}</span> <span class="num text-muted text-[11px]">${d.originalScore != null ? Math.round(d.originalScore) : ""}</span></td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top">${REASON_LABEL[d.reason] || d.reason}${d.note ? `<div class="text-[10.5px] text-muted">${d.note}</div>` : ""}</td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${d.status === "open" ? "c-review" : "c-approved"}">${d.status}</span></td>
+            <td class="py-2 px-2 border-b border-white/[.06] align-top whitespace-nowrap">${actions}</td>
+          </tr>`;
+        }).join("")
+      : `<tr><td colspan="7" class="empty">No disputes opened yet.</td></tr>`;
+    $("dpTable").querySelectorAll("[data-resolve]").forEach((b) => {
+      b.onclick = async () => {
+        b.disabled = true;
+        await api("POST", `/api/disputes/${b.dataset.resolve}/resolve`, { resolution: b.dataset.res });
+        loadDisputes();
+      };
+    });
+  } catch {}
+}
+
+$("btnDispute").onclick = async () => {
+  const transactionId = $("dpTx").value;
+  const msg = $("dpMsg");
+  if (!transactionId) { msg.className = "mt-2.5 text-[11px] text-bad"; msg.textContent = "Pick a transaction first."; return; }
+  const r = await api("POST", "/api/disputes", { transactionId, reason: $("dpReason").value, note: $("dpNote").value.trim() });
+  if (r.status === 201) {
+    msg.className = "mt-2.5 text-[11px] text-good"; msg.textContent = "Dispute opened.";
+    $("dpNote").value = "";
+    loadDisputes();
+  } else {
+    msg.className = "mt-2.5 text-[11px] text-bad"; msg.textContent = r.json?.error || "Failed to open dispute.";
+  }
+};
+
+/* ---------- settings ---------- */
+const PREFS_KEY = "sps.prefs";
+function loadPrefs() {
+  try { return { name: "Wilmar", merchant: "Mbare Fresh Produce", poll: 3, ...JSON.parse(localStorage.getItem(PREFS_KEY) || "{}") }; }
+  catch { return { name: "Wilmar", merchant: "Mbare Fresh Produce", poll: 3 }; }
+}
+let prefs = loadPrefs();
+let feedTimer = null;
+function startFeedPolling() {
+  clearInterval(feedTimer);
+  feedTimer = setInterval(refreshFeed, Math.max(1, prefs.poll) * 1000);
+}
+
+$("btnSavePrefs").onclick = () => {
+  prefs = {
+    name: $("stName").value.trim() || "Wilmar",
+    merchant: $("stMerchant").value.trim() || "Mbare Fresh Produce",
+    poll: Math.min(60, Math.max(1, Number($("stPoll").value) || 3)),
+  };
+  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  applyPrefs();
+  startFeedPolling();
+  $("stMsg").textContent = "Saved — greeting, default merchant and refresh rate updated.";
+  setTimeout(() => { $("stMsg").textContent = ""; }, 3000);
+};
+
+function applyPrefs() {
+  const h = new Date().getHours();
+  const part = h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+  $("greetTitle").textContent = `Good ${part}, ${prefs.name}`;
+  if (!$("merchantName").value || $("merchantName").value === "Mbare Fresh Produce") $("merchantName").value = prefs.merchant;
+  $("stName").value = prefs.name;
+  $("stMerchant").value = prefs.merchant;
+  $("stPoll").value = prefs.poll;
+}
+
+async function loadSystemConfig() {
+  try {
+    const r = await api("GET", "/api/system/config");
+    const c = r.json || {};
+    const group = (title, obj) => `<div><div class="text-[10px] uppercase tracking-[1.2px] text-muted mb-1.5">${title}</div>` +
+      Object.entries(obj).map(([k, v]) => `<div class="flex justify-between gap-3 py-1 border-b border-white/[.06]"><span class="text-muted">${k}</span><span class="font-mono text-ink text-right break-all">${typeof v === "object" ? JSON.stringify(v) : (v ?? "—")}</span></div>`).join("") + `</div>`;
+    $("stConfig").innerHTML =
+      group("Backend", c.backend || {}) + group("ML service", c.ml || {}) +
+      group("Firestore", c.firestore || {}) + group("Scoring policy", c.scoring || {}) +
+      group("EcoCash EIP sandbox", c.ecocashEip || {});
+  } catch {
+    $("stConfig").textContent = "Backend unreachable.";
+  }
+}
 
 /* ---------- EcoCash live sandbox ---------- */
 let eipPollTimer = null;
@@ -849,12 +1201,13 @@ $("btnEipCharge").onclick = async () => {
 };
 
 loadEipConfig();
+applyPrefs();
 
 health();
 loadModelInfo();
 refreshFeed();
 setInterval(health, 10000);
-setInterval(refreshFeed, 3000);
+startFeedPolling();
 </script>
 </body>
 </html>

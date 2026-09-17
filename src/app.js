@@ -7,6 +7,8 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const fraudRoutes = require("./routes/fraudRoutes");
 const ecocashRoutes = require("./routes/ecocashRoutes");
 const ecocashEipRoutes = require("./routes/ecocashEipRoutes");
+const disputesRoutes = require("./routes/disputesRoutes");
+const systemRoutes = require("./routes/systemRoutes");
 
 const { requestLogger } = require("./utils/logger");
 
@@ -34,5 +36,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/fraud", fraudRoutes);
 app.use("/api/ecocash", ecocashRoutes);
 app.use("/api/ecocash-eip", ecocashEipRoutes);
+app.use("/api/disputes", disputesRoutes);
+app.use("/api/system", systemRoutes);
 
 module.exports = app;
