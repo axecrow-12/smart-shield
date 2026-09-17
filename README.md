@@ -2,10 +2,10 @@
 
 Smart fraud detection for Zimbabwe mobile money (EcoCash/OneMoney). Two services:
 
-- **Node/Express backend** (`src/`, port **5050**) — QR payment tokens, payment processing, mock EcoCash provider, Firestore persistence. Also serves the merchant dashboard (`public/index.html`) and a real customer-facing checkout page (`public/pay.html`) that a second device can open by scanning the QR code on the same network.
+- **Node/Express backend** (`src/`, port **5050**) — QR payment tokens, payment processing, a mock EcoCash provider, and a **real EcoCash Instant Payment (EIP) sandbox integration** (see below), all backed by Firestore. Also serves the merchant dashboard (`public/index.html`) and a real customer-facing checkout page (`public/pay.html`) that a second device can open by scanning the QR code on the same network.
 - **Python ML service** (`ml_core/`, port **8000**) — FastAPI serving a LightGBM v4 fraud model + 8 Zimbabwe-specific rules, with explainable risk scores (0–100), decisions (APPROVE / MONITOR / CHALLENGE / VERIFY / BLOCK), and per-feature SHAP contributions (`top_features`) on every score. Any triggered deterministic rule floors the score at 70 (VERIFY).
 
-Every payment processed by the backend is scored live by the ML service (`ml+rules`); if the ML service is down, the backend falls back to local rules (`rules_fallback`).
+Every payment processed by the backend is scored live by the ML service (`ml+rules`); if the ML service is down, the backend falls back to local rules (`rules_fallback`). **MEDIUM-risk transactions don't dead-end** — the customer is handed an interactive verification challenge (a 6-digit code shown on `pay.html`, since no SMS provider is wired up) and their response decides the final outcome. See [Customer verification](#customer-verification-medium-risk) below.
 
 > **New here or presenting a demo?** See [docs/RUNNING_AND_NAVIGATION.md](docs/RUNNING_AND_NAVIGATION.md) for a plain-language, step-by-step guide to starting everything and a full walkthrough of the dashboard.
 
@@ -98,9 +98,13 @@ Backend (`http://127.0.0.1:5050`):
 |---|---|
 | `POST /api/payments/create-payment` | Create payment request (returns one-time token + QR payload, 10-min expiry) |
 | `POST /api/payments/validate-token` | Check a token is valid/unused/unexpired |
-| `POST /api/payments/process` | Process payment — scored by ML, status approved/review/rejected |
+| `POST /api/payments/process` | Process payment — scored by ML; approved/rejected immediately, or `verification_required` for MEDIUM risk |
+| `POST /api/payments/verify` | Resolve a pending MEDIUM-risk challenge — `{token, code}` to confirm, or `{token, deny:true}` to decline |
 | `GET /api/payments/transactions` | Recent transactions |
 | `POST /api/ecocash/initiate` / `callback` / `status/:ref` | Mock EcoCash provider flow |
+| `POST /api/ecocash-eip/charge` | **Real** EcoCash sandbox charge — scores first; only forwards LOW-risk transactions |
+| `GET /api/ecocash-eip/status/:clientCorrelator` | Poll a forwarded charge's real sandbox status |
+| `GET /api/ecocash-eip/config` | Non-secret UI hints (e.g. default test MSISDN) |
 | `POST /api/fraud/score` | Score an arbitrary payment + context |
 | `GET /api/auth/me` | Verify a Firebase ID token |
 
@@ -108,6 +112,21 @@ ML service (`http://127.0.0.1:8000`, full OpenAPI docs at `/docs`):
 `/score`, `/batch-score`, `/check-rules`, `/analyze`, `/model-info`, `/health`.
 
 The `context` object on `process`/`score` accepts demo-friendly flags (`isNewDevice`, `rapidAttempts`, `locationMismatch`) and an `mlFeatures` override for any of the 19 model features (e.g. `is_mule_destination`, `geo_velocity_kmh`).
+
+## Customer verification (MEDIUM risk)
+
+HIGH and LOW risk resolve synchronously (rejected / approved). MEDIUM risk instead holds the payment token open and returns `{ status: "verification_required", verification: { demoCode, expiresAt } }` — the customer completes it on `pay.html` by entering the code (or explicitly declining "this wasn't me"), which finalizes the transaction as approved or rejected. Three wrong attempts or letting the 2-minute window expire also auto-rejects. Nothing is written to the `transactions` collection, and the token isn't marked `used`, until this resolves one way or the other. The Attack Simulator's **Unverified merchant** scenario is the one guaranteed way to trigger this tier — none of the other six scenarios land in MEDIUM, since any triggered deterministic rule floors the score at 70 (HIGH).
+
+## Real EcoCash sandbox (EIP)
+
+`src/services/ecocashEipClient.js` talks to EcoCash's actual Instant Payment API sandbox (Charge / Refund / Query Transaction, HTTP Basic auth) — see `.env.example` for the full config block. The dashboard's **"EcoCash Sandbox (Live)"** card drives it:
+
+- Every request is scored with the same `scoreTransaction()` used everywhere else, **before** anything is sent to EcoCash.
+- HIGH or MEDIUM risk is blocked locally — no real charge is ever sent, nothing to reverse.
+- Only LOW risk is forwarded as a real Charge Request, then polled via `GET /status/:clientCorrelator` (not the inbound `notifyUrl` webhook) until it resolves — no public tunnel/ngrok required for the block path or the polling path.
+- Stored separately from the mock flow, in its own `ecocashEipTransactions` Firestore collection.
+
+The approve path needs your own registered sandbox test MSISDN (EcoCash requires test numbers to be allow-listed by their POC) — enter it directly in the card at demo time.
 
 ## ML core
 

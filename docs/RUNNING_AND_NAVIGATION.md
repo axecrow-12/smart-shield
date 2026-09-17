@@ -150,23 +150,42 @@ To make this work, **the second device must be on the same Wi-Fi / hotspot as th
 
 If you don't want to deal with a second device at all, that's fine too — the **Attack simulator** (next column) is the primary way to demo the fraud engine and needs nothing but the one screen.
 
-**4. Attack simulator** (middle column)
-Six buttons, each firing a complete, realistic transaction through the actual fraud pipeline (Node backend → LightGBM ML API → risk engine → back). Use these to demo the system without needing a real payment flow:
+**4. EcoCash Sandbox (Live)** (left column, below the merchant terminal)
+This one talks to EcoCash's *real* Instant Payment API sandbox, not a simulation. Enter a Zimbabwe-format MSISDN and an amount, click **Charge (Live Sandbox)**:
+
+- The transaction is scored first, same engine as everything else. HIGH or MEDIUM risk is **blocked locally** — you'll see `ecocash: null` in the result and nothing ever reaches EcoCash's servers.
+- Only LOW risk gets a real Charge Request sent, then the card polls for the sandbox's real result (`PENDING SUBSCRIBER VALIDATION` → `COMPLETED`/`FAILED`) until it resolves.
+
+Blocking works with any well-formatted number — nothing real is contacted. **Actually completing a charge needs your own registered sandbox test MSISDN** (EcoCash only accepts test numbers their POC has allow-listed for your account).
+
+**5. Attack simulator** (middle column)
+Seven buttons, each firing a complete, realistic transaction through the actual fraud pipeline (Node backend → LightGBM ML API → risk engine → back). Use these to demo the system without needing a real payment flow:
 
 - **Legitimate purchase** — a clean transaction, should approve
 - **OTP interception / SIM swap** — simulates a hijacked session
 - **Mule network payout** — simulates paying a known high-risk account
 - **Velocity / smurfing** — simulates rapid small structured transactions
 - **Impossible travel** — simulates a transaction from a geographically implausible location jump
+- **Unverified merchant** — the one scenario that lands in MEDIUM risk rather than clearly safe or clearly HIGH. On the dashboard this shows as amber "AWAITING CUSTOMER VERIFICATION" — the merchant side can't resolve it; only a customer on `pay.html` can (see below)
 - **Token replay** — creates a payment, processes it once, then immediately tries to process the *same* token again, to prove the system rejects reused tokens
 
-Each scenario's badge (Safe / Medium / High Risk / Low) is a preview hint of what to expect — the actual verdict always comes from the live model, not the badge.
+Each scenario's badge (Safe / Medium / High Risk / Verify / Low) is a preview hint of what to expect — the actual verdict always comes from the live model, not the badge.
 
-**5. Fraud engine verdict** (right column, appears after you run a scenario)
-The animated risk gauge (0–100), the decision (Approved / Review / Rejected), the specific fraud signals that were triggered, and — the most useful part for explaining the system — a **"Why the model thinks so"** breakdown showing exactly which input features pushed the score up or down and by how much. This comes straight from the LightGBM model's own feature-contribution output, not a canned explanation.
+**6. Fraud engine verdict** (right column, appears after you run a scenario)
+The animated risk gauge (0–100), the decision (Approved / Rejected / Awaiting Customer Verification), the specific fraud signals that were triggered, and — the most useful part for explaining the system — a **"Why the model thinks so"** breakdown showing exactly which input features pushed the score up or down and by how much. This comes straight from the LightGBM model's own feature-contribution output, not a canned explanation.
 
-**6. Live transaction feed** (right column, below the verdict)
-A running table of every transaction scored this session, plus a small donut chart (approved/review/blocked split) and a sparkline showing risk trending over time. This updates automatically every 3 seconds — you don't need to refresh anything. Click **View All →** to jump to the full-width Transactions page.
+**7. Live transaction feed** (right column, below the verdict)
+A running table of every *finalized* transaction scored this session, plus a small donut chart (approved/review/blocked split) and a sparkline showing risk trending over time. This updates automatically every 3 seconds — you don't need to refresh anything. Click **View All →** to jump to the full-width Transactions page. (A MEDIUM-risk transaction pending customer verification won't appear here yet — it only shows up once the customer resolves it.)
+
+### The customer's side of a borderline transaction
+
+When a transaction scores MEDIUM risk (either the "Unverified merchant" scenario, or a real payment through `pay.html`), it doesn't just approve or reject — the **customer** is asked to confirm it, the way a real OTP/2FA challenge works:
+
+1. `pay.html` shows a 6-digit code — clearly labeled as a demo stand-in, since no SMS provider is wired up here — with a 2-minute countdown.
+2. The customer types the code back in and taps **Confirm it's me** → approved. Or taps **This wasn't me — decline** → rejected immediately. Three wrong code attempts also auto-rejects.
+3. Only at that point does the transaction show up in the merchant dashboard's live feed.
+
+This is the one part of the system that's genuinely customer-facing rather than merchant-facing — everywhere else, the customer only ever sees a final approve/decline.
 
 ---
 
@@ -179,8 +198,10 @@ If you're presenting this live, a clean run-through is:
 3. If you have a phone on the same Wi-Fi handy: scan the QR code, show the real checkout page load with the correct amount/merchant, and tap **Approve & Pay** — a completely independent device just completed a live transaction through the same fraud engine. Otherwise, skip straight to step 4.
 4. Run the **Legitimate purchase** scenario — point out the low score, green approval, and the "why" breakdown showing nothing suspicious.
 5. Run the **Mule network payout** scenario — point out the high score, red rejection, and the specific SHAP feature contributions driving it.
-6. Run **Token replay** last — this is the strongest "aha" moment, since it proves the system won't let the same payment token be used twice even if the fraud score alone wouldn't have caught it.
-7. Scroll to the live feed and point out the donut/sparkline updating in real time as a summary of everything just demoed.
+6. Run **Unverified merchant** — point out the amber "awaiting customer verification" state, then (if you have that second phone handy) show the actual code challenge on `pay.html` and resolve it live — this is the moment that shows the customer isn't just a passive recipient of a decision.
+7. In the **EcoCash Sandbox (Live)** card, fire a large amount (e.g. $2,500) with any number — point out `ecocash: null` in the result: it never left this machine. If you have your registered sandbox MSISDN, fire a small amount too and show the real charge resolve against EcoCash's actual servers.
+8. Run **Token replay** last — this is the strongest "aha" moment, since it proves the system won't let the same payment token be used twice even if the fraud score alone wouldn't have caught it.
+9. Scroll to the live feed and point out the donut/sparkline updating in real time as a summary of everything just demoed.
 
 ---
 
