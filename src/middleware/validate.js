@@ -8,6 +8,7 @@ const PHONE_RE = /^\+?[0-9]{9,15}$/;
 const TOKEN_RE = /^[a-f0-9]{32}$/i;
 const ECO_REF_RE = /^ECO-[a-f0-9]{16}$/i;
 const ECO_STATUSES = ["SUCCESS", "FAILED", "PENDING"];
+const CUSTOMER_ID_RE = /^[a-zA-Z0-9_-]{8,64}$/;
 
 function bad(res, message) {
   return res.status(400).json({ error: message });
@@ -87,6 +88,34 @@ function validateVerify(req, res, next) {
   next();
 }
 
+// Shared by all four Vendor Tap ceremony endpoints (register/assert x
+// options/verify) — every one of them needs both a valid payment token
+// and a valid customerId, and two (*/verify) also need the WebAuthn
+// response body the browser produced.
+function validateVendorTapRequest({ requireResponse } = {}) {
+  return (req, res, next) => {
+    const { token, customerId, response } = req.body || {};
+    if (typeof token !== "string" || !TOKEN_RE.test(token)) {
+      return bad(res, "token must be a 32-character hex string");
+    }
+    if (typeof customerId !== "string" || !CUSTOMER_ID_RE.test(customerId)) {
+      return bad(res, "customerId must be an 8-64 char alphanumeric/-/_ string");
+    }
+    if (requireResponse && (!response || typeof response !== "object" || Array.isArray(response))) {
+      return bad(res, "response is required (the object returned by startRegistration()/startAuthentication())");
+    }
+    next();
+  };
+}
+
+function validateVendorTapCustomerId(req, res, next) {
+  const { customerId } = req.query;
+  if (typeof customerId !== "string" || !CUSTOMER_ID_RE.test(customerId)) {
+    return bad(res, "customerId must be an 8-64 char alphanumeric/-/_ string");
+  }
+  next();
+}
+
 function validateEcocashInitiate(req, res, next) {
   const { amount, customerPhone, merchantName } = req.body || {};
   if (checkAmount(res, amount) === null) return;
@@ -118,6 +147,8 @@ module.exports = {
   validateFraudScore,
   validateEcocashInitiate,
   validateEcocashCallback,
+  validateVendorTapRequest,
+  validateVendorTapCustomerId,
   // exported for tests
-  _internals: { PHONE_RE, TOKEN_RE, ECO_REF_RE, MAX_AMOUNT },
+  _internals: { PHONE_RE, TOKEN_RE, ECO_REF_RE, CUSTOMER_ID_RE, MAX_AMOUNT },
 };

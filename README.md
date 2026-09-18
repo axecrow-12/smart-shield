@@ -109,6 +109,7 @@ Backend (`http://127.0.0.1:5050`):
 | `GET /api/auth/me` | Verify a Firebase ID token |
 | `GET /api/disputes` / `POST /api/disputes` / `POST /api/disputes/:id/resolve` | Open and resolve disputes against a finalized transaction |
 | `GET /api/system/config` | Non-secret runtime config for the Settings page |
+| `GET /api/vendor-tap/has-credential` / `POST /register/options` / `register/verify` / `assert/options` / `assert/verify` | Vendor Tap fast-lane — see below |
 
 ML service (`http://127.0.0.1:8000`, full OpenAPI docs at `/docs`):
 `/score`, `/batch-score`, `/check-rules`, `/analyze`, `/model-info`, `/health`.
@@ -129,6 +130,19 @@ HIGH and LOW risk resolve synchronously (rejected / approved). MEDIUM risk inste
 - Stored separately from the mock flow, in its own `ecocashEipTransactions` Firestore collection.
 
 The approve path needs your own registered sandbox test MSISDN (EcoCash requires test numbers to be allow-listed by their POC) — enter it directly in the card at demo time.
+
+## Vendor Tap mode (fast repeat customers)
+
+An **additive** fast lane for a high-throughput vendor (a kiosk, a stall) serving many repeat customers back-to-back, where the standard flow's 2-minute typed-code challenge for MEDIUM risk would kill throughput. Instead of a self-reported "new device" flag, Vendor Tap uses real **WebAuthn device attestation** — the customer's own phone (Face ID / Touch ID / Android biometric) cryptographically signs the transaction with a device-bound key.
+
+- First tap for a given phone: a one-time WebAuthn **registration** ceremony (a few extra seconds, creates the device-bound keypair). Every tap after that: a WebAuthn **assertion** — a single biometric gesture, no typing, faster than the standard flow.
+- `context.deviceAttested` / `context.attestationAgeSeconds` feed into the same `scoreTransaction()` everyone else uses — a real attestation overrides the self-reported `isNewDevice` flag, but a request with no attestation at all degrades gracefully to standard behavior. No OTP fallback for MEDIUM/HIGH — those are rejected outright, since the whole point of this mode is speed, not a second slower path.
+- **Needs an HTTPS front door.** WebAuthn only runs in a secure context (HTTPS, or `localhost`/`127.0.0.1`) — the plain-LAN-HTTP QR link the standard checkout flow uses will not work here. Run `ngrok http 5050` and use the tunnel's HTTPS URL. See `docs/RUNNING_AND_NAVIGATION.md`.
+- Fully separate from the standard flow: its own page (`public/vendor-tap.html`), its own Firestore collection (`deviceCredentials` — credential ID, public key, sign counter, enrolled-at timestamp; never any biometric data, which never leaves the phone), but reuses the same `create-payment` tokens and the same `finalizePayment()`, so results show up in the existing transaction feed / Fraud Monitoring / Merchants / Reports pages unchanged. Toggle "⚡ Vendor Tap" on the Merchant Terminal card to generate its link/QR instead of the standard one.
+
+| `GET /api/vendor-tap/has-credential?customerId=` | Does this device already have an enrolled credential? |
+| `POST /api/vendor-tap/register/options` / `register/verify` | WebAuthn registration ceremony (first tap) |
+| `POST /api/vendor-tap/assert/options` / `assert/verify` | WebAuthn assertion ceremony (every tap after) |
 
 ## ML core
 

@@ -187,6 +187,18 @@ When a transaction scores MEDIUM risk (either the "Unverified merchant" scenario
 
 This is the one part of the system that's genuinely customer-facing rather than merchant-facing — everywhere else, the customer only ever sees a final approve/decline.
 
+### Vendor Tap mode (needs ngrok — optional, for a repeat-customer/high-throughput demo)
+
+This is a separate fast lane for a vendor serving many repeat customers back-to-back, where the standard flow's 2-minute code challenge would be too slow. It replaces "type back a code" with a real biometric device attestation (WebAuthn — Face ID / Touch ID / Android fingerprint), which only runs in a secure context, so it needs HTTPS:
+
+1. Start a tunnel: `C:\ngrok\ngrok.exe http 5050` (or wherever `ngrok.exe` lives on this machine), and note the `https://....ngrok-free.app` URL it prints.
+2. On the Dashboard's **Merchant terminal**, flip the **"⚡ Vendor Tap (fast lane, needs HTTPS)"** toggle before creating the payment request — this swaps the generated link/QR from `/pay?...` to `/vendor-tap?...`.
+3. Because the QR still encodes your LAN IP, either scan it and then manually swap the host for the ngrok URL, or just type the ngrok URL + `/vendor-tap?token=...` directly into the phone's browser (copy the token from the text link the dashboard prints under the QR).
+4. **First tap for that phone**: it prompts a one-time WebAuthn enrollment (biometric), then immediately scores and finalizes.
+5. Reload the same page on the same phone (or create a new payment and open the vendor-tap link again): it now recognizes the enrolled device and goes straight to a single fast biometric tap — no re-enrollment, no typed code.
+
+If the phone's browser doesn't support WebAuthn, the page says so plainly and points back to the standard `pay.html` flow rather than dead-ending.
+
 ### The other sidebar pages
 
 - **Fraud Monitoring** — a signal-frequency bar chart (which reasons fire most often), a risk-score histogram across every transaction, and a table of just the blocked ones with their single biggest ML driver called out.

@@ -60,6 +60,28 @@ test("buildMlFeatures: mlFeatures overrides win", () => {
   assert.equal(f.is_mule_destination, 1);
 });
 
+// Vendor Tap mode: a real WebAuthn ceremony is cryptographic ground
+// truth and must override the self-reported isNewDevice flag, not just
+// add to it — a device that just proved its own identity is definitionally
+// not "new" regardless of what isNewDevice claims.
+test("buildMlFeatures: deviceAttested=true overrides isNewDevice, even if isNewDevice says true", () => {
+  const f = buildMlFeatures({ amount: 100 }, { isNewDevice: true, deviceAttested: true, attestationAgeSeconds: 4000 });
+  assert.equal(f.new_device_login, 0);
+  assert.equal(f.time_since_login_seconds, 4000);
+});
+
+test("buildMlFeatures: deviceAttested=false (enrollment moment) still reads as a new device", () => {
+  const f = buildMlFeatures({ amount: 100 }, { deviceAttested: false, attestationAgeSeconds: 0 });
+  assert.equal(f.new_device_login, 1);
+  assert.equal(f.time_since_login_seconds, 0);
+});
+
+test("buildMlFeatures: without deviceAttested present, behavior is unchanged from the standard flow", () => {
+  const f = buildMlFeatures({ amount: 100 }, { isNewDevice: false });
+  assert.equal(f.new_device_login, 0);
+  assert.equal(f.time_since_login_seconds, 3600); // untouched default
+});
+
 test("scoreTransaction: falls back to local rules when ML API is down", async () => {
   const realFetch = global.fetch;
   global.fetch = async () => { throw new Error("ECONNREFUSED"); };

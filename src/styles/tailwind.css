@@ -1,9 +1,10 @@
 /* ============================================================
    SmartPay Shield — Tailwind v4 source.
    One shared stylesheet for every page in public/ (index.html,
-   pay.html). Build with `npm run build:css`, or `npm run watch:css`
-   while editing. Compiled output: public/tailwind.css (committed,
-   so a fresh clone renders correctly even before anyone rebuilds).
+   pay.html, vendor-tap.html). Build with `npm run build:css`, or
+   `npm run watch:css` while editing. Compiled output:
+   public/tailwind.css (committed, so a fresh clone renders correctly
+   even before anyone rebuilds).
 
    Most markup uses plain Tailwind utility classes directly. The
    handful of named classes below exist only where JavaScript does a
@@ -11,6 +12,10 @@
    chips, KPI trend arrows, nav/page active states) — those classes
    must carry their ENTIRE style on their own, since nothing else
    survives that reassignment.
+
+   Adding a new page? Add its path to @source below, or its classes
+   silently won't compile — easy to miss since the page still loads,
+   it just renders unstyled.
    ============================================================ */
 
 @import "tailwindcss";
@@ -19,6 +24,7 @@
    automatic detection, so the build is predictable from any cwd. */
 @source "../../public/index.html";
 @source "../../public/pay.html";
+@source "../../public/vendor-tap.html";
 
 /* ---------- design tokens ("Frost Sentinel") ---------- */
 @theme {

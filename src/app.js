@@ -9,6 +9,7 @@ const ecocashRoutes = require("./routes/ecocashRoutes");
 const ecocashEipRoutes = require("./routes/ecocashEipRoutes");
 const disputesRoutes = require("./routes/disputesRoutes");
 const systemRoutes = require("./routes/systemRoutes");
+const vendorTapRoutes = require("./routes/vendorTapRoutes");
 
 const { requestLogger } = require("./utils/logger");
 
@@ -31,6 +32,11 @@ app.get("/pay", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "pay.html"));
 });
 
+// Same pattern for the Vendor Tap fast-lane page.
+app.get("/vendor-tap", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "vendor-tap.html"));
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/fraud", fraudRoutes);
@@ -38,5 +44,6 @@ app.use("/api/ecocash", ecocashRoutes);
 app.use("/api/ecocash-eip", ecocashEipRoutes);
 app.use("/api/disputes", disputesRoutes);
 app.use("/api/system", systemRoutes);
+app.use("/api/vendor-tap", vendorTapRoutes);
 
 module.exports = app;

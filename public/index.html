@@ -201,6 +201,10 @@
               <input id="merchantName" value="Mbare Fresh Produce" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
               <label class="block text-[11px] text-muted mt-2.5 mb-1">Amount (USD)</label>
               <input id="amount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <div class="flex items-center justify-between gap-2 mt-3 py-2 px-2.5 rounded-lg bg-blue/[.08] border border-blue/20">
+                <span class="text-[11px] text-blue font-semibold">⚡ Vendor Tap (fast lane, needs HTTPS)</span>
+                <label class="switch"><input type="checkbox" id="tgVendorTap"><span class="slider"></span></label>
+              </div>
               <button id="btnCreate" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Create payment request</button>
               <div id="qrBox" class="hidden mt-3.5 mx-auto w-[180px] p-4 rounded-xl bg-white/90 text-[#0b1020] justify-center"><div id="qr"></div></div>
               <div class="mt-2.5 text-center font-mono text-[10px] text-muted break-all" id="tokenLine"></div>
@@ -658,11 +662,17 @@ function renderPayment() {
   $("qrBox").classList.remove("hidden");
   $("qrBox").classList.add("flex");
   $("qr").innerHTML = "";
-  // Real, scannable link — opens the customer-facing pay page on this
-  // machine's LAN address so a phone on the same Wi-Fi can complete it.
-  new QRCode($("qr"), { text: p.paymentLink, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
+  // Vendor Tap reuses the exact same payment token — only the page the
+  // QR points at changes (/pay -> /vendor-tap). WebAuthn requires HTTPS
+  // (or localhost), so this link only works over an HTTPS tunnel (e.g.
+  // ngrok) even though the standard /pay link works fine over plain LAN.
+  const vendorTap = $("tgVendorTap").checked;
+  const link = vendorTap ? p.paymentLink.replace("/pay?", "/vendor-tap?") : p.paymentLink;
+  new QRCode($("qr"), { text: link, width: 148, height: 148, correctLevel: QRCode.CorrectLevel.M });
   $("tokenLine").textContent = "token " + p.token;
-  $("payLinkNote").innerHTML = `Scan with a phone on the same Wi-Fi, or open:<br><a href="${p.paymentLink}" target="_blank" rel="noopener">${p.paymentLink}</a>`;
+  $("payLinkNote").innerHTML = vendorTap
+    ? `Vendor Tap link (needs HTTPS — e.g. <code>ngrok http 5050</code>):<br><a href="${link}" target="_blank" rel="noopener">${link}</a>`
+    : `Scan with a phone on the same Wi-Fi, or open:<br><a href="${link}" target="_blank" rel="noopener">${link}</a>`;
   clearInterval(expiryTimer);
   expiryTimer = setInterval(() => {
     const left = Math.max(0, Math.floor((p.expiresAt - Date.now()) / 1000));

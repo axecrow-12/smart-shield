@@ -7,13 +7,15 @@ const {
   validateFraudScore,
   validateEcocashInitiate,
   validateEcocashCallback,
+  validateVendorTapRequest,
+  validateVendorTapCustomerId,
 } = require("../src/middleware/validate");
 
-function run(mw, body) {
+function run(mw, body, query) {
   let statusCode = null;
   let payload = null;
   let nexted = false;
-  const req = { body };
+  const req = { body, query: query || {} };
   const res = {
     status(c) { statusCode = c; return this; },
     json(p) { payload = p; return this; },
@@ -79,4 +81,29 @@ test("ecocash callback: reference format and status whitelist", () => {
   assert.ok(run(validateEcocashCallback, { providerReference: ref, status: "SUCCESS" }).nexted);
   assert.equal(run(validateEcocashCallback, { providerReference: "nope", status: "SUCCESS" }).statusCode, 400);
   assert.equal(run(validateEcocashCallback, { providerReference: ref, status: "HACKED" }).statusCode, 400);
+});
+
+const CUSTOMER_ID = "device1234abcd";
+
+test("vendor tap request: options endpoints need token + customerId, no response required", () => {
+  const mw = validateVendorTapRequest();
+  assert.ok(run(mw, { token: TOKEN, customerId: CUSTOMER_ID }).nexted);
+  assert.equal(run(mw, { token: "short", customerId: CUSTOMER_ID }).statusCode, 400);
+  assert.equal(run(mw, { token: TOKEN, customerId: "x" }).statusCode, 400, "customerId too short");
+  assert.equal(run(mw, { token: TOKEN, customerId: "has spaces!" }).statusCode, 400);
+  assert.equal(run(mw, { token: TOKEN }).statusCode, 400, "missing customerId");
+});
+
+test("vendor tap request: verify endpoints also require a response object", () => {
+  const mw = validateVendorTapRequest({ requireResponse: true });
+  assert.equal(run(mw, { token: TOKEN, customerId: CUSTOMER_ID }).statusCode, 400, "missing response");
+  assert.equal(run(mw, { token: TOKEN, customerId: CUSTOMER_ID, response: "not-an-object" }).statusCode, 400);
+  assert.equal(run(mw, { token: TOKEN, customerId: CUSTOMER_ID, response: [] }).statusCode, 400, "array rejected");
+  assert.ok(run(mw, { token: TOKEN, customerId: CUSTOMER_ID, response: { id: "cred1" } }).nexted);
+});
+
+test("vendor tap customerId (query param): validates has-credential lookups", () => {
+  assert.ok(run(validateVendorTapCustomerId, {}, { customerId: CUSTOMER_ID }).nexted);
+  assert.equal(run(validateVendorTapCustomerId, {}, {}).statusCode, 400, "missing");
+  assert.equal(run(validateVendorTapCustomerId, {}, { customerId: "short" }).statusCode, 400);
 });

@@ -9,6 +9,7 @@ const {
   isExpired,
 } = require("../services/tokenService");
 const { scoreTransaction } = require("../services/fraudService");
+const { finalizePayment } = require("../services/paymentService");
 const { getLanUrl } = require("../utils/network");
 const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
 const {
@@ -199,28 +200,6 @@ router.post("/process", requireAuthUnlessDemo, validateTokenBody, async (req, re
     res.status(500).json({ error: "Payment processing failed" });
   }
 });
-
-async function finalizePayment(payment, fraudResult, status) {
-  const transactionData = {
-    paymentId: payment.paymentId,
-    token: payment.token,
-    amount: payment.amount,
-    merchantName: payment.merchantName,
-    merchantUid: payment.merchantUid,
-    customerPhone: payment.customerPhone || null,
-    fraudResult,
-    status,
-    createdAt: Date.now(),
-  };
-
-  await db.collection("transactions").add(transactionData);
-  await db.collection("paymentRequests").doc(payment.paymentId).update({
-    used: true,
-    status,
-  });
-
-  return transactionData;
-}
 
 // Customer resolves a MEDIUM-risk challenge: either confirms the code
 // (correct code -> approved) or explicitly declines ("this wasn't me" ->

@@ -53,9 +53,15 @@ function buildMlFeatures(payment, context = {}) {
     transaction_type: context.transactionType || "merchant",
     sim_change_frequency: context.simChangeFrequency ?? 0,
     network_type: context.networkType || "ecoz_mobile",
-    new_device_login: context.isNewDevice ? 1 : 0,
+    // context.deviceAttested (set only by Vendor Tap mode, after a real
+    // WebAuthn ceremony) is cryptographic ground truth and overrides the
+    // self-reported isNewDevice flag when present. Absent it, behavior is
+    // unchanged from the standard checkout flow.
+    new_device_login: context.deviceAttested !== undefined
+      ? (context.deviceAttested ? 0 : 1)
+      : (context.isNewDevice ? 1 : 0),
     time_since_login_seconds:
-      context.timeSinceLoginSeconds ?? (context.rapidAttempts ? 30 : 3600),
+      context.attestationAgeSeconds ?? context.timeSinceLoginSeconds ?? (context.rapidAttempts ? 30 : 3600),
     is_smurf_pattern: context.isSmurfPattern ? 1 : 0,
     recent_cashins_24h:
       context.recentCashins24h ?? (context.rapidAttempts ? 6 : 0),
