@@ -191,13 +191,15 @@ This is the one part of the system that's genuinely customer-facing rather than 
 
 This is a separate fast lane for a vendor serving many repeat customers back-to-back, where the standard flow's 2-minute code challenge would be too slow. It replaces "type back a code" with a real biometric device attestation (WebAuthn — Face ID / Touch ID / Android fingerprint), which only runs in a secure context, so it needs HTTPS:
 
-1. Start a tunnel: `C:\ngrok\ngrok.exe http 5050` (or wherever `ngrok.exe` lives on this machine), and note the `https://....ngrok-free.app` URL it prints.
-2. On the Dashboard's **Merchant terminal**, flip the **"⚡ Vendor Tap (fast lane, needs HTTPS)"** toggle before creating the payment request — this swaps the generated link/QR from `/pay?...` to `/vendor-tap?...`.
-3. Because the QR still encodes your LAN IP, either scan it and then manually swap the host for the ngrok URL, or just type the ngrok URL + `/vendor-tap?token=...` directly into the phone's browser (copy the token from the text link the dashboard prints under the QR).
+1. Start a tunnel: `C:\ngrok\ngrok.exe http 5050` (or wherever `ngrok.exe` lives on this machine), and note the `https://....ngrok-free.app` (or `.ngrok-free.dev`) URL it prints.
+2. Set `PUBLIC_HTTPS_URL=https://<that ngrok URL>` in `.env`, then restart the backend (`npm run dev`). The Merchant terminal's **"⚡ Vendor Tap (fast lane, needs HTTPS)"** toggle now generates a QR/link that points straight at that HTTPS tunnel — no manual URL-swapping needed. If `PUBLIC_HTTPS_URL` isn't set, flipping the toggle shows a message telling you to do this instead of a QR that will fail on the phone.
+3. Flip the toggle **before** creating the payment request, then scan the QR (or copy the text link printed under it) on the phone — it's already the correct `https://....ngrok-free.dev/vendor-tap?token=...` link.
 4. **First tap for that phone**: it prompts a one-time WebAuthn enrollment (biometric), then immediately scores and finalizes.
 5. Reload the same page on the same phone (or create a new payment and open the vendor-tap link again): it now recognizes the enrolled device and goes straight to a single fast biometric tap — no re-enrollment, no typed code.
 
 If the phone's browser doesn't support WebAuthn, the page says so plainly and points back to the standard `pay.html` flow rather than dead-ending.
+
+> **Note:** `ngrok`'s free tier assigns a new random URL every time you restart the tunnel — if you stop and restart `ngrok`, update `PUBLIC_HTTPS_URL` to match and restart the backend again.
 
 ### The other sidebar pages
 

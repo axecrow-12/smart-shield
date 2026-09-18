@@ -15,6 +15,11 @@ const { requestLogger } = require("./utils/logger");
 
 const app = express();
 
+// Behind an HTTPS tunnel (ngrok) the request that reaches Node is plain
+// HTTP — without this, req.protocol always reads "http", which breaks
+// Vendor Tap's WebAuthn origin check (the browser's real origin is https).
+app.set("trust proxy", true);
+
 app.use(requestLogger);
 app.use(cors());
 app.use(express.json());

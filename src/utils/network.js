@@ -40,4 +40,18 @@ function getLanUrl(req) {
   return `${req.protocol}://${req.get("host")}`;
 }
 
-module.exports = { getLanUrl };
+/**
+ * Base URL for the Vendor Tap fast-lane link. WebAuthn requires a secure
+ * context (HTTPS, or localhost/127.0.0.1) — the plain-LAN-HTTP address
+ * getLanUrl() returns does NOT qualify, so this deliberately does not
+ * fall back to it. Set PUBLIC_HTTPS_URL in .env to your HTTPS tunnel's
+ * URL (e.g. `ngrok http 5050` prints one) to enable Vendor Tap links.
+ * Returns null if unset, so callers can show an explicit "not configured"
+ * state instead of silently handing out a link that will fail on the phone.
+ */
+function getVendorTapUrl() {
+  if (!process.env.PUBLIC_HTTPS_URL) return null;
+  return process.env.PUBLIC_HTTPS_URL.replace(/\/$/, "");
+}
+
+module.exports = { getLanUrl, getVendorTapUrl };

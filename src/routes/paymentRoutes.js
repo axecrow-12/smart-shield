@@ -10,7 +10,7 @@ const {
 } = require("../services/tokenService");
 const { scoreTransaction } = require("../services/fraudService");
 const { finalizePayment } = require("../services/paymentService");
-const { getLanUrl } = require("../utils/network");
+const { getLanUrl, getVendorTapUrl } = require("../utils/network");
 const { requireAuthUnlessDemo } = require("../middleware/authMiddleware");
 const {
   validateCreatePayment,
@@ -54,6 +54,14 @@ router.post("/create-payment", requireAuthUnlessDemo, validateCreatePayment, asy
     // scan the QR code and actually complete the payment.
     const paymentLink = `${getLanUrl(req)}/pay?token=${token}`;
 
+    // Vendor Tap needs a real secure-context (HTTPS) origin for WebAuthn —
+    // built from PUBLIC_HTTPS_URL (an ngrok tunnel URL, typically), never
+    // from the LAN link above. null when not configured, so the frontend
+    // can show an explicit "set PUBLIC_HTTPS_URL" state instead of handing
+    // out a link that will fail WebAuthn's secure-context check.
+    const vendorTapUrl = getVendorTapUrl();
+    const vendorTapLink = vendorTapUrl ? `${vendorTapUrl}/vendor-tap?token=${token}` : null;
+
     const paymentRequest = {
       paymentId,
       token,
@@ -66,6 +74,7 @@ router.post("/create-payment", requireAuthUnlessDemo, validateCreatePayment, asy
       expiresAt,
       createdAt: Date.now(),
       paymentLink,
+      vendorTapLink,
       qrPayload,
     };
 

@@ -12,6 +12,7 @@ router.get("/config", requireAuthUnlessDemo, (req, res) => {
       port: Number(process.env.PORT || 5050),
       demoMode: process.env.ALLOW_ANON_DEMO === "1",
       publicBaseUrl: process.env.PUBLIC_BASE_URL || null,
+      publicHttpsUrl: process.env.PUBLIC_HTTPS_URL || null,
     },
     ml: {
       apiUrl: process.env.ML_API_URL || "http://localhost:8000",
