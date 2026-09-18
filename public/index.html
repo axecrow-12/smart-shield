@@ -21,8 +21,8 @@
   <!-- SIDEBAR -->
   <aside class="w-60 shrink-0 sticky top-0 h-screen flex flex-col py-5 px-3.5 border-r border-white/13 bg-[#060a14]/55 backdrop-blur-[18px] z-40 transition-transform duration-200 max-[899px]:fixed max-[899px]:left-0 max-[899px]:top-0 max-[899px]:-translate-x-full max-[899px]:shadow-[20px_0_50px_rgba(0,0,0,.4)] max-[899px]:group-[.navOpen]:translate-x-0">
     <div class="flex items-center gap-2.5 px-2.5 pt-1.5 pb-5.5">
-      <div class="w-8.5 h-[34px] rounded-[10px] flex items-center justify-center bg-gradient-to-br from-accent-2 to-accent text-white shrink-0 shadow-[0_6px_18px_rgba(20,184,166,.3)]">
-        <svg class="icon w-[19px] h-[19px] [&_*]:stroke-2" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
+      <div class="w-8.5 h-8.5 rounded-[10px] flex items-center justify-center bg-linear-to-br from-accent-2 to-accent text-white shrink-0 shadow-[0_6px_18px_rgba(20,184,166,.3)]">
+        <svg class="icon w-4.75 h-4.75 [&_*]:stroke-2" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
       </div>
       <div>
         <div class="text-[15px] font-extrabold leading-tight">SmartPay <em class="not-italic text-accent">Shield</em></div>
@@ -64,12 +64,12 @@
     <div class="flex-1"></div>
 
     <div class="glass text-center mt-2.5 py-4 px-3.5 overflow-hidden">
-      <div class="w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center bg-good/[.14] text-good">
+      <div class="w-10 h-10 rounded-xl mx-auto mb-2.5 flex items-center justify-center bg-good/14 text-good">
         <svg class="icon w-5 h-5" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><polyline points="8.5 12 11 14.5 15.5 9.5"/></svg>
       </div>
       <div class="text-[13px] font-bold">Real-time protection</div>
       <div class="text-[11px] text-muted mt-0.5 mb-2.5">for every transaction.</div>
-      <svg class="w-full h-[30px] block" viewBox="0 0 200 30" preserveAspectRatio="none">
+      <svg class="w-full h-7.5 block" viewBox="0 0 200 30" preserveAspectRatio="none">
         <defs><linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#14b8a6"/>
         </linearGradient></defs>
@@ -81,26 +81,26 @@
 
   <!-- MAIN -->
   <div class="flex-1 min-w-0 flex flex-col">
-    <header class="h-16 shrink-0 flex items-center gap-3.5 px-[22px] border-b border-white/[.13] bg-[#060a14]/40 backdrop-blur-[18px] sticky top-0 z-30">
-      <button class="hidden max-[899px]:flex w-[34px] h-[34px] rounded-lg border border-white/[.13] bg-white/[.045] text-ink items-center justify-center cursor-pointer shrink-0" id="btnMenu" aria-label="Toggle menu">
+    <header class="h-16 shrink-0 flex items-center gap-3.5 px-5.5 border-b border-white/13 bg-[#060a14]/40 backdrop-blur-[18px] sticky top-0 z-30">
+      <button class="hidden max-[899px]:flex w-8.5 h-8.5 rounded-lg border border-white/13 bg-white/4.5 text-ink items-center justify-center cursor-pointer shrink-0" id="btnMenu" aria-label="Toggle menu">
         <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="flex-1 max-w-[420px] flex items-center gap-[9px] py-2 px-[13px] rounded-[10px] border border-white/[.13] bg-white/[.06] text-muted max-[899px]:hidden">
+      <div class="flex-1 max-w-105 flex items-center gap-2.25 py-2 px-3.25 rounded-[10px] border border-white/13 bg-white/6 text-muted max-[899px]:hidden">
         <svg class="icon w-4 h-4" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input id="searchInput" placeholder="Search transactions, merchants, or IDs…" class="flex-1 bg-transparent border-0 text-ink text-[13px] font-sans outline-none placeholder:text-faint">
       </div>
       <div class="ml-auto flex items-center gap-4">
-        <div class="flex items-center gap-[7px] text-[12.5px] text-muted whitespace-nowrap">
+        <div class="flex items-center gap-1.75 text-[12.5px] text-muted whitespace-nowrap">
           <span class="statusDot" id="statusDot"></span>
           <span id="statusText">Checking…</span>
         </div>
-        <button class="relative w-9 h-9 rounded-[10px] border border-white/[.13] bg-white/[.045] text-muted flex items-center justify-center cursor-pointer shrink-0" title="Transactions flagged for review">
+        <button class="relative w-9 h-9 rounded-[10px] border border-white/13 bg-white/4.5 text-muted flex items-center justify-center cursor-pointer shrink-0" title="Transactions flagged for review">
           <svg class="icon" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
           <span class="bellBadge" id="bellBadge">0</span>
         </button>
         <div class="flex items-center gap-2.5 cursor-pointer">
-          <div class="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-accent-2 to-accent text-[#06251f] flex items-center justify-center text-xs font-extrabold shrink-0">WM</div>
-          <div class="leading-[1.25] max-[899px]:hidden">
+          <div class="w-8.5 h-8.5 rounded-full bg-linear-to-br from-accent-2 to-accent text-[#06251f] flex items-center justify-center text-xs font-extrabold shrink-0">WM</div>
+          <div class="leading-tight max-[899px]:hidden">
             <div class="text-[12.5px] font-bold">Wilmar Macheke</div>
             <div class="text-[10.5px] text-muted">Admin</div>
           </div>
@@ -109,7 +109,7 @@
       </div>
     </header>
 
-    <div class="p-[22px] px-[26px] pb-10 max-w-[1520px] w-full mx-auto max-[899px]:px-3.5 max-[899px]:pb-8 max-[899px]:pt-[18px]">
+    <div class="p-5.5 px-6.5 pb-10 max-w-380 w-full mx-auto max-[899px]:px-3.5 max-[899px]:pb-8 max-[899px]:pt-4.5">
 
       <!-- ============ DASHBOARD PAGE ============ -->
       <section class="page active" id="page-dashboard">
@@ -120,22 +120,22 @@
             <p class="text-[13px] text-muted mt-1">Here's what's happening with your payments today.</p>
           </div>
           <div class="flex items-center gap-2.5 flex-wrap">
-            <div class="flex items-center gap-2 py-2 px-3.5 rounded-[10px] border border-white/[.13] bg-white/[.045] text-[12.5px] text-ink">
+            <div class="flex items-center gap-2 py-2 px-3.5 rounded-[10px] border border-white/13 bg-white/4.5 text-[12.5px] text-ink">
               <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
               <span id="dateRangeText">—</span>
             </div>
-            <span class="flex items-center gap-1.5 py-[7px] px-3.5 rounded-full bg-good/[.14] text-good text-[12.5px] font-bold">
-              <i class="w-[7px] h-[7px] rounded-full bg-good shadow-[0_0_6px_var(--color-good)] animate-pulse-dot"></i>Live
+            <span class="flex items-center gap-1.5 py-1.75 px-3.5 rounded-full bg-good/14 text-good text-[12.5px] font-bold">
+              <i class="w-1.75 h-1.75 rounded-full bg-good shadow-[0_0_6px_var(--color-good)] animate-pulse-dot"></i>Live
             </span>
           </div>
         </div>
 
         <!-- KPI STRIP -->
-        <div class="grid grid-cols-5 gap-3 mb-[18px] max-[1150px]:grid-cols-2">
+        <div class="grid grid-cols-5 gap-3 mb-4.5 max-[1150px]:grid-cols-2">
           <div class="kpi glass p-4">
             <div class="flex items-center justify-between mb-3">
-              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-good/[.14] text-good">
-                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
+              <div class="w-9.5 h-9.5 rounded-[10px] flex items-center justify-center bg-good/14 text-good">
+                <svg class="icon w-4.75 h-4.75" viewBox="0 0 24 24"><polyline points="3 12 8 12 10 7 14 17 16 12 21 12"/></svg>
               </div>
             </div>
             <div class="text-2xl font-extrabold font-mono" id="kpiScored">–</div>
@@ -145,8 +145,8 @@
 
           <div class="kpi glass p-4">
             <div class="flex items-center justify-between mb-3">
-              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-bad/[.14] text-bad">
-                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              <div class="w-9.5 h-9.5 rounded-[10px] flex items-center justify-center bg-bad/14 text-bad">
+                <svg class="icon w-4.75 h-4.75" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
               </div>
             </div>
             <div class="text-2xl font-extrabold font-mono text-bad" id="kpiBlocked">–</div>
@@ -156,8 +156,8 @@
 
           <div class="kpi glass p-4">
             <div class="flex items-center justify-between mb-3">
-              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-amber/[.14] text-amber">
-                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
+              <div class="w-9.5 h-9.5 rounded-[10px] flex items-center justify-center bg-amber/14 text-amber">
+                <svg class="icon w-4.75 h-4.75" viewBox="0 0 24 24"><path d="M12 3 L22 20 H2 Z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.7" fill="currentColor" stroke="none"/></svg>
               </div>
             </div>
             <div class="text-2xl font-extrabold font-mono" id="kpiRate">–</div>
@@ -167,8 +167,8 @@
 
           <div class="kpi glass p-4">
             <div class="flex items-center justify-between mb-3">
-              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-purple/[.14] text-purple">
-                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
+              <div class="w-9.5 h-9.5 rounded-[10px] flex items-center justify-center bg-purple/14 text-purple">
+                <svg class="icon w-4.75 h-4.75" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/></svg>
               </div>
             </div>
             <div class="text-2xl font-extrabold font-mono" id="kpiAvg">–</div>
@@ -178,8 +178,8 @@
 
           <div class="kpi glass p-4">
             <div class="flex items-center justify-between mb-3">
-              <div class="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-blue/[.14] text-blue">
-                <svg class="icon w-[19px] h-[19px]" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
+              <div class="w-9.5 h-9.5 rounded-[10px] flex items-center justify-center bg-blue/14 text-blue">
+                <svg class="icon w-4.75 h-4.75" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>
               </div>
             </div>
             <div class="text-2xl font-extrabold font-mono text-blue" id="kpiAuc">–</div>
@@ -192,107 +192,107 @@
 
           <!-- MERCHANT TERMINAL -->
           <div class="grid gap-3.5">
-            <div class="card glass p-[18px]">
+            <div class="card glass p-4.5">
               <div class="flex items-center justify-between mb-3.5">
                 <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Merchant terminal</h2>
-                <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-good/[.14] text-good">Active</span>
+                <span class="text-[10.5px] font-bold py-0.75 px-2.5 rounded-full bg-good/14 text-good">Active</span>
               </div>
               <label class="block text-[11px] text-muted mt-2.5 mb-1">Merchant</label>
-              <input id="merchantName" value="Mbare Fresh Produce" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <input id="merchantName" value="Mbare Fresh Produce" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
               <label class="block text-[11px] text-muted mt-2.5 mb-1">Amount (USD)</label>
-              <input id="amount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
-              <div class="flex items-center justify-between gap-2 mt-3 py-2 px-2.5 rounded-lg bg-blue/[.08] border border-blue/20">
+              <input id="amount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <div class="flex items-center justify-between gap-2 mt-3 py-2 px-2.5 rounded-lg bg-blue/8 border border-blue/20">
                 <span class="text-[11px] text-blue font-semibold">⚡ Vendor Tap (fast lane, needs HTTPS)</span>
                 <label class="switch"><input type="checkbox" id="tgVendorTap"><span class="slider"></span></label>
               </div>
-              <button id="btnCreate" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Create payment request</button>
-              <div id="qrBox" class="hidden mt-3.5 mx-auto w-[180px] p-4 rounded-xl bg-white/90 text-[#0b1020] justify-center"><div id="qr"></div></div>
+              <button id="btnCreate" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-linear-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Create payment request</button>
+              <div id="qrBox" class="hidden mt-3.5 mx-auto w-45 p-4 rounded-xl bg-white/90 text-[#0b1020] justify-center"><div id="qr"></div></div>
               <div class="mt-2.5 text-center font-mono text-[10px] text-muted break-all" id="tokenLine"></div>
-              <div class="text-center text-xs text-amber mt-[5px]" id="expiryLine"></div>
+              <div class="text-center text-xs text-amber mt-1.25" id="expiryLine"></div>
               <div class="mt-2 text-center text-[10.5px] text-muted leading-normal [&_a]:text-accent [&_a]:break-all" id="payLinkNote"></div>
             </div>
 
             <!-- ECOCASH LIVE SANDBOX -->
-            <div class="card glass p-[18px]">
+            <div class="card glass p-4.5">
               <div class="flex items-center justify-between mb-3.5">
                 <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">EcoCash Sandbox (Live)</h2>
-                <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-blue/[.14] text-blue">Real API</span>
+                <span class="text-[10.5px] font-bold py-0.75 px-2.5 rounded-full bg-blue/14 text-blue">Real API</span>
               </div>
               <label class="block text-[11px] text-muted mt-2.5 mb-1">Sandbox MSISDN</label>
-              <input id="eipPhone" placeholder="263771234567" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <input id="eipPhone" placeholder="263771234567" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
               <label class="block text-[11px] text-muted mt-2.5 mb-1">Amount (USD)</label>
-              <input id="eipAmount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
-              <button id="btnEipCharge" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-white bg-gradient-to-br from-blue to-[#2563eb] shadow-[0_6px_18px_rgba(59,130,246,.3)] hover:brightness-110 cursor-pointer">Charge (Live Sandbox)</button>
+              <input id="eipAmount" type="number" value="18.50" step="0.5" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
+              <button id="btnEipCharge" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-white bg-linear-to-br from-blue to-[#2563eb] shadow-[0_6px_18px_rgba(59,130,246,.3)] hover:brightness-110 cursor-pointer">Charge (Live Sandbox)</button>
               <div class="mt-3" id="eipResult"></div>
             </div>
           </div>
 
           <!-- ATTACK SIMULATOR -->
           <div class="grid gap-3.5">
-            <div class="card glass p-[18px]">
+            <div class="card glass p-4.5">
               <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Customer / attack simulator</h2>
-              <div class="grid gap-[9px]">
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="normal">
-                  <span class="sb-safe w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>
+              <div class="grid gap-2.25">
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="normal">
+                  <span class="sb-safe w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="8 12.2 10.8 15 16 9.5"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Legitimate purchase</b><br><span class="text-[11px] text-muted font-normal">Known device, home area</span></span>
-                    <span class="sb-safe text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Safe</span>
+                    <span class="sb-safe text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">Safe</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="otp">
-                  <span class="sb-high w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="otp">
+                  <span class="sb-high w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><line x1="4" y1="4" x2="20" y2="20"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>OTP interception / SIM swap</b><br><span class="text-[11px] text-muted font-normal">New device, 25s session, cycled SIM</span></span>
-                    <span class="sb-high text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">High Risk</span>
+                    <span class="sb-high text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">High Risk</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="mule">
-                  <span class="sb-medium w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18.5" r="2.4"/><circle cx="19" cy="18.5" r="2.4"/><line x1="10.9" y1="7.1" x2="6.2" y2="16.4"/><line x1="13.1" y1="7.1" x2="17.8" y2="16.4"/><line x1="7.4" y1="18.5" x2="16.6" y2="18.5"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="mule">
+                  <span class="sb-medium w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="18.5" r="2.4"/><circle cx="19" cy="18.5" r="2.4"/><line x1="10.9" y1="7.1" x2="6.2" y2="16.4"/><line x1="13.1" y1="7.1" x2="17.8" y2="16.4"/><line x1="7.4" y1="18.5" x2="16.6" y2="18.5"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Mule network payout</b><br><span class="text-[11px] text-muted font-normal">Known mule destination</span></span>
-                    <span class="sb-medium text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Medium</span>
+                    <span class="sb-medium text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">Medium</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="velocity">
-                  <span class="sb-high w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polygon points="13 2 4.5 13.5 11 13.5 10 22 19.5 10.5 13 10.5"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="velocity">
+                  <span class="sb-high w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><polygon points="13 2 4.5 13.5 11 13.5 10 22 19.5 10.5 13 10.5"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Velocity / smurfing</b><br><span class="text-[11px] text-muted font-normal">9 cash-ins in 24h</span></span>
-                    <span class="sb-high text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">High Risk</span>
+                    <span class="sb-high text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">High Risk</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="travel">
-                  <span class="sb-medium w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="travel">
+                  <span class="sb-medium w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><polygon points="3 11 21 3 13 21 11 13 3 11"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Impossible travel</b><br><span class="text-[11px] text-muted font-normal">450 km/h between transactions</span></span>
-                    <span class="sb-medium text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Medium</span>
+                    <span class="sb-medium text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">Medium</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="unverified">
-                  <span class="sb-verify w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><circle cx="12" cy="13" r="0.7" fill="currentColor" stroke="none"/><path d="M12 8.5c1.3 0 2.2 1 2.2 2 0 1.3-2.2 1.5-2.2 3.2" stroke-linecap="round"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="unverified">
+                  <span class="sb-verify w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z"/><circle cx="12" cy="13" r="0.7" fill="currentColor" stroke="none"/><path d="M12 8.5c1.3 0 2.2 1 2.2 2 0 1.3-2.2 1.5-2.2 3.2" stroke-linecap="round"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Unverified merchant</b><br><span class="text-[11px] text-muted font-normal">Borderline — customer must confirm</span></span>
-                    <span class="sb-verify text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Verify</span>
+                    <span class="sb-verify text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">Verify</span>
                   </span>
                 </button>
-                <button class="flex gap-[11px] items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/[.13] bg-white/[.045] text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="replay">
-                  <span class="sb-low w-[34px] h-[34px] rounded-[9px] shrink-0 flex items-center justify-center">
-                    <svg class="icon w-[17px] h-[17px]" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
+                <button class="flex gap-2.75 items-center text-left w-full py-2.5 px-3 rounded-[10px] border border-white/13 bg-white/4.5 text-ink text-[13px] font-medium hover:border-accent cursor-pointer" data-s="replay">
+                  <span class="sb-low w-8.5 h-8.5 rounded-[9px] shrink-0 flex items-center justify-center">
+                    <svg class="icon w-4.25 h-4.25" viewBox="0 0 24 24"><polyline points="2.5 4.5 2.5 10 8 10"/><path d="M4.3 15a8.5 8.5 0 1 0 1.9-9.2L2.5 10"/></svg>
                   </span>
                   <span class="flex-1 flex items-center justify-between gap-2">
                     <span><b>Token replay</b><br><span class="text-[11px] text-muted font-normal">Same QR presented twice</span></span>
-                    <span class="sb-low text-[10px] font-bold py-[3px] px-[9px] rounded-full whitespace-nowrap shrink-0">Low</span>
+                    <span class="sb-low text-[10px] font-bold py-0.75 px-2.25 rounded-full whitespace-nowrap shrink-0">Low</span>
                   </span>
                 </button>
               </div>
@@ -301,7 +301,7 @@
 
           <!-- VERDICT + FEED -->
           <div class="grid gap-3.5">
-            <div class="card glass p-[18px] hidden" id="resultCard">
+            <div class="card glass p-4.5 hidden" id="resultCard">
               <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Fraud engine verdict</h2>
               <div class="flex gap-5 items-center flex-wrap">
                 <svg viewBox="0 0 160 160" width="170" height="170">
@@ -311,7 +311,7 @@
                   <text id="gaugeNum" x="80" y="76" text-anchor="middle" class="font-mono font-extrabold text-[40px] transition-[fill] duration-300" style="fill:var(--color-ink)">–</text>
                   <text x="80" y="100" text-anchor="middle" class="text-[9px] tracking-[2px]" style="fill:var(--color-muted)">RISK SCORE</text>
                 </svg>
-                <div class="flex-1 min-w-[280px]">
+                <div class="flex-1 min-w-70">
                   <span class="decision" id="decisionChip"></span>
                   <div class="my-2.5 flex flex-wrap gap-1.5" id="reasonChips"></div>
                   <div id="explain"></div>
@@ -320,12 +320,12 @@
               </div>
             </div>
 
-            <div class="card glass p-[18px]">
+            <div class="card glass p-4.5">
               <div class="flex items-center justify-between mb-3.5">
                 <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Live transaction feed</h2>
                 <button class="text-[11.5px] text-accent bg-transparent border-0 p-0 hover:underline cursor-pointer" id="btnViewAll">View All →</button>
               </div>
-              <div class="flex gap-[22px] items-center mb-3.5 flex-wrap">
+              <div class="flex gap-5.5 items-center mb-3.5 flex-wrap">
                 <div class="flex gap-3 items-center">
                   <svg viewBox="0 0 88 88" width="92" height="92" id="donut">
                     <circle id="donutG" cx="44" cy="44" r="34" fill="none" stroke="var(--color-good)" stroke-width="11" stroke-dasharray="0 213.6" transform="rotate(-90 44 44)"/>
@@ -334,15 +334,15 @@
                     <text id="donutNum" x="44" y="41" text-anchor="middle" class="font-mono font-extrabold text-xl" style="fill:var(--color-ink)">0</text>
                     <text x="44" y="55" text-anchor="middle" class="text-[8px] tracking-wide" style="fill:var(--color-muted)">scored</text>
                   </svg>
-                  <div class="grid gap-[5px] text-[11px] text-muted">
-                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-good"></i><span id="lgApproved">approved 0</span></span>
-                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-amber"></i><span id="lgReview">review 0</span></span>
-                    <span><i class="inline-block w-[9px] h-[9px] rounded-[3px] mr-1.5 bg-bad"></i><span id="lgBlocked">blocked 0</span></span>
+                  <div class="grid gap-1.25 text-[11px] text-muted">
+                    <span><i class="inline-block w-2.25 h-2.25 rounded-[3px] mr-1.5 bg-good"></i><span id="lgApproved">approved 0</span></span>
+                    <span><i class="inline-block w-2.25 h-2.25 rounded-[3px] mr-1.5 bg-amber"></i><span id="lgReview">review 0</span></span>
+                    <span><i class="inline-block w-2.25 h-2.25 rounded-[3px] mr-1.5 bg-bad"></i><span id="lgBlocked">blocked 0</span></span>
                   </div>
                 </div>
-                <div class="flex-1 min-w-[220px]">
+                <div class="flex-1 min-w-55">
                   <div class="text-[10px] uppercase tracking-wide text-muted mb-1">risk over time</div>
-                  <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="w-full h-[54px] block">
+                  <svg viewBox="0 0 260 54" preserveAspectRatio="none" class="w-full h-13.5 block">
                     <defs>
                       <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0" stop-color="var(--color-accent)"/><stop offset="1" stop-color="transparent"/>
@@ -355,12 +355,12 @@
               </div>
               <table class="w-full border-collapse text-[12.5px]">
                 <thead><tr>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th>
-                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Time</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Merchant</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Amount</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Risk</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Status</th>
+                  <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Signals</th>
                 </tr></thead>
                 <tbody id="feed"><tr><td colspan="6" class="empty">No transactions yet — run a scenario.</td></tr></tbody>
               </table>
@@ -375,15 +375,15 @@
         <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div><h1 class="text-[23px] font-extrabold">Transactions</h1><p class="text-[13px] text-muted mt-1">All recent transactions scored by the fraud engine.</p></div>
         </div>
-        <div class="card glass p-[18px]">
+        <div class="card glass p-4.5">
           <table class="w-full border-collapse text-[12.5px]">
             <thead><tr>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th>
-              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Time</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Merchant</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Amount</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Risk</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Status</th>
+              <th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Signals</th>
             </tr></thead>
             <tbody id="feedFull"><tr><td colspan="6" class="empty">No transactions yet — run a scenario from the Dashboard.</td></tr></tbody>
           </table>
@@ -396,26 +396,26 @@
           <div><h1 class="text-[23px] font-extrabold">Fraud Monitoring</h1><p class="text-[13px] text-muted mt-1">Every signal the engine fired this session, and every transaction it stopped.</p></div>
         </div>
 
-        <div class="grid grid-cols-3 gap-3 mb-[18px] max-[1150px]:grid-cols-1">
+        <div class="grid grid-cols-3 gap-3 mb-4.5 max-[1150px]:grid-cols-1">
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="fmBlocked">–</div><div class="text-[11.5px] text-muted mt-0.5">Transactions blocked</div></div>
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="fmSignals">–</div><div class="text-[11.5px] text-muted mt-0.5">Signals fired (total)</div></div>
           <div class="glass p-4"><div class="text-[15px] font-extrabold font-mono truncate" id="fmTopSignal">–</div><div class="text-[11.5px] text-muted mt-0.5">Most common signal</div></div>
         </div>
         <div class="grid grid-cols-2 gap-3.5 mb-3.5 max-[1150px]:grid-cols-1">
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Signal frequency</h2>
             <div id="fmSignalBars" class="grid gap-2"></div>
           </div>
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Risk score distribution</h2>
-            <div id="fmHistogram" class="flex items-end gap-1.5 h-[120px]"></div>
+            <div id="fmHistogram" class="flex items-end gap-1.5 h-30"></div>
             <div class="flex justify-between text-[10px] text-faint mt-1.5 font-mono"><span>0</span><span>50</span><span>100</span></div>
           </div>
         </div>
-        <div class="card glass p-[18px]">
+        <div class="card glass p-4.5">
           <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Blocked transactions</h2>
           <table class="w-full border-collapse text-[12.5px]">
-            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Time</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Top ML driver</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Signals</th></tr></thead>
+            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Time</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Top ML driver</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Signals</th></tr></thead>
             <tbody id="fmTable"><tr><td colspan="6" class="empty">Nothing blocked yet.</td></tr></tbody>
           </table>
         </div>
@@ -427,9 +427,9 @@
           <div><h1 class="text-[23px] font-extrabold">Merchants</h1><p class="text-[13px] text-muted mt-1">Risk profile per merchant, derived from every transaction scored this session.</p></div>
         </div>
 
-        <div class="card glass p-[18px]">
+        <div class="card glass p-4.5">
           <table class="w-full border-collapse text-[12.5px]">
-            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Txns</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Volume</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Approved</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Blocked</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Block rate</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Avg risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Last seen</th></tr></thead>
+            <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Txns</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Volume</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Approved</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Blocked</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Block rate</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Avg risk</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Last seen</th></tr></thead>
             <tbody id="mtTable"><tr><td colspan="8" class="empty">No merchants yet — run a scenario from the Dashboard.</td></tr></tbody>
           </table>
         </div>
@@ -442,20 +442,20 @@
         </div>
 
         <div class="grid grid-cols-[340px_1fr] gap-3.5 items-start max-[1150px]:grid-cols-1">
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Open a dispute</h2>
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Transaction</label>
-            <select id="dpTx" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent"></select>
+            <select id="dpTx" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent"></select>
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Reason</label>
-            <select id="dpReason" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <select id="dpReason" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-[#0d1428] text-ink text-sm font-sans focus:outline-none focus:border-accent">
               <option value="false_positive">False positive — legitimate payment was blocked</option>
               <option value="false_negative">False negative — fraud got through</option>
               <option value="customer_complaint">Customer complaint</option>
               <option value="chargeback">Chargeback request</option>
             </select>
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Note (optional)</label>
-            <input id="dpNote" maxlength="500" placeholder="What happened?" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
-            <button id="btnDispute" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-amber to-[#f59e0b] shadow-[0_6px_18px_rgba(251,191,36,.3)] hover:brightness-110 cursor-pointer">Open dispute</button>
+            <input id="dpNote" maxlength="500" placeholder="What happened?" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <button id="btnDispute" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-linear-to-br from-amber to-[#f59e0b] shadow-[0_6px_18px_rgba(251,191,36,.3)] hover:brightness-110 cursor-pointer">Open dispute</button>
             <div class="mt-2.5 text-[11px]" id="dpMsg"></div>
           </div>
           <div class="grid gap-3.5">
@@ -463,10 +463,10 @@
               <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-amber" id="dpOpen">–</div><div class="text-[11.5px] text-muted mt-0.5">Open</div></div>
               <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="dpResolved">–</div><div class="text-[11.5px] text-muted mt-0.5">Resolved</div></div>
             </div>
-            <div class="card glass p-[18px]">
+            <div class="card glass p-4.5">
               <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">All disputes</h2>
               <table class="w-full border-collapse text-[12.5px]">
-                <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Opened</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Original verdict</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Reason</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Status</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/[.13]">Resolve</th></tr></thead>
+                <thead><tr><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Opened</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Merchant</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Amount</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Original verdict</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Reason</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Status</th><th class="text-left text-[10px] uppercase tracking-wide text-muted py-1.5 px-2 border-b border-white/13">Resolve</th></tr></thead>
                 <tbody id="dpTable"><tr><td colspan="7" class="empty">No disputes opened yet.</td></tr></tbody>
               </table>
             </div>
@@ -478,13 +478,13 @@
       <section class="page" id="page-reports">
         <div class="flex items-start justify-between gap-4 mb-5 flex-wrap">
           <div><h1 class="text-[23px] font-extrabold">Reports</h1><p class="text-[13px] text-muted mt-1">Session summary across every transaction scored, plus the live model's own metrics.</p></div>
-          <button id="btnExportCsv" class="w-auto mt-0 py-2 px-3.5 rounded-lg font-bold text-[12.5px] text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer flex items-center gap-2">
+          <button id="btnExportCsv" class="w-auto mt-0 py-2 px-3.5 rounded-lg font-bold text-[12.5px] text-[#06251f] bg-linear-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer flex items-center gap-2">
             <svg class="icon w-4 h-4" viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M4 17v3h16v-3"/></svg>
             Export CSV
           </button>
         </div>
 
-        <div class="grid grid-cols-6 gap-3 mb-[18px] max-[1150px]:grid-cols-2">
+        <div class="grid grid-cols-6 gap-3 mb-4.5 max-[1150px]:grid-cols-2">
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono " id="rpTotal">–</div><div class="text-[11.5px] text-muted mt-0.5">Scored</div></div>
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-good" id="rpApproved">–</div><div class="text-[11.5px] text-muted mt-0.5">Approved</div></div>
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="rpBlocked">–</div><div class="text-[11.5px] text-muted mt-0.5">Blocked</div></div>
@@ -493,13 +493,13 @@
           <div class="glass p-4"><div class="text-2xl font-extrabold font-mono text-bad" id="rpStopped">–</div><div class="text-[11.5px] text-muted mt-0.5">Volume stopped</div></div>
         </div>
         <div class="grid grid-cols-2 gap-3.5 max-[1150px]:grid-cols-1">
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Decisions</h2>
             <div id="rpDecisions" class="grid gap-2 mb-5"></div>
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Signals</h2>
             <div id="rpSignals" class="grid gap-2"></div>
           </div>
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Model — LightGBM v4</h2>
             <div id="rpModel" class="text-[12.5px] text-muted">Loading from the ML service…</div>
           </div>
@@ -513,21 +513,21 @@
         </div>
 
         <div class="grid grid-cols-[360px_1fr] gap-3.5 items-start max-[1150px]:grid-cols-1">
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold mb-3.5">Presenter preferences</h2>
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Your name (used in the greeting)</label>
-            <input id="stName" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <input id="stName" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Default merchant name</label>
-            <input id="stMerchant" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <input id="stMerchant" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
             <label class="block text-[11px] text-muted mt-2.5 mb-1">Live feed refresh (seconds)</label>
-            <input id="stPoll" type="number" min="1" max="60" class="w-full py-2.5 px-[11px] rounded-lg border border-white/[.13] bg-white/[.06] text-ink text-sm font-sans focus:outline-none focus:border-accent">
-            <button id="btnSavePrefs" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-gradient-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Save preferences</button>
+            <input id="stPoll" type="number" min="1" max="60" class="w-full py-2.5 px-2.75 rounded-lg border border-white/13 bg-white/6 text-ink text-sm font-sans focus:outline-none focus:border-accent">
+            <button id="btnSavePrefs" class="w-full mt-3.5 py-2.5 rounded-lg font-bold text-sm text-[#06251f] bg-linear-to-br from-accent-2 to-accent shadow-[0_6px_18px_rgba(20,184,166,.3)] hover:brightness-110 cursor-pointer">Save preferences</button>
             <div class="mt-2.5 text-[11px] text-good" id="stMsg"></div>
           </div>
-          <div class="card glass p-[18px]">
+          <div class="card glass p-4.5">
             <div class="flex items-center justify-between mb-3.5">
               <h2 class="text-xs uppercase tracking-[1.4px] text-muted font-bold">Runtime configuration</h2>
-              <span class="text-[10.5px] font-bold py-[3px] px-2.5 rounded-full bg-white/[.06] text-muted">read-only · no secrets</span>
+              <span class="text-[10.5px] font-bold py-0.75 px-2.5 rounded-full bg-white/6 text-muted">read-only · no secrets</span>
             </div>
             <div id="stConfig" class="grid gap-4 text-[12.5px]">Loading…</div>
           </div>
@@ -769,8 +769,8 @@ function showResult(fr, status, label) {
           ? `left:50%;width:${pct}%;background:var(--color-bad)`
           : `left:${50 - pct}%;width:${pct}%;background:var(--color-good)`;
         return `<div class="flex items-center gap-2 text-[11px] mt-1">
-          <span class="w-[165px] text-right font-mono text-muted text-[10px]">${f.feature}</span>
-          <span class="flex-1 h-2 rounded-full bg-white/[.09] relative overflow-hidden"><i class="absolute top-0 bottom-0 rounded-full not-italic" style="${barStyle}"></i></span>
+          <span class="w-41.25 text-right font-mono text-muted text-[10px]">${f.feature}</span>
+          <span class="flex-1 h-2 rounded-full bg-white/9 relative overflow-hidden"><i class="absolute top-0 bottom-0 rounded-full not-italic" style="${barStyle}"></i></span>
           <span class="w-11 font-mono text-[11px]" style="color:${pos ? "var(--color-bad)" : "var(--color-good)"}">${pos ? "+" : ""}${f.contribution.toFixed(2)}</span>
         </div>`;
       }).join("");
@@ -858,12 +858,12 @@ function rowHtml(t) {
   const cls = st === "approved" ? "c-approved" : st === "review" ? "c-review" : "c-rejected";
   const reasons = (t.fraudResult?.reasons || []).slice(0, 3).join("<br>");
   return `<tr>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top">${t.merchantName || "-"}</td>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top num">$${Number(t.amount).toFixed(2)}</td>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${cls}">${st}</span></td>
-    <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${reasons || "—"}</td>
+    <td class="py-2 px-2 border-b border-white/6 align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
+    <td class="py-2 px-2 border-b border-white/6 align-top">${t.merchantName || "-"}</td>
+    <td class="py-2 px-2 border-b border-white/6 align-top num">$${Number(t.amount).toFixed(2)}</td>
+    <td class="py-2 px-2 border-b border-white/6 align-top"><span class="riskbar"><i style="width:${score}%;background:${color}"></i></span><span class="num">${score}</span></td>
+    <td class="py-2 px-2 border-b border-white/6 align-top"><span class="chip ${cls}">${st}</span></td>
+    <td class="py-2 px-2 border-b border-white/6 align-top sig">${reasons || "—"}</td>
   </tr>`;
 }
 
@@ -910,8 +910,8 @@ function barList(entries, total, color) {
   const max = entries[0][1] || 1;
   return entries.map(([label, n]) => `
     <div class="flex items-center gap-2 text-[11px]">
-      <span class="w-[190px] text-right font-mono text-muted text-[10px] truncate" title="${label}">${label}</span>
-      <span class="flex-1 h-2 rounded-full bg-white/[.09] overflow-hidden"><i class="block h-full rounded-full not-italic" style="width:${(n / max) * 100}%;background:${color}"></i></span>
+      <span class="w-47.5 text-right font-mono text-muted text-[10px] truncate" title="${label}">${label}</span>
+      <span class="flex-1 h-2 rounded-full bg-white/9 overflow-hidden"><i class="block h-full rounded-full not-italic" style="width:${(n / max) * 100}%;background:${color}"></i></span>
       <span class="w-14 font-mono text-[11px]">${n}${total ? ` <span class="text-faint">· ${Math.round((n / total) * 100)}%</span>` : ""}</span>
     </div>`).join("");
 }
@@ -945,12 +945,12 @@ function renderAnalytics(txs) {
         const score = Math.round(t.fraudResult?.score ?? 0);
         const top = (t.fraudResult?.mlTopFeatures || [])[0];
         return `<tr>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top">${t.merchantName || "-"}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(t.amount)}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${score}%;background:${riskColor(score)}"></i></span><span class="num">${score}</span></td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${top ? `${top.feature} <span class="text-bad">${top.contribution > 0 ? "+" : ""}${top.contribution.toFixed(2)}</span>` : "—"}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top sig">${(t.fraudResult?.reasons || []).join("<br>") || "—"}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top">${new Date(t.createdAt).toLocaleTimeString()}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top">${t.merchantName || "-"}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num">${money(t.amount)}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top"><span class="riskbar"><i style="width:${score}%;background:${riskColor(score)}"></i></span><span class="num">${score}</span></td>
+          <td class="py-2 px-2 border-b border-white/6 align-top sig">${top ? `${top.feature} <span class="text-bad">${top.contribution > 0 ? "+" : ""}${top.contribution.toFixed(2)}</span>` : "—"}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top sig">${(t.fraudResult?.reasons || []).join("<br>") || "—"}</td>
         </tr>`;
       }).join("")
     : `<tr><td colspan="6" class="empty">Nothing blocked yet.</td></tr>`;
@@ -972,14 +972,14 @@ function renderAnalytics(txs) {
         const rate = Math.round((m.blocked / m.n) * 100);
         const avg = Math.round(m.riskSum / m.n);
         return `<tr>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top font-semibold">${name}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${m.n}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(m.volume)}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num text-good">${m.approved}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num text-bad">${m.blocked}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="riskbar"><i style="width:${rate}%;background:${riskColor(rate)}"></i></span><span class="num">${rate}%</span></td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top num" style="color:${riskColor(avg)}">${avg}</td>
-          <td class="py-2 px-2 border-b border-white/[.06] align-top text-muted">${new Date(m.last).toLocaleTimeString()}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top font-semibold">${name}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num">${m.n}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num">${money(m.volume)}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num text-good">${m.approved}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num text-bad">${m.blocked}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top"><span class="riskbar"><i style="width:${rate}%;background:${riskColor(rate)}"></i></span><span class="num">${rate}%</span></td>
+          <td class="py-2 px-2 border-b border-white/6 align-top num" style="color:${riskColor(avg)}">${avg}</td>
+          <td class="py-2 px-2 border-b border-white/6 align-top text-muted">${new Date(m.last).toLocaleTimeString()}</td>
         </tr>`;
       }).join("")
     : `<tr><td colspan="8" class="empty">No merchants yet — run a scenario from the Dashboard.</td></tr>`;
@@ -1014,7 +1014,7 @@ async function loadModelReport() {
     const res = await fetch("http://127.0.0.1:8000/model-info");
     const m = await res.json();
     const p = m.performance || {};
-    const row = (k, v) => `<div class="flex justify-between gap-3 py-1.5 border-b border-white/[.06]"><span class="text-muted">${k}</span><span class="font-mono text-ink">${v}</span></div>`;
+    const row = (k, v) => `<div class="flex justify-between gap-3 py-1.5 border-b border-white/6"><span class="text-muted">${k}</span><span class="font-mono text-ink">${v}</span></div>`;
     $("rpModel").innerHTML =
       row("ROC-AUC (held-out)", p.roc_auc ?? "–") + row("F1", p.f1_score ?? "–") +
       row("Precision", p.precision ?? "–") + row("Recall", p.recall ?? "–") +
@@ -1058,16 +1058,16 @@ async function loadDisputes() {
           const vCls = d.originalStatus === "approved" ? "c-approved" : d.originalStatus === "review" ? "c-review" : "c-rejected";
           const actions = d.status === "open"
             ? ["upheld", "overturned", "refunded"].map((res) =>
-                `<button class="w-auto mt-0 mr-1 py-1 px-2 rounded-md text-[10.5px] font-bold border border-white/[.13] bg-white/[.045] text-ink shadow-none hover:border-accent cursor-pointer" data-resolve="${d.id}" data-res="${res}">${res}</button>`).join("")
+                `<button class="w-auto mt-0 mr-1 py-1 px-2 rounded-md text-[10.5px] font-bold border border-white/13 bg-white/4.5 text-ink shadow-none hover:border-accent cursor-pointer" data-resolve="${d.id}" data-res="${res}">${res}</button>`).join("")
             : `<span class="text-muted text-[11px]">${d.resolution}</span>`;
           return `<tr>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top">${new Date(d.openedAt).toLocaleTimeString()}</td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top">${d.merchantName || "-"}</td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top num">${money(d.amount)}</td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${vCls}">${d.originalStatus}</span> <span class="num text-muted text-[11px]">${d.originalScore != null ? Math.round(d.originalScore) : ""}</span></td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top">${REASON_LABEL[d.reason] || d.reason}${d.note ? `<div class="text-[10.5px] text-muted">${d.note}</div>` : ""}</td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top"><span class="chip ${d.status === "open" ? "c-review" : "c-approved"}">${d.status}</span></td>
-            <td class="py-2 px-2 border-b border-white/[.06] align-top whitespace-nowrap">${actions}</td>
+            <td class="py-2 px-2 border-b border-white/6 align-top">${new Date(d.openedAt).toLocaleTimeString()}</td>
+            <td class="py-2 px-2 border-b border-white/6 align-top">${d.merchantName || "-"}</td>
+            <td class="py-2 px-2 border-b border-white/6 align-top num">${money(d.amount)}</td>
+            <td class="py-2 px-2 border-b border-white/6 align-top"><span class="chip ${vCls}">${d.originalStatus}</span> <span class="num text-muted text-[11px]">${d.originalScore != null ? Math.round(d.originalScore) : ""}</span></td>
+            <td class="py-2 px-2 border-b border-white/6 align-top">${REASON_LABEL[d.reason] || d.reason}${d.note ? `<div class="text-[10.5px] text-muted">${d.note}</div>` : ""}</td>
+            <td class="py-2 px-2 border-b border-white/6 align-top"><span class="chip ${d.status === "open" ? "c-review" : "c-approved"}">${d.status}</span></td>
+            <td class="py-2 px-2 border-b border-white/6 align-top whitespace-nowrap">${actions}</td>
           </tr>`;
         }).join("")
       : `<tr><td colspan="7" class="empty">No disputes opened yet.</td></tr>`;
@@ -1136,7 +1136,7 @@ async function loadSystemConfig() {
     const r = await api("GET", "/api/system/config");
     const c = r.json || {};
     const group = (title, obj) => `<div><div class="text-[10px] uppercase tracking-[1.2px] text-muted mb-1.5">${title}</div>` +
-      Object.entries(obj).map(([k, v]) => `<div class="flex justify-between gap-3 py-1 border-b border-white/[.06]"><span class="text-muted">${k}</span><span class="font-mono text-ink text-right break-all">${typeof v === "object" ? JSON.stringify(v) : (v ?? "—")}</span></div>`).join("") + `</div>`;
+      Object.entries(obj).map(([k, v]) => `<div class="flex justify-between gap-3 py-1 border-b border-white/6"><span class="text-muted">${k}</span><span class="font-mono text-ink text-right break-all">${typeof v === "object" ? JSON.stringify(v) : (v ?? "—")}</span></div>`).join("") + `</div>`;
     $("stConfig").innerHTML =
       group("Backend", c.backend || {}) + group("ML service", c.ml || {}) +
       group("Firestore", c.firestore || {}) + group("Scoring policy", c.scoring || {}) +
